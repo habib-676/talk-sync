@@ -30,7 +30,7 @@ const MobileNav = () => {
         </div>
 
         {/* aside links */}
-        <ul className="flex flex-col items-start gap-2 my-12">
+        <ul className="flex flex-col items-start gap- my-12">
           {[
             { to: "/", label: "Home" },
             { to: "/community", label: "Community" },
