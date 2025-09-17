@@ -1,2 +1,99 @@
 @import "tailwindcss";
 @plugin "daisyui";
+@plugin "daisyui/theme" {
+  /* ----------------- Light Theme ----------------- */
+  name: "lightTheme";
+  default: true; /* default theme */
+  prefersdark: false;
+  color-scheme: light;
+
+  /* Base (backgrounds + surfaces) */
+  --color-base-100: #F9FAFB; /* main background */
+  --color-base-200: #FFFFFF; /* cards, panels */
+  --color-base-300: #E5E7EB; /* light borders/shadows */
+  --color-base-content: #111827; /* text color */
+
+  /* Brand Colors */
+  --color-primary: #2563EB; /* Blue (main action buttons) */
+  --color-primary-content: #FFFFFF; /* Text on primary buttons */
+  --color-secondary: #10B981; /* Green (accents) */
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #10B981; /* Accent same as secondary */
+  --color-accent-content: #FFFFFF;
+
+  /* Neutral / Info States */
+  --color-neutral: #374151; /* neutral gray */
+  --color-neutral-content: #F9FAFB;
+  --color-info: #3B82F6; /* lighter blue for info alerts */
+  --color-info-content: #FFFFFF;
+  --color-success: #10B981; /* green for success */
+  --color-success-content: #FFFFFF;
+  --color-warning: #F59E0B; /* orange/yellow warning */
+  --color-warning-content: #111827;
+  --color-error: #DC2626; /* red error */
+  --color-error-content: #FFFFFF;
+
+  /* Radius (rounded corners) */
+  --radius-selector: 1rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+
+  /* Base sizes (spacing for UI elements) */
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  /* Border */
+  --border: 1px;
+
+  /* Effects */
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  /* ----------------- Dark Theme ----------------- */
+  name: "darkTheme";
+  color-scheme: dark;
+
+  /* Base (backgrounds + surfaces) */
+  --color-base-100: #0F172A; /* main dark background */
+  --color-base-200: #1E293B; /* cards, panels */
+  --color-base-300: #334155; /* darker border/shadows */
+  --color-base-content: #F9FAFB; /* text light */
+
+  /* Brand Colors */
+  --color-primary: #3B82F6; /* lighter blue for visibility */
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #34D399; /* green accent */
+  --color-secondary-content: #111827;
+  --color-accent: #34D399;
+  --color-accent-content: #111827;
+
+  /* Neutral / Info States */
+  --color-neutral: #94A3B8; /* slate gray */
+  --color-neutral-content: #0F172A;
+  --color-info: #60A5FA; /* sky blue for info */
+  --color-info-content: #111827;
+  --color-success: #22C55E; /* bright green for success */
+  --color-success-content: #111827;
+  --color-warning: #FACC15; /* yellow warning */
+  --color-warning-content: #111827;
+  --color-error: #F87171; /* soft red */
+  --color-error-content: #111827;
+
+  /* Radius */
+  --radius-selector: 1rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+
+  /* Base sizes */
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  /* Border */
+  --border: 1px;
+
+  /* Effects */
+  --depth: 1;
+  --noise: 0;
+}
