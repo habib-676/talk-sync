@@ -13,7 +13,7 @@ const ContactUs = () => {
           <span className="text-accent font-semibold">24-48 hours</span>.
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
         <ContactFaq />
         <ContactForm />
       </div>
