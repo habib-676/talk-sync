@@ -1,3 +1,4 @@
+import BadgesPreview from "./sections/BadgesPreview";
 import Faq from "./sections/Faq";
 import Hero from "./sections/Hero";
 import HowItWorks from "./sections/HowItWorks";
@@ -14,6 +15,9 @@ const Home = () => {
       </section>
       <section>
         <HowItWorks/>
+      </section>
+      <section>
+        <BadgesPreview />
       </section>
       <section>
         <Faq />
