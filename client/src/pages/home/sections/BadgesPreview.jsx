@@ -96,7 +96,7 @@ export default function BadgesPreview({
 
                 {/* Expandable detail area (static here) */}
                 <div className="mt-6 text-xs text-gray-500">
-                  {b.id === "bronze" && <span>Bronze badges reward consistent beginners — each counted session must be >10 minutes and with positive rating.</span>}
+                  {b.id === "bronze" && <span>Bronze badges reward consistent beginners — each counted session must be at least 10 minutes and with positive rating.</span>}
                   {b.id === "silver" && <span>Silver requires commitment and quality: more sessions and positive feedback from partners.</span>}
                   {b.id === "gold" && <span>Gold badges indicate mastery — long-term consistent practice and high-rated contributions.</span>}
                 </div>
