@@ -3,6 +3,7 @@ import Faq from "./sections/Faq";
 import Hero from "./sections/Hero";
 import HowItWorks from "./sections/HowItWorks";
 import Reviews from "./sections/Reviews";
+import StatsWithLanguages from "./sections/StatsWithLanguages";
 
 const Home = () => {
   return (
@@ -11,10 +12,13 @@ const Home = () => {
         <Hero />
       </section>
       <section>
+        <StatsWithLanguages></StatsWithLanguages>
+      </section>
+      <section>
         <Reviews />
       </section>
       <section>
-        <HowItWorks/>
+        <HowItWorks />
       </section>
       <section>
         <BadgesPreview />

@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
 const pct = (value, max) => clamp(Math.round((value / max) * 100), 0, 100);
 
-export default function BadgesShowcaseFull({
+export default function BadgesPreview({
   userName = "You",
   userPoints = 85,
   thresholds = { bronze: 10, silver: 50, gold: 200 },
