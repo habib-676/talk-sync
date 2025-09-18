@@ -8,7 +8,7 @@ const DesktopNav = () => {
     <ul className="hidden lg:flex items-center">
       {[
         { to: "/", label: "Home" },
-        { to: "/community", label: "Community" },
+        { to: "/about", label: "About Us" },
         { to: "/chat", label: "Chat" },
         { to: "/blogs", label: "Blogs" },
         { to: "/contact-us", label: "Contact Us" },
