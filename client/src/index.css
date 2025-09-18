@@ -8,30 +8,30 @@
   color-scheme: light;
 
   /* Base (backgrounds + surfaces) */
-  --color-base-100: #F9FAFB; /* main background */
-  --color-base-200: #FFFFFF; /* cards, panels */
-  --color-base-300: #E5E7EB; /* light borders/shadows */
+  --color-base-100: #f9fafb; /* main background */
+  --color-base-200: #ffffff; /* cards, panels */
+  --color-base-300: #e5e7eb; /* light borders/shadows */
   --color-base-content: #111827; /* text color */
 
   /* Brand Colors */
-  --color-primary: #2563EB; /* Blue (main action buttons) */
-  --color-primary-content: #FFFFFF; /* Text on primary buttons */
-  --color-secondary: #10B981; /* Green (accents) */
-  --color-secondary-content: #FFFFFF;
-  --color-accent: #10B981; /* Accent same as secondary */
-  --color-accent-content: #FFFFFF;
+  --color-primary: #2563eb; /* Blue (main action buttons) */
+  --color-primary-content: #ffffff; /* Text on primary buttons */
+  --color-secondary: #10b981; /* Green */
+  --color-secondary-content: #ffffff;
+  --color-accent: #a855f7; /* Purple-500 */
+  --color-accent-content: #ffffff;
 
   /* Neutral / Info States */
   --color-neutral: #374151; /* neutral gray */
-  --color-neutral-content: #F9FAFB;
-  --color-info: #3B82F6; /* lighter blue for info alerts */
-  --color-info-content: #FFFFFF;
-  --color-success: #10B981; /* green for success */
-  --color-success-content: #FFFFFF;
-  --color-warning: #F59E0B; /* orange/yellow warning */
+  --color-neutral-content: #f9fafb;
+  --color-info: #3b82f6; /* lighter blue for info alerts */
+  --color-info-content: #ffffff;
+  --color-success: #10b981; /* green for success */
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b; /* orange/yellow warning */
   --color-warning-content: #111827;
-  --color-error: #DC2626; /* red error */
-  --color-error-content: #FFFFFF;
+  --color-error: #dc2626; /* red error */
+  --color-error-content: #ffffff;
 
   /* Radius (rounded corners) */
   --radius-selector: 1rem;
@@ -56,29 +56,29 @@
   color-scheme: dark;
 
   /* Base (backgrounds + surfaces) */
-  --color-base-100: #0F172A; /* main dark background */
-  --color-base-200: #1E293B; /* cards, panels */
+  --color-base-100: #0f172a; /* main dark background */
+  --color-base-200: #1e293b; /* cards, panels */
   --color-base-300: #334155; /* darker border/shadows */
-  --color-base-content: #F9FAFB; /* text light */
+  --color-base-content: #f9fafb; /* text light */
 
   /* Brand Colors */
-  --color-primary: #3B82F6; /* lighter blue for visibility */
-  --color-primary-content: #FFFFFF;
-  --color-secondary: #34D399; /* green accent */
+  --color-primary: #3b82f6; /* lighter blue for visibility */
+  --color-primary-content: #ffffff;
+  --color-secondary: #34d399; /* green */
   --color-secondary-content: #111827;
-  --color-accent: #34D399;
+  --color-accent: #a855f7; /* Purple-500 */
   --color-accent-content: #111827;
 
   /* Neutral / Info States */
-  --color-neutral: #94A3B8; /* slate gray */
-  --color-neutral-content: #0F172A;
-  --color-info: #60A5FA; /* sky blue for info */
+  --color-neutral: #94a3b8; /* slate gray */
+  --color-neutral-content: #0f172a;
+  --color-info: #60a5fa; /* sky blue for info */
   --color-info-content: #111827;
-  --color-success: #22C55E; /* bright green for success */
+  --color-success: #22c55e; /* bright green for success */
   --color-success-content: #111827;
-  --color-warning: #FACC15; /* yellow warning */
+  --color-warning: #facc15; /* yellow warning */
   --color-warning-content: #111827;
-  --color-error: #F87171; /* soft red */
+  --color-error: #f87171; /* soft red */
   --color-error-content: #111827;
 
   /* Radius */
