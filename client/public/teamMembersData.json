@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Anik",
+    "head_shot": "https://res.cloudinary.com/dnh9rdh01/image/upload/v1758194979/portrait-young-confident-businessman-wearing-glasses_1_v3s2sl.jpg",
+    "role": "Team Manager",
+    "bio": "Orchestrating the symphony of code and collaboration to bring TalkSync to life. I keep the project on track and the team motivated. When I'm not managing timelines, I'm trying to convince my Spanish conversation partner that my pronunciation isn't *that* bad."
+  },
+  {
+    "name": "Habibur Rahman",
+    "head_shot": "https://res.cloudinary.com/dnh9rdh01/image/upload/v1758194979/portrait-young-confident-businessman-wearing-glasses_1_v3s2sl.jpg",
+    "role": "Team Leader",
+    "bio": "Leading the charge to turn our vision into a functional reality. I bridge the gap between planning and execution, ensuring every feature enhances the user experience. My goal is to make language learning less lonely for everyone, one merged pull request at a time."
+  },
+  {
+    "name": "Humayra",
+    "head_shot": "https://res.cloudinary.com/dnh9rdh01/image/upload/v1758194979/portrait-young-confident-businessman-wearing-glasses_1_v3s2sl.jpg",
+    "role": "MERN Developer",
+    "bio": "Crafting the seamless front-end magic that users interact with. I love designing interfaces that feel intuitive and joyful to use. When I'm not debugging CSS, I'm probably binge-watching Korean dramas and picking up new phrases without even realizing it."
+  },
+  {
+    "name": "Amena",
+    "head_shot": "https://res.cloudinary.com/dnh9rdh01/image/upload/v1758194979/portrait-young-confident-businessman-wearing-glasses_1_v3s2sl.jpg",
+    "role": "MERN Developer",
+    "bio": "Building the robust engine that powers TalkSync behind the scenes. I focus on creating APIs that are as efficient and reliable as the conversations they enable. My own language learning journey involves a lot of Italian cookbooks—it's delicious research!"
+  },
+  {
+    "name": "Jannatul",
+    "head_shot": "https://res.cloudinary.com/dnh9rdh01/image/upload/v1758194979/portrait-young-confident-businessman-wearing-glasses_1_v3s2sl.jpg",
+    "role": "MERN Developer",
+    "bio": "Full-stack developer passionate about creating features that foster genuine connection. I enjoy solving complex problems to make the user journey smooth. My Japanese is currently at the level where I can order sushi perfectly, but that's about it!"
+  },
+  {
+    "name": "Asif",
+    "head_shot": "https://res.cloudinary.com/dnh9rdh01/image/upload/v1758194979/portrait-young-confident-businessman-wearing-glasses_1_v3s2sl.jpg",
+    "role": "MERN Developer",
+    "bio": "Focusing on the data and functionality that make real-time interaction possible on TalkSync. I'm dedicated to writing clean, scalable code. I believe the best way to learn a language is to just start speaking, even if you make mistakes—a philosophy I apply to coding too!"
+  }
+]
