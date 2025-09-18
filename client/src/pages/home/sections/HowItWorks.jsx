@@ -1,125 +1,108 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export const HowItWorks = () => {
-  const steps = [
-    {
-      id: 1,
-      title: 'Create your profile',
-      desc: 'Upload a photo, set your native & target languages, and pick availability.',
-    },
-    {
-      id: 2,
-      title: 'Find a match',
-      desc: 'Smart matching pairs you with partners by language, level & time — or pick a tutor for paid lessons.',
-    },
-    {
-      id: 3,
-      title: 'Start a session',
-      desc: 'One-on-one or small group video/audio with guided prompts and screen sharing.',
-    },
-    {
-      id: 4,
-      title: 'Give & Grow',
-      desc: 'Rate sessions, earn badges, and track progress — keep improving every week.',
-    },
-  ];
+const STEPS = [
+  {
+    id: 1,
+    title: 'Create your profile',
+    hint: 'Photo • Languages • Availability',
+    emoji: '🖼️',
+    gradient: 'bg-gradient-to-r from-pink-400 via-fuchsia-400 to-rose-400',
+  },
+  {
+    id: 2,
+    title: 'Find a match',
+    hint: 'Smart pairing or tutor',
+    emoji: '🔎',
+    gradient: 'bg-gradient-to-r from-indigo-400 via-blue-400 to-cyan-400',
+  },
+  {
+    id: 3,
+    title: 'Start a session',
+    hint: 'Video • Screen share • Prompts',
+    emoji: '🎬',
+    gradient: 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-300',
+  },
+  {
+    id: 4,
+    title: 'Reflect & grow',
+    hint: 'Feedback • Badges • Review',
+    emoji: '🌱',
+    gradient: 'bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300',
+  },
+];
 
+export default function HowItWorks() {
   return (
-    <section className="bg-gradient-to-r from-white via-sky-50 to-white rounded-2xl p-8 shadow-lg">
-      <div className="flex flex-col lg:flex-row gap-8 items-center">
-        <div className="lg:w-5/12">
-          <motion.h2
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl font-extrabold leading-tight"
-          >
-            How <span className="text-indigo-600">TalkSync</span> Works
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="mt-4 text-gray-600"
-          >
-            Quick, guided language practice with real people — schedule, join, and learn. Earn
-            badges and build confidence with every session.
-          </motion.p>
+    <section className="max-w-6xl mx-auto px-6 py-14">
+      <div className="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-white via-slate-50 to-white shadow-2xl ring-1 ring-gray-100">
+        <div className="md:flex md:items-start md:justify-between gap-8">
+          {/* Left: heading */}
+          <div className="md:w-1/3">
+            <h2 className="text-3xl md:text-4xl font-extrabold">How <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">TalkSync</span> works</h2>
+            <p className="mt-3 text-gray-600">Fast, friendly language practice — tap a card to explore. Hover a card to see playful highlights and gradient accents.</p>
 
-          <div className="mt-6 grid grid-cols-1 gap-4">
-            {steps.map((s, i) => (
-              <motion.div
-                key={s.id}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 * i, duration: 0.5 }}
-                className="flex items-start gap-4 bg-white/70 p-4 rounded-xl shadow-sm ring-1 ring-gray-100"
-              >
-                <div className="flex-none text-indigo-600">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-50 grid place-items-center">{s.id}</div>
-                </div>
-                <div>
-                  <h4 className="font-semibold">{s.title}</h4>
-                  <p className="text-sm text-gray-500">{s.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-600 text-white font-medium shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            >
-              Get Started
-            </a>
-          </div>
-        </div>
-
-        <div className="lg:w-7/12 flex justify-center">
-          <motion.div
-            initial={{ scale: 0.98, y: 8 }}
-            animate={{ scale: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative w-full max-w-md"
-          >
-            <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-gray-100">
-              <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
-                <div className="flex items-center justify-between text-white">
-                  <div>
-                    <div className="text-sm font-semibold">Live Session</div>
-                    <div className="text-xs opacity-90">Spanish • Intermediate</div>
-                  </div>
-                  <div className="text-xs">⏱ 25m</div>
-                </div>
-              </div>
-              <div className="bg-white p-4">
-                <div className="h-40 bg-gray-50 rounded-md flex items-center justify-center text-gray-400">
-                  Video Stream Mock
-                </div>
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img src="https://images.unsplash.com/photo-1545996124-54f1c6cf6d5b?w=60&h=60&fit=crop" alt="avatar" className="w-10 h-10 rounded-full ring-2 ring-white shadow-sm" />
-                    <div>
-                      <div className="font-medium">You</div>
-                      <div className="text-sm text-gray-500">Partner: Carlos</div>
-                    </div>
-                  </div>
-                  <div className="inline-flex gap-2">
-                    <button className="px-3 py-1 rounded-full bg-red-50 text-red-600 text-sm">Leave</button>
-                    <button className="px-3 py-1 rounded-full bg-green-50 text-green-600 text-sm">Mute</button>
-                  </div>
-                </div>
-              </div>
+            <div className="mt-5 flex gap-3">
+              <a href="#signup" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-medium shadow-md hover:scale-[1.02] transform transition">Get started</a>
+              <a href="#features" className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50">Explore</a>
             </div>
 
-            <div className="absolute -bottom-6 left-6 bg-white/90 px-3 py-1 rounded-full shadow-md text-xs ring-1 ring-gray-100">Guided prompts • Screen share</div>
-          </motion.div>
+            <ul className="mt-6 space-y-3 text-sm text-gray-600">
+              <li>• Onboarding in 2 minutes</li>
+              <li>• Secure, moderated sessions</li>
+              <li>• Earn badges for progress</li>
+            </ul>
+          </div>
+
+          {/* Right: grid of cards */}
+          <div className="md:w-2/3 mt-6 md:mt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {STEPS.map((s) => (
+                <motion.button
+                  key={s.id}
+                  whileHover={{ translateY: -6 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="relative group text-left overflow-hidden rounded-xl p-4 bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all"
+                  aria-label={s.title}
+                >
+                  <div className="flex items-start gap-4">
+                    {/* emoji within a perfectly centered circle */}
+                    <div className={`flex-none w-14 h-14 rounded-lg grid place-items-center text-2xl shadow-inner ${s.gradient}`} style={{flexShrink:0}}>
+                      <div className="transform translate-y-[1px]">{s.emoji}</div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="text-lg font-semibold truncate">{s.title}</h3>
+                          <p className="text-sm text-gray-500 mt-1 truncate">{s.hint}</p>
+                        </div>
+
+                        {/* Hover badge */}
+                        <div className="opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all text-xs bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 py-1 rounded-full">Try</div>
+                      </div>
+
+                      {/* gradient progress */}
+                      <div className="mt-4 h-2 rounded-full overflow-hidden bg-gray-100">
+                        <div className="h-2 rounded-full transition-all duration-400" style={{ width: '60%', background: 'linear-gradient(90deg, rgba(99,102,241,1), rgba(236,72,153,1))' }} />
+                      </div>
+
+                      {/* playful caption */}
+                      <div className="mt-3 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">{s.id === 1 ? 'Profile setup takes 2 minutes — be yourself!' : s.id === 2 ? 'Filter by language, level, and time.' : s.id === 3 ? 'Ensure mic & camera are enabled for best results.' : 'Leave feedback to unlock badges.'}</div>
+                    </div>
+                  </div>
+                  
+                  {/* soft radial highlight on hover */}
+                  <span className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-t from-white/0 to-white/30 opacity-0 group-hover:opacity-40 transition-opacity mix-blend-screen" />
+
+                  {/* subtle corner accent */}
+                  <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-10 bg-gradient-to-br from-indigo-400 to-pink-400 transform rotate-12 pointer-events-none" />
+                </motion.button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default HowItWorks;
+}
