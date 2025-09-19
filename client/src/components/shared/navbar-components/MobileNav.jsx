@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Link, NavLink } from "react-router";
 import { FiMenu } from "react-icons/fi";
 import { MdClose } from "react-icons/md";
+import TalkSyncLogo from "../../logo/TalkSyncLogo";
 
 const MobileNav = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,9 +25,7 @@ const MobileNav = () => {
       >
         {/* logo */}
         <div className="my-10">
-          <Link to="/">
-            <h2 className="text-3xl text-primary font-bold">TalkSync</h2>
-          </Link>
+          <TalkSyncLogo />
         </div>
 
         {/* aside links */}

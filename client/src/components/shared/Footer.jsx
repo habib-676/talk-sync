@@ -4,6 +4,7 @@ import {
   FaInstagram,
   FaLinkedinIn,
 } from "react-icons/fa";
+import LogoForFooter from "../logo/LogoForFooter";
 
 const Footer = () => {
   return (
@@ -11,7 +12,7 @@ const Footer = () => {
       <div className="maximum-w mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* About */}
         <div>
-          <h2 className="text-2xl font-bold text-base-100 mb-4">Talksync</h2>
+          <LogoForFooter />
           <p className="text-base-300">
             Connect, learn, and grow with language learners worldwide. Practice
             languages in real-time with peers.
@@ -54,16 +55,28 @@ const Footer = () => {
         <div>
           <h3 className="text-xl font-semibold mb-4">Stay Connected</h3>
           <div className="flex space-x-4 mb-4">
-            <a href="#" className="text-base-300/50 hover:text-base-100 transition-all duration-300">
+            <a
+              href="#"
+              className="text-base-300/50 hover:text-base-100 transition-all duration-300"
+            >
               <FaFacebookF />
             </a>
-            <a href="#" className="text-base-300/50 hover:text-base-100 transition-all duration-300">
+            <a
+              href="#"
+              className="text-base-300/50 hover:text-base-100 transition-all duration-300"
+            >
               <FaTwitter />
             </a>
-            <a href="#" className="text-base-300/50 hover:text-base-100 transition-all duration-300">
+            <a
+              href="#"
+              className="text-base-300/50 hover:text-base-100 transition-all duration-300"
+            >
               <FaInstagram />
             </a>
-            <a href="#" className="text-base-300/50 hover:text-base-100 transition-all duration-300">
+            <a
+              href="#"
+              className="text-base-300/50 hover:text-base-100 transition-all duration-300"
+            >
               <FaLinkedinIn />
             </a>
           </div>
