@@ -1,8 +1,7 @@
 import { use, useState } from "react";
 
 const faqPromise = fetch("/faq.json").then((res) => res.json());
-
-const Faq = () => {
+const ContactFaq = () => {
   const faqData = use(faqPromise);
 
   //state for the active faq item/card (fnc added by - Asif)
@@ -11,10 +10,12 @@ const Faq = () => {
     setActiveIndex(activeIndex === id ? null : id);
   };
   return (
-    <section className="max-w-4xl mx-auto py-12 px-4">
-      <h2 className="text-3xl font-bold text-center mb-8">
-        Frequently Asked Questions
-      </h2>
+    <div>
+      <h2 className="text-2xl font-semibold mb-6">Quick Help</h2>
+      <p className="text-base-content/70 mb-8">
+        Many questions are answered in our FAQ. Find your answer faster!
+      </p>
+
       <div className="space-y-2  mx-auto mt-10">
         {faqData.map((faq) => (
           <div key={faq.id}>
@@ -31,8 +32,8 @@ const Faq = () => {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 
-export default Faq;
+export default ContactFaq;

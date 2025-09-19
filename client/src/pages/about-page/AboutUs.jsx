@@ -8,6 +8,7 @@ import OurValues from "./sections/OurValues";
 const AboutUs = () => {
   return (
     <section className="bg-white min-h-screen max-w-7xl mx-auto mt-16">
+      <title>About Us - TalkSync</title>
       <TopSection />
       <OurMission />
       <WhyWeBuilt />
