@@ -53,10 +53,12 @@ export default function StatsWithLanguages() {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+    <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50 px-4">
       {/* Counter Section */}
       <div className="max-w-6xl mx-auto text-center mb-12">
-        <h2 className="text-4xl font-bold text-primary">Our Global Impact 🌍</h2>
+        <h2 className="text-4xl font-bold text-primary">
+          Our Global Impact 🌍
+        </h2>
         <p className="text-gray-600 mt-3">
           Connecting people through languages across the world.
         </p>
@@ -70,7 +72,8 @@ export default function StatsWithLanguages() {
           >
             {item.icon}
             <h2 className="text-3xl font-bold mt-4">
-              <CountUp end={item.value} duration={3} />{item.suffix}
+              <CountUp end={item.value} duration={3} />
+              {item.suffix}
             </h2>
             <p className="text-lg font-semibold text-gray-700">{item.label}</p>
             <p className="text-success mt-2 text-sm text-center">{item.desc}</p>

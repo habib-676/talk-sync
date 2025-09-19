@@ -99,17 +99,34 @@
 }
 /* smoother ping animation */
 @keyframes ping-slower {
-  0% { transform: scale(0.8); opacity: 0.9; }
-  70% { transform: scale(1.6); opacity: 0.18; }
-  100% { transform: scale(2); opacity: 0; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.6);
+    opacity: 0.18;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 .animate-ping-slower {
-  animation: ping-slower 2s cubic-bezier(.4,0,.2,1) infinite;
+  animation: ping-slower 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* subtle lift on hover for cards if you want additional smoothness */
 @keyframes lift {
-  from { transform: translateY(0); }
-  to { transform: translateY(-6px); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-6px);
+  }
 }
 
+/* custom css class for */
+.maximum-w {
+  max-width: 1560px;
+}

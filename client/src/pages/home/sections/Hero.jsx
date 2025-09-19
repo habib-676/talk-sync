@@ -4,7 +4,7 @@ import { TiWorld } from "react-icons/ti";
 const Hero = () => {
   return (
     <section className="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
-      <div className="container mx-auto px-6 py-20 flex flex-col md:flex-row items-center">
+      <div className="maximum-w mx-auto px-4 py-20 flex flex-col md:flex-row items-center">
         {/* Left Content */}
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">

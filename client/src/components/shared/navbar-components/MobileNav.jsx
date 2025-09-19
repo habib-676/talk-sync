@@ -33,7 +33,7 @@ const MobileNav = () => {
         <ul className="flex flex-col items-start gap- my-12">
           {[
             { to: "/", label: "Home" },
-            { to: "/community", label: "Community" },
+            { to: "/about", label: "About Us" },
             { to: "/chat", label: "Chat" },
             { to: "/blogs", label: "Blogs" },
             { to: "/contact-us", label: "Contact Us" },
