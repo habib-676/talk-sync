@@ -1,3 +1,4 @@
+import SpeakingPracticeDemo from "../SpeakingDemo";
 import ChooseUs from "../WhyUs/Chooseus";
 import BadgesPreview from "./sections/BadgesPreview";
 import Faq from "./sections/Faq";
@@ -15,11 +16,15 @@ const Home = () => {
       <section>
         <StatsWithLanguages></StatsWithLanguages>
       </section>
+      
       <section>
         <Reviews />
       </section>
       <section>
         <HowItWorks />
+      </section>
+      <section>
+        <SpeakingPracticeDemo></SpeakingPracticeDemo>
       </section>
       <section>
         <BadgesPreview />
