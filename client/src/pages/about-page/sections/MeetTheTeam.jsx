@@ -21,7 +21,7 @@ const MeetTheTeam = () => {
   console.log(leaders);
   return (
     <section className="bg-base py-16 lg:py-24">
-      <div className="px-4 text-center">
+      <div className="maximum-w mx-auto px-4 text-center">
         <h2 className="text-3xl md:text-5xl font-bold mb-4">Meet the Team</h2>
         <p className="text-lg mb-12">
           The passionate people building TalkSync.

@@ -3,7 +3,7 @@ import ContactForm from "./sections/ContactForm";
 
 const ContactUs = () => {
   return (
-    <section className="bg-base-100 min-h-screen max-w-7xl mx-auto px-4 mt-16 flex flex-col items-center justify-center">
+    <section className="bg-base-100 min-h-screen max-w-7xl mx-auto px-4 py-16 mt-16 flex flex-col items-center justify-center">
       {/* page header section */}
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Get in Touch</h1>
