@@ -1,3 +1,4 @@
+import ChooseUs from "../WhyUs/Chooseus";
 import BadgesPreview from "./sections/BadgesPreview";
 import Faq from "./sections/Faq";
 import Hero from "./sections/Hero";
@@ -22,6 +23,9 @@ const Home = () => {
       </section>
       <section>
         <BadgesPreview />
+      </section>
+      <section>
+        <ChooseUs></ChooseUs>
       </section>
       <section>
         <Faq />
