@@ -4,6 +4,9 @@ import Home from "../pages/home/Home";
 import AboutUs from "../pages/about-page/AboutUs";
 import NotFound from "../components/not-found/NotFound";
 import ContactUs from "../pages/contact-us/ContactUs";
+import Login from "../components/shared/JoinWebsite/login/Login";
+import SignUp from "../components/shared/JoinWebsite/SignUp/SignUp";
+import AuthLayouts from "../layouts/AuthLayouts";
 
 export const router = createBrowserRouter([
   {
@@ -28,4 +31,21 @@ export const router = createBrowserRouter([
     path: "*",
     Component: NotFound,
   },
+    {
+        path:'/auth',
+        element: <AuthLayouts></AuthLayouts>,
+        children:[
+            {
+                path:'/auth/login',
+                Component:Login
+            },
+            {
+                path:'/auth/register',
+                Component:SignUp
+            },
+            
+        ]
+
+
+    },
 ]);

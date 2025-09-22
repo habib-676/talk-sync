@@ -1,4 +1,5 @@
-import SpeakingPracticeDemo from "../SpeakingDemo";
+
+import SpeakingPracticeDemo from "../Demo/SpeakingDemo";
 import ChooseUs from "../WhyUs/Chooseus";
 import BadgesPreview from "./sections/BadgesPreview";
 import Faq from "./sections/Faq";
