@@ -31,21 +31,18 @@ export const router = createBrowserRouter([
     path: "*",
     Component: NotFound,
   },
-    {
-        path:'/auth',
-        element: <AuthLayouts></AuthLayouts>,
-        children:[
-            {
-                path:'/auth/login',
-                Component:Login
-            },
-            {
-                path:'/auth/register',
-                Component:SignUp
-            },
-            
-        ]
-
-
-    },
+  {
+    path: "/auth",
+    element: <AuthLayouts></AuthLayouts>,
+    children: [
+      {
+        path: "/auth/login",
+        Component: Login,
+      },
+      {
+        path: "/auth/register",
+        Component: SignUp,
+      },
+    ],
+  },
 ]);
