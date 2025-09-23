@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import LoadingSpinner from "../../../loading/LoadingSpinner";
 import { updateProfile } from "firebase/auth";
 import { auth } from "../../../../firebase-config/firebase.config";
+import SocialLogin from "../social-login/SocialLogin";
 
 export default function SignUp() {
   const { createUser, setUser } = useAuth();
@@ -91,6 +92,8 @@ export default function SignUp() {
               Create your account & start practicing 🌍
             </p>
           </div>
+
+          <SocialLogin />
 
           <form onSubmit={handleSignUp} className="space-y-5">
             {/* Name */}

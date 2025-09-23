@@ -19,12 +19,19 @@ const AuthButtons = () => {
   return (
     <div className="hidden lg:flex gap-4">
       {user ? (
-        <button
-          onClick={handleLogout}
-          className="bg-error text-white font-medium px-4 py-2 rounded cursor-pointer transform hover:-translate-y-1 transition-all duration-300"
-        >
-          Log Out
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="avatar avatar-online">
+            <div className="w-12 rounded-full">
+              <img src={user.photoURL} alt={user.displayName} />
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-error text-white font-medium px-4 py-2 rounded cursor-pointer transform hover:-translate-y-1 transition-all duration-300"
+          >
+            Log Out
+          </button>
+        </div>
       ) : (
         <div className="flex items-center gap-4">
           <Link to="/auth/login">

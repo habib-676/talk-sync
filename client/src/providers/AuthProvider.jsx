@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
 import { auth } from "../firebase-config/firebase.config";
+
+const googleProvider = new GoogleAuthProvider();
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -26,6 +30,12 @@ const AuthProvider = ({ children }) => {
     return signOut(auth);
   };
 
+  //social login methods (Google, GitHub, etc.) can be added here
+  const googleLogin = () => {
+    return signInWithPopup(auth, googleProvider);
+  };
+
+  // observe auth state change
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -39,7 +49,9 @@ const AuthProvider = ({ children }) => {
     user,
     createUser,
     signIn,
-    logOut
+    logOut,
+    googleLogin,
+    setUser,
   };
   return (
     <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
