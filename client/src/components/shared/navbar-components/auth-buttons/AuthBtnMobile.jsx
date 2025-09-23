@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router";
-import useAuth from "../../../../hooks/useAuth";
 import toast from "react-hot-toast";
+import useAuth from "../../../../hooks/useAuth";
 
-const AuthButtons = () => {
+const AuthBtnMobile = () => {
   const { user, logOut } = useAuth();
 
   const handleLogout = () => {
@@ -17,7 +17,7 @@ const AuthButtons = () => {
       });
   };
   return (
-    <div className="hidden lg:flex gap-4">
+    <div className="flex lg:hidden gap-4">
       {user ? (
         <button
           onClick={handleLogout}
@@ -43,4 +43,4 @@ const AuthButtons = () => {
   );
 };
 
-export default AuthButtons;
+export default AuthBtnMobile;

@@ -8,9 +8,11 @@ import TalkSyncLogo from "../../../logo/TalkSyncLogo";
 import useAuth from "../../../../hooks/useAuth";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../../loading/LoadingSpinner";
+import { updateProfile } from "firebase/auth";
+import { auth } from "../../../../firebase-config/firebase.config";
 
 export default function SignUp() {
-  const { createUser } = useAuth();
+  const { createUser, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = (e) => {
@@ -23,37 +25,58 @@ export default function SignUp() {
 
     const { user_name, user_email, password, confirm_password } = newUser;
 
-    // console.log({ user_name, user_email, password, confirm_password });
+    console.log({ user_name, user_email, password, confirm_password });
 
     // Form Validation
+    // if (password.length < 6) {
+    //   setLoading(false);
+    //   return toast.error("Password must be at least 6 character long");
+    // }
+
+    // // password complexity validation
     // const passValidation = (password) => {
     //   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
     //   return regex.test(password);
     // };
-    // if (password.length < 6) {
-    //   return toast.error("Password must be at least 6 character long");
-    // }
+
     // if (!passValidation(password)) {
+    //   setLoading(false);
     //   return toast.error(
     //     "Password must have 1 uppercase, 1 lowercase, 1 special character and 1 number"
     //   );
     // }
+
     // if (password !== confirm_password) {
+    //   setLoading(false);
     //   return toast.error("Password and Confirm Password Should be Same");
     // }
 
     createUser(user_email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log(user);
-        setLoading(false);
+
+        return updateProfile(user, { displayName: user_name });
+      })
+      .then(() => {
+        setUser(auth.currentUser);
         form.reset();
         toast.success("Registration Successful");
       })
       .catch((error) => {
-        console.log(error);
-        toast.error("Registration failed! Try Again!");
-      });
+        console.error("Registration error:", error);
+
+        // Handle ALL errors in one place
+        if (error.code === "auth/email-already-in-use") {
+          toast.error("Email already exists. Please use another email.");
+        } else if (error.code === "auth/weak-password") {
+          toast.error("Weak password. Please choose a stronger password.");
+        } else if (error.code === "auth/invalid-email") {
+          toast.error("Invalid email address format.");
+        } else {
+          toast.error("Registration failed! Try Again!");
+        }
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
