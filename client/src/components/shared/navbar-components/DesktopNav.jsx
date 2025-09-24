@@ -3,7 +3,8 @@
 import React from "react";
 import { NavLink } from "react-router";
 
-const DesktopNav = () => {
+const DesktopNav = ({ user }) => {
+  console.log("DesktopNav user:", user);
   return (
     <ul className="hidden lg:flex items-center">
       {[
