@@ -2,8 +2,8 @@ import React from "react";
 
 const TopSection = () => {
   return (
-    <section className="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-base-100 via-base-200 to-secondary/10 py-12 px-4 sm:px-8 lg:px-16">
-      <div className="container mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16 lg:gap-24 max-w-6xl">
+    <section className="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-base-100 via-base-200 to-secondary/10 py-12">
+      <div className="maximum-w mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-16 lg:gap-24">
         {/* Content Section */}
         <div className="flex-1 text-center md:text-left space-y-6 md:space-y-8">
          
@@ -31,7 +31,7 @@ const TopSection = () => {
         </div>
 
         {/* Image Section */}
-        <div className="flex-1 flex justify-center md:justify-end mt-10 md:mt-0">
+        <div className="flex-1 flex justify-center md:justify-end mt-10 md:mt-0 lg:mr-4">
           <div className="relative w-full max-w-md lg:max-w-lg">
             {/* Main Image with subtle shadow and rounded corners */}
             <img
