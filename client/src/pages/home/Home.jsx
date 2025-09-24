@@ -4,6 +4,7 @@ import Hero from "./sections/Hero";
 import HowItWorks from "./sections/HowItWorks";
 import Reviews from "./sections/Reviews";
 import StatsWithLanguages from "./sections/StatsWithLanguages";
+import VoicesOfCommunity from "./sections/VoicesOfCommunity";
 
 const Home = () => {
   return (
