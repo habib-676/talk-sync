@@ -7,6 +7,7 @@ import ContactUs from "../pages/contact-us/ContactUs";
 import Login from "../components/shared/JoinWebsite/login/Login";
 import SignUp from "../components/shared/JoinWebsite/SignUp/SignUp";
 import AuthLayouts from "../layouts/AuthLayouts";
+import blogs from "../pages/Blogs/blogs";
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: "/about",
         Component: AboutUs, //added by asif
+      },
+      {
+        path: "/blogs",
+        Component: blogs, //added by asif
       },
       {
         path: "contact-us",
