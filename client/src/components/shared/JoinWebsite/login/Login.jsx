@@ -8,6 +8,7 @@ import TalkSyncLogo from "../../../logo/TalkSyncLogo";
 import useAuth from "../../../../hooks/useAuth";
 import { toast } from "react-hot-toast";
 import LoadingSpinner from "../../../loading/LoadingSpinner";
+import SocialLogin from "../social-login/SocialLogin";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -71,6 +72,8 @@ export default function Login() {
               Connect. Practice. Speak. 🌍
             </p>
           </div>
+
+          <SocialLogin />
 
           <form onSubmit={handleLogin} className="space-y-5">
             {/* Email */}
