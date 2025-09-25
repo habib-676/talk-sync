@@ -6,7 +6,7 @@ export default function BlogRecommendations() {
       id: 1,
       title: "Breaking the Fear: First Time Speaking with a Native",
       description:
-        "Tips and real stories on overcoming anxiety during your first language exchange.",
+        "Speaking with a native speaker for the very first time can feel overwhelming, but you’re not alone. This blog shares real learner stories, practical tips, and confidence-boosting exercises to help you break through anxiety. By the end, you’ll see that mistakes are part of learning and a key step toward fluency.",
       readingTime: "5 min read",
       author: "Talksync Team",
       image: "https://i.ibb.co.com/5W5Mdfnt/undraw-conference-speaker-kl0d.png",
@@ -24,7 +24,7 @@ export default function BlogRecommendations() {
       id: 3,
       title: "Why Badges Keep You Motivated in Talksync",
       description:
-        "Explore the psychology of gamification and why small achievements matter.",
+        "Gamification isn’t just a buzzword—it’s a proven way to keep learners motivated. In this blog, we explore how badges in Talksync celebrate your milestones, encourage consistency, and transform small wins into lasting progress. You’ll discover the psychology behind why these little rewards push learners to keep going.",
       readingTime: "4 min read",
       author: "Talksync Research",
       image: "https://i.ibb.co.com/5hRnJWd3/undraw-creative-flow-t3kz.png",
@@ -33,7 +33,7 @@ export default function BlogRecommendations() {
       id: 4,
       title: "Language Exchange vs Traditional Classes",
       description:
-        "Which method works better for fluency? We compare classroom vs peer practice.",
+        "Should you choose a classroom or a peer-to-peer exchange? This post compares the strengths and limitations of both methods, from structured lessons to real-life conversations. By weighing flexibility, cost, and learning style, you’ll be able to decide which approach fits your fluency goals best.",
       readingTime: "7 min read",
       author: "David Kim",
       image: "https://i.ibb.co.com/bnG4PXM/undraw-youtube-tutorial-xgp1.png",
@@ -42,7 +42,7 @@ export default function BlogRecommendations() {
       id: 5,
       title: "How to Make Online Sessions Engaging",
       description:
-        "Use games, prompts, and roleplay to keep your conversations lively and effective.",
+        "Virtual lessons can easily feel dull if they lack energy and structure. This article introduces creative ways to make online sessions interactive, including language games, roleplay scenarios, and fun prompts. Whether you’re a tutor or a learner, these strategies will help keep conversations lively and effective.",
       readingTime: "5 min read",
       author: "Talksync Tutors",
       image: "https://i.ibb.co.com/67vmWjSB/undraw-online-learning-tgmv.png",
@@ -51,7 +51,7 @@ export default function BlogRecommendations() {
       id: 6,
       title: "Success Story: From Beginner to Fluent in One Year",
       description:
-        "Read how one learner went from basic greetings to fluent conversation in Japanese.",
+        "Fluency in just twelve months sounds impossible—but this inspiring learner’s journey proves otherwise. Starting with only basic greetings, they committed to daily practice, overcame self-doubt, and built confidence step by step. This story shows that with dedication and the right tools, fast progress is within reach.",
       readingTime: "8 min read",
       author: "Community Spotlight",
       image: "https://i.ibb.co.com/60Lh6ngW/undraw-winners-fre4.png",
@@ -59,7 +59,7 @@ export default function BlogRecommendations() {
   ];
 
   return (
-    <section className="mt-10 px-6 lg:px-20">
+    <section className="my-10 px-6 lg:px-20">
       <h2 className="text-3xl font-bold text-indigo-700 mb-6">
         Recommended for You
       </h2>
