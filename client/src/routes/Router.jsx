@@ -7,14 +7,12 @@ import ContactUs from "../pages/contact-us/ContactUs";
 import Login from "../components/shared/JoinWebsite/login/Login";
 import SignUp from "../components/shared/JoinWebsite/SignUp/SignUp";
 import AuthLayouts from "../layouts/AuthLayouts";
-<<<<<<< HEAD
 import blogs from "../pages/Blogs/blogs";
 import BlogDetails from "../pages/Blogs/BlogDetails";
+import Inbox from "../pages/inbox/Inbox";
 
-=======
 import PrivateRoute from "../routes/PrivateRoute";
 import ProfilePage from "../pages/ProfilePage";
->>>>>>> 87446329cc9b2e69dd2fd52af0e2c4fd3d9fa5a9
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -35,6 +33,10 @@ export const router = createBrowserRouter([
       {
        path: "/blogs/:id",
        Component: BlogDetails,//added by amena
+      },
+      {
+        path: "/inbox",
+        element: <Inbox />,
       },
       {
         path: "contact-us",
