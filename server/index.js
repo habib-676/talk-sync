@@ -2,6 +2,7 @@ const express = require("express");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
+const bcrypt = require("bcrypt");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -30,10 +31,45 @@ async function run() {
     await client.connect();
 
     const database = client.db("Talk-Sync-Data");
-    const usersCollections = database.collection("talksync_users");
+    const usersCollections = database.collection("users");
 
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
+    });
+
+    // User related APIs
+    app.post("/users", async (req, res) => {
+      try {
+        const { user_name, user_email, password } = req.body;
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = {
+          user_name,
+          user_email,
+          password: hashedPassword,
+          user_country,
+          photo,
+          bio,
+          date_of_birth,
+          native_language,
+          learning_language,
+          gender,
+          interests: [],
+          proficiency_level,
+          status: "Offline",
+          friends: [],
+          feedback: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          role: "user",
+        };
+
+        const result = await usersCollections.insertOne(newUser);
+        res.status(201).json({ success: true, userId: result.insertedId });
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     });
 
     // Send a ping to confirm a successful connection
