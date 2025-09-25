@@ -7,9 +7,14 @@ import ContactUs from "../pages/contact-us/ContactUs";
 import Login from "../components/shared/JoinWebsite/login/Login";
 import SignUp from "../components/shared/JoinWebsite/SignUp/SignUp";
 import AuthLayouts from "../layouts/AuthLayouts";
+<<<<<<< HEAD
 import blogs from "../pages/Blogs/blogs";
 import BlogDetails from "../pages/Blogs/BlogDetails";
 
+=======
+import PrivateRoute from "../routes/PrivateRoute";
+import ProfilePage from "../pages/ProfilePage";
+>>>>>>> 87446329cc9b2e69dd2fd52af0e2c4fd3d9fa5a9
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -38,24 +43,29 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "*",
-    Component: NotFound,
+    path: "/auth",
+    element: <AuthLayouts></AuthLayouts>,
+    children: [
+      {
+        path: "/auth/signin",
+        Component: Login,
+      },
+      {
+        path: "/auth/register",
+        Component: SignUp,
+      },
+    ],
   },
-    {
-        path:'/auth',
-        element: <AuthLayouts></AuthLayouts>,
-        children:[
-            {
-                path:'/auth/login',
-                Component:Login
-            },
-            {
-                path:'/auth/register',
-                Component:SignUp
-            },
-            
-        ]
-
-
-    },
+  {
+    path: "/profile",
+    element: (
+      <PrivateRoute>
+        <ProfilePage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
 ]);

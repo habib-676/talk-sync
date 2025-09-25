@@ -5,6 +5,7 @@ import { Link, NavLink } from "react-router";
 import { FiMenu } from "react-icons/fi";
 import { MdClose } from "react-icons/md";
 import TalkSyncLogo from "../../logo/TalkSyncLogo";
+import AuthBtnMobile from "./auth-buttons/AuthBtnMobile";
 
 const MobileNav = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,11 +57,7 @@ const MobileNav = () => {
 
         {/* auth buttons */}
         <div className="mt-10">
-          <Link to="/signup">
-            <button className="bg-primary text-white font-medium px-4 py-2 rounded cursor-pointer transform hover:-translate-y-1 transition-all duration-300">
-              Sign Up
-            </button>
-          </Link>
+          <AuthBtnMobile />
         </div>
       </aside>
     </div>

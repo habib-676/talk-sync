@@ -97,6 +97,7 @@
   --depth: 1;
   --noise: 0;
 }
+
 /* smoother ping animation */
 @keyframes ping-slower {
   0% {
@@ -126,7 +127,7 @@
   }
 }
 
-/* custom css class for */
+/* custom css class */
 .maximum-w {
   max-width: 1560px;
 }
