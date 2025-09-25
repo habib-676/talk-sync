@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Mail, Lock, User, EyeOff, Eye } from "lucide-react";
 import Lottie from "lottie-react";
 import languageAnimation from "./register.json";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import TalkSyncLogo from "../../../logo/TalkSyncLogo";
 import useAuth from "../../../../hooks/useAuth";
 import toast from "react-hot-toast";
@@ -18,6 +18,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
 
   // react-hook-form setup
   const {
@@ -43,6 +44,7 @@ export default function SignUp() {
         setUser(auth.currentUser);
         reset();
         toast.success("Registration Successful");
+        navigate("/auth/signin");
       })
       .catch((error) => {
         console.error("Registration error:", error);
