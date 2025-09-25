@@ -1,16 +1,49 @@
 // TalkSyncLogin.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import Lottie from "lottie-react";
 import languageAnimation from "./Login.json"; // your Lottie file
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import TalkSyncLogo from "../../../logo/TalkSyncLogo";
+import useAuth from "../../../../hooks/useAuth";
+import { toast } from "react-hot-toast";
+import LoadingSpinner from "../../../loading/LoadingSpinner";
 
 export default function Login() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
+
+  //navigate to dashboard/homepage after login
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const form = e.target;
+    const email = form.user_email.value;
+    const password = form.password.value;
+
+    console.log({ email, password });
+
+    signIn(email, password)
+      .then((result) => {
+        const loggedUser = result.user;
+        console.log(loggedUser);
+        setIsLoading(false);
+        form.reset();
+        toast.success("Login Successful!");
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("Error during sign-in:", error);
+        setIsLoading(false);
+        toast.error(`Login Failed! ${error.message}`);
+      });
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-300 via-purple-300 to-pink-200 p-6">
       <div className="w-full max-w-5xl grid md:grid-cols-2 bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20">
-        
         {/* Left: Login Form */}
         <div className="flex flex-col justify-center p-10">
           {/* Logo + Title */}
@@ -21,24 +54,26 @@ export default function Login() {
             </p>
           </div>
 
-          <form className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-5">
             {/* Email */}
             <div className="relative">
-              <Mail className="absolute left-3 top-3 text-gray-300" size={20} />
+              <Mail className="absolute left-3 top-3 text-accent" size={20} />
               <input
                 type="email"
                 placeholder="Email"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/20 text-accent placeholder-accent border border-white/30 focus:outline-none focus:ring-2 focus:ring-success"
+                name="user_email"
               />
             </div>
 
             {/* Password */}
             <div className="relative">
-              <Lock className="absolute left-3 top-3 text-gray-300" size={20} />
+              <Lock className="absolute left-3 top-3 text-accent" size={20} />
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/20 text-accent placeholder-accent border border-white/30 focus:outline-none focus:ring-2 focus:ring-success"
+                name="password"
               />
             </div>
 
@@ -56,16 +91,15 @@ export default function Login() {
               type="submit"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:scale-105 hover:shadow-pink-500/30 transition"
             >
-              Sign In
+              {isLoading ? <LoadingSpinner /> : "Login"}
             </button>
           </form>
 
           {/* Signup link */}
-          <p className="text-center text-gray-200 mt-6">
+          <p className="text-center text-gray-800 mt-6">
             Don’t have an account?{" "}
-            
-            <Link to='/auth/register' className="text-pink-300 hover:underline">
-            Sign Up
+            <Link to="/auth/register" className="text-success hover:underline">
+              Sign Up
             </Link>
           </p>
         </div>
@@ -80,9 +114,9 @@ export default function Login() {
               TalkSync helps you connect with partners around the world to
               improve speaking through video, audio, and chat.
             </p>
-            <Lottie 
-              animationData={languageAnimation} 
-              loop={true} 
+            <Lottie
+              animationData={languageAnimation}
+              loop={true}
               className="w-127 mx-auto drop-shadow-lg"
             />
           </div>
