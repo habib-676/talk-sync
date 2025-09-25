@@ -7,8 +7,12 @@ import ContactUs from "../pages/contact-us/ContactUs";
 import Login from "../components/shared/JoinWebsite/login/Login";
 import SignUp from "../components/shared/JoinWebsite/SignUp/SignUp";
 import AuthLayouts from "../layouts/AuthLayouts";
+import blogs from "../pages/Blogs/blogs";
+import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
 
+import PrivateRoute from "../routes/PrivateRoute";
+import ProfilePage from "../pages/ProfilePage";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -23,6 +27,14 @@ export const router = createBrowserRouter([
         Component: AboutUs, //added by asif
       },
       {
+        path: "/blogs",
+        Component: blogs, //added by amena
+      },
+      {
+       path: "/blogs/:id",
+       Component: BlogDetails,//added by amena
+      },
+      {
         path: "/inbox",
         element: <Inbox />,
       },
@@ -31,10 +43,6 @@ export const router = createBrowserRouter([
         Component: ContactUs,
       },
     ],
-  },
-  {
-    path: "*",
-    Component: NotFound,
   },
   {
     path: "/auth",
@@ -49,5 +57,17 @@ export const router = createBrowserRouter([
         Component: SignUp,
       },
     ],
+  },
+  {
+    path: "/profile",
+    element: (
+      <PrivateRoute>
+        <ProfilePage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);

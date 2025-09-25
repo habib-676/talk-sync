@@ -35,11 +35,11 @@ const SocialLogin = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-3 mb-5">
+    <div className="mb-5">
       {/* Google */}
       <button
         onClick={handleGoogleLogin}
-        className="btn bg-white text-black border-[#e5e5e5] w-full"
+        className="btn bg-white text-black border-[#e5e5e5] w-full hover:bg-gray-100"
         disabled={isLoading}
       >
         {isLoading ? (

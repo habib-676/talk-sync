@@ -97,6 +97,7 @@
   --depth: 1;
   --noise: 0;
 }
+
 /* smoother ping animation */
 @keyframes ping-slower {
   0% {

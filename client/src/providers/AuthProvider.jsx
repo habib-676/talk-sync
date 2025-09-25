@@ -15,6 +15,7 @@ const googleProvider = new GoogleAuthProvider();
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  console.log("user in auth provider:", user);
 
   // register/sign-up method for user
   const createUser = (email, password) => {
@@ -62,7 +63,7 @@ const AuthProvider = ({ children }) => {
     logOut,
     googleLogin,
     setUser,
-    resetPassword
+    resetPassword,
   };
   return (
     <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
