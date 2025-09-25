@@ -1,6 +1,6 @@
 // TalkSyncLogin.jsx
 import React, { useState } from "react";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, EyeOff, Eye } from "lucide-react";
 import Lottie from "lottie-react";
 import languageAnimation from "./Login.json"; // your Lottie file
 import { Link, useNavigate } from "react-router";
@@ -11,7 +11,8 @@ import LoadingSpinner from "../../../loading/LoadingSpinner";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const { signIn, resetPassword } = useAuth();
 
   //navigate to dashboard/homepage after login
   const navigate = useNavigate();
@@ -41,6 +42,23 @@ export default function Login() {
         toast.error(`Login Failed! ${error.message}`);
       });
   };
+
+  const handleResetPassword = () => {
+    const email = document.querySelector('input[name="user_email"]').value;
+    if (!email) {
+      toast.error("Please enter your email address to reset password.");
+      return;
+    }
+    resetPassword(email)
+      .then(() => {
+        toast.success("Password reset email sent! Check your inbox.");
+      })
+      .catch((error) => {
+        console.error("Error sending password reset email:", error);
+        toast.error("Failed to send password reset email. Try again.");
+      });
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-300 via-purple-300 to-pink-200 p-6">
       <div className="w-full max-w-5xl grid md:grid-cols-2 bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20">
@@ -70,11 +88,18 @@ export default function Login() {
             <div className="relative">
               <Lock className="absolute left-3 top-3 text-accent" size={20} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/20 text-accent placeholder-accent border border-white/30 focus:outline-none focus:ring-2 focus:ring-success"
                 name="password"
               />
+              <button
+                type="button"
+                className="absolute right-3 top-3 text-accent"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
 
             {/* Remember Me */}
@@ -83,7 +108,13 @@ export default function Login() {
                 <input type="checkbox" className="accent-pink-500" />
                 Remember me
               </label>
-              <button className="hover:underline">Forgot password?</button>
+              <button
+                type="button"
+                className=" text-gray-800 cursor-pointer hover:underline"
+                onClick={handleResetPassword}
+              >
+                Forgot password?
+              </button>
             </div>
 
             {/* Submit Button */}

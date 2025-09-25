@@ -43,7 +43,7 @@ const AuthButtons = () => {
         </div>
       ) : (
         <div className="flex items-center gap-4">
-          <Link to="/auth/login">
+          <Link to="/auth/signin">
             <button className="bg-primary text-white font-medium px-4 py-2 rounded cursor-pointer transform hover:-translate-y-1 transition-all duration-300">
               Sign In
             </button>
