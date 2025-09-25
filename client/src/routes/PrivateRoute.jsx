@@ -10,7 +10,9 @@ export default function PrivateRoute({ children }) {
   if (loading) {
     return (
       <div className="min-h-screen grid place-items-center">
-        <div className="animate-pulse text-gray-500">Checking authentication...</div>
+        <div className="animate-pulse text-gray-500">
+          Checking authentication...
+        </div>
       </div>
     );
   }

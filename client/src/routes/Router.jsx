@@ -9,6 +9,7 @@ import SignUp from "../components/shared/JoinWebsite/SignUp/SignUp";
 import AuthLayouts from "../layouts/AuthLayouts";
 import PrivateRoute from "../routes/PrivateRoute";
 import ProfilePage from "../pages/ProfilePage";
+import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -47,6 +48,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <ProfilePage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/profile/edit",
+    element: (
+      <PrivateRoute>
+        <EditProfile />
       </PrivateRoute>
     ),
   },
