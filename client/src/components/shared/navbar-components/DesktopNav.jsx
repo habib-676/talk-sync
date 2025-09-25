@@ -8,7 +8,7 @@ const DesktopNav = ({ user }) => {
   const menuItems = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About Us" },
-    { to: "/chat", label: "Chat" },
+    { to: "/inbox", label: "Inbox" },
     { to: "/blogs", label: "Blogs" },
     { to: "/contact-us", label: "Contact Us" },
   ];

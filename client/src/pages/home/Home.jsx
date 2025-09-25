@@ -8,6 +8,7 @@ import HowItWorks from "./sections/HowItWorks";
 import Reviews from "./sections/Reviews";
 import StatsWithLanguages from "./sections/StatsWithLanguages";
 
+
 const Home = () => {
   return (
     <div>
@@ -17,7 +18,6 @@ const Home = () => {
       <section>
         <StatsWithLanguages></StatsWithLanguages>
       </section>
-      
       <section>
         <Reviews />
       </section>
