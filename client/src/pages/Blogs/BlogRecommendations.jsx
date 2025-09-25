@@ -60,9 +60,12 @@ export default function BlogRecommendations() {
 
   return (
     <section className="my-10 px-6 lg:px-20">
-      <h2 className="text-3xl font-bold text-indigo-700 mb-6">
-        Recommended for You
-      </h2>
+      <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10">
+  <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
+    Handpicked 
+  </span>{" "}
+  Reads for You
+</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {recommendations.map((item) => (
           <Link
@@ -77,7 +80,7 @@ export default function BlogRecommendations() {
               className="w-full h-100 object-cover"
             />
             <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-accent mb-2">
                 {item.title}
               </h3>
               <p className="text-gray-600 text-sm mb-3">{item.description}</p>

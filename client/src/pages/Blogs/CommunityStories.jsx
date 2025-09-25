@@ -34,10 +34,12 @@ export default function CommunityStories() {
       <div className="grid lg:grid-cols-4 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-3">
-          <h2 className="text-3xl font-bold text-indigo-700 mb-6">
-            Language Stories from the Community
-          </h2>
-
+       <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10">
+  Language Stories from the{" "}
+  <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
+    Community
+  </span>
+</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {stories.map((story) => (
               <div
@@ -51,7 +53,7 @@ export default function CommunityStories() {
                     className="w-12 h-12 rounded-full object-cover"
                   />
                   <div>
-                    <p className="font-semibold">{story.name}</p>
+                    <p className="text-accent font-semibold">{story.name}</p>
                     <div className="flex items-center gap-2 text-xl text-gray-600">
                       <span>{story.nativeIcon}</span> <span>→</span> <span>{story.learningIcon}</span>
                     </div>

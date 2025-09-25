@@ -74,9 +74,11 @@ export default function SuccessStoriesSection() {
   return (
     <section className="bg-gray-50 py-16">
       <div className="max-w-[1280px] mx-auto px-6">
-        <h2 className="text-3xl font-bold text-indigo-700 mb-10 text-center">
-          Learners’ Journeys
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10">
+  <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
+    Learners’ Journeys
+  </span>
+</h2>
         {/* 4-columns on md+, 2 on sm, 1 on xs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {cards.map((c) =>

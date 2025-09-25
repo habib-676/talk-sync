@@ -88,12 +88,12 @@ export default function BlogDetails() {
         <img
           src={blog.image}
           alt={blog.title}
-          className="w-full h-64 md:h-96 object-cover hover:scale-105 transition-transform duration-500"
+          className="w-full h-84 md:h-96 object-cover hover:scale-105 transition-transform duration-500"
         />
       </div>
 
       {/* Blog Title */}
-      <h1 className="text-2xl md:text-4xl font-extrabold text-indigo-700 mb-4 leading-snug">
+      <h1 className="text-2xl md:text-4xl font-extrabold text-accent mb-4 leading-snug">
         {blog.title}
       </h1>
 
