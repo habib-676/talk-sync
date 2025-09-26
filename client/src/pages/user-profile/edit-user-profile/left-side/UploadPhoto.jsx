@@ -51,7 +51,7 @@ const UploadPhoto = () => {
     }
   };
   return (
-    <div className="bg-base-300 p-6 rounded-lg shadow-md">
+    <section className="bg-base-300 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-6">Profile Photo</h2>
       <div className="flex items-center gap-4">
         <img
@@ -79,7 +79,7 @@ const UploadPhoto = () => {
           <p className="text-gray-600">JPG, GIF or PNG. Max size 2MB</p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
