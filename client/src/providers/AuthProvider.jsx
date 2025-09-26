@@ -62,23 +62,8 @@ const AuthProvider = ({ children }) => {
   };
 
   //update password methods can be added here
-  const updateUserPassword = async (currentPassword, newPassword) => {
-    try {
-      if (!auth.currentUser) {
-        throw new Error("No user is currently signed in.");
-      }
 
-      // Update the password
-      await updatePassword(auth.currentUser, newPassword);
-
-      return true;
-    } catch (error) {
-      console.error("Error updating password:", error.message);
-      return { success: false, message: error.message };
-    }
-  };
-
-  //re-authentic user
+  //step - 1:re-authenticate user
   const reauthenticateUser = async (password) => {
     if (!auth.currentUser) throw new Error("No user is signed in");
     const credential = EmailAuthProvider.credential(
@@ -88,9 +73,37 @@ const AuthProvider = ({ children }) => {
     return reauthenticateWithCredential(auth.currentUser, credential);
   };
 
-  // const verifyEmail = () => {
-  //   return sendEmailVerification(auth.currentUser);
-  // };
+  // step-2: update password
+  const updateUserPassword = async (currentPassword, newPassword) => {
+    setLoading(true);
+    try {
+      if (!auth.currentUser) {
+        throw new Error("No user is currently signed in.");
+      }
+
+      await reauthenticateUser(currentPassword);
+      await updatePassword(auth.currentUser, newPassword);
+
+      return { success: true, message: "Password updated successfully!" };
+    } catch (error) {
+      console.error("Error updating password:", error);
+
+      //handle firebase errors
+      let errorMessage = error.message;
+      if (error.code === "auth/wrong-password") {
+        errorMessage = "Current password is incorrect.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage =
+          "New password is too weak. Please use a stronger password.";
+      } else if (error.code === "auth/requires-recent-login") {
+        errorMessage = "Please log in again to change your password.";
+      }
+
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // observe auth state change
   useEffect(() => {

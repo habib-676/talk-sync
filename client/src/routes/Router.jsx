@@ -32,8 +32,8 @@ export const router = createBrowserRouter([
         Component: blogs, //added by amena
       },
       {
-       path: "/blogs/:id",
-       Component: BlogDetails,//added by amena
+        path: "/blogs/:id",
+        Component: BlogDetails, //added by amena
       },
       {
         path: "/inbox",
@@ -42,6 +42,14 @@ export const router = createBrowserRouter([
       {
         path: "contact-us",
         Component: ContactUs,
+      },
+      {
+        path: "/profile",
+        element: (
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>
+        ),
       },
     ],
   },
@@ -63,7 +71,7 @@ export const router = createBrowserRouter([
     path: "/profile",
     element: (
       <PrivateRoute>
-        <Profile/>
+        <Profile />
       </PrivateRoute>
     ),
   },
@@ -75,6 +83,7 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
+
   {
     path: "*",
     element: <NotFound />,
