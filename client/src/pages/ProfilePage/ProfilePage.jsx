@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import useAuth from "../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 
 export default function ProfilePage() {
   const { user: authUser } = useAuth(); // may contain basic auth info
@@ -68,7 +68,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-100 via-white to-pink-100">
+    <div className="my-15 min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-100 via-white to-pink-100">
       {/* Decorative floating blobs */}
       <div className="pointer-events-none absolute -right-20 -top-28 w-80 h-80 rounded-full bg-gradient-to-tr from-indigo-300 to-pink-300 opacity-30 blur-3xl transform rotate-45"></div>
       <div className="pointer-events-none absolute -left-28 -bottom-20 w-72 h-72 rounded-full bg-gradient-to-tr from-emerald-200 to-cyan-200 opacity-25 blur-2xl"></div>
