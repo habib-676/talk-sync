@@ -12,7 +12,7 @@ import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
 
 import PrivateRoute from "../routes/PrivateRoute";
-import ProfilePage from "../pages/ProfilePage";
+import Profile from "../pages/ProfilePage/Profile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 export const router = createBrowserRouter([
   {
@@ -66,6 +66,14 @@ export const router = createBrowserRouter([
         Component: SignUp,
       },
     ],
+  },
+  {
+    path: "/profile",
+    element: (
+      <PrivateRoute>
+        <Profile />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/profile/edit",
