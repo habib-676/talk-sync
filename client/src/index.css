@@ -98,6 +98,10 @@
   --noise: 0;
 }
 
+body {
+  overflow-x: hidden;
+}
+
 /* smoother ping animation */
 @keyframes ping-slower {
   0% {

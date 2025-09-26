@@ -70,7 +70,9 @@ const UploadPhoto = () => {
           <label
             htmlFor="photo-upload"
             aria-label="Upload Profile Photo"
-            className={`btn btn-primary mb-4 ${uploading ? "loading" : ""}`}
+            className={`btn bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-base-100 mb-4 ${
+              uploading ? "loading" : ""
+            }`}
           >
             <Camera /> {uploading ? "Uploading..." : "Change Photo"}
           </label>
