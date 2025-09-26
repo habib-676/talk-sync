@@ -1,19 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router";
-import { UserPlus, MessageCircle, CheckCircle2, Star } from "lucide-react";
+import { UserPlus, UserCheck, MessageCircle, CheckCircle2, Star } from "lucide-react";
 
 export default function UserProfile() {
   const { username } = useParams();
   const [user, setUser] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     fetch("/users.json")
       .then((res) => res.json())
       .then((data) => {
         const foundUser = data.users.find((u) => u.username === username);
-        setUser(foundUser);
+        if (foundUser) {
+          // Load follow state from localStorage
+          const savedFollowState = JSON.parse(localStorage.getItem('followState') || '{}');
+          setIsFollowing(savedFollowState[username] || false);
+          setUser(foundUser);
+        }
       });
   }, [username]);
+
+  const handleFollowToggle = () => {
+    const newFollowState = !isFollowing;
+    setIsFollowing(newFollowState);
+
+    // Update localStorage
+    const savedFollowState = JSON.parse(localStorage.getItem('followState') || '{}');
+    savedFollowState[username] = newFollowState;
+    localStorage.setItem('followState', JSON.stringify(savedFollowState));
+
+    // Update user data if needed
+    if (user) {
+      setUser({
+        ...user,
+        followersCount: newFollowState ? user.followersCount + 1 : user.followersCount - 1,
+      });
+    }
+  };
 
   if (!user) return <p className="text-center py-20">Loading...</p>;
 
@@ -51,8 +75,16 @@ export default function UserProfile() {
 
           {/* Buttons */}
           <div className="flex justify-center gap-4 mt-5">
-            <button className="flex items-center gap-2 px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition shadow">
-              <UserPlus size={16} /> Follow
+            <button 
+              onClick={handleFollowToggle}
+              className={`flex items-center gap-2 px-5 py-2 rounded-full transition shadow ${
+                isFollowing
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-purple-600 text-white hover:bg-purple-700"
+              }`}
+            >
+              {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
+              {isFollowing ? "Following" : "Follow"}
             </button>
             <button className="flex items-center gap-2 px-5 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition shadow">
               <MessageCircle size={16} /> Message

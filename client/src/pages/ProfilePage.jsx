@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
+import { Link } from "react-router";
 
 export default function ProfilePage() {
   const { user: authUser } = useAuth(); // may contain basic auth info
@@ -206,7 +207,10 @@ export default function ProfilePage() {
             <div className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition">
               <h4 className="text-sm text-indigo-600 font-semibold">Quick Actions</h4>
               <div className="mt-3 flex flex-col gap-3">
-                <a href="/match" className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm text-center hover:brightness-105 transition">Find a partner</a>
+                
+                <Link to='/follow' className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm text-center hover:brightness-105 transition">
+                Find a partner
+                </Link>
                 <a href="/schedule" className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center hover:shadow-sm transition">Schedule a session</a>
                 <a href="/badges" className="px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-300 to-orange-400 text-sm text-center hover:brightness-105 transition">View badges</a>
               </div>

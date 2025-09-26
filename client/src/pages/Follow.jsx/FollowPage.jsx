@@ -9,28 +9,46 @@ export default function FollowPage() {
     fetch("/users.json")
       .then((res) => res.json())
       .then((data) => {
-        // Add isFollowing flag for each user
+        // Load follow state and followers count from localStorage
+        const savedFollowState = JSON.parse(localStorage.getItem('followState') || '{}');
+        const savedFollowersCount = JSON.parse(localStorage.getItem('followersCount') || '{}');
+        
         const withFollowState = data.users.map((u) => ({
           ...u,
-          isFollowing: false,
+          isFollowing: savedFollowState[u.username] || false,
+          followersCount: savedFollowersCount[u.username] || u.followersCount
         }));
         setUsers(withFollowState);
       });
   }, []);
 
-  const handleFollowToggle = (index) => {
+  const handleFollowToggle = (username) => {
     setUsers((prev) =>
-      prev.map((user, i) =>
-        i === index
-          ? {
-              ...user,
-              isFollowing: !user.isFollowing,
-              followersCount: user.isFollowing
-                ? user.followersCount - 1
-                : user.followersCount + 1,
-            }
-          : user
-      )
+      prev.map((user) => {
+        if (user.username === username) {
+          const newFollowState = !user.isFollowing;
+          const newFollowersCount = newFollowState 
+            ? user.followersCount + 1
+            : user.followersCount - 1;
+
+          // Update localStorage for follow state
+          const savedFollowState = JSON.parse(localStorage.getItem('followState') || '{}');
+          savedFollowState[username] = newFollowState;
+          localStorage.setItem('followState', JSON.stringify(savedFollowState));
+
+          // Update localStorage for followers count
+          const savedFollowersCount = JSON.parse(localStorage.getItem('followersCount') || '{}');
+          savedFollowersCount[username] = newFollowersCount;
+          localStorage.setItem('followersCount', JSON.stringify(savedFollowersCount));
+
+          return {
+            ...user,
+            isFollowing: newFollowState,
+            followersCount: newFollowersCount
+          };
+        }
+        return user;
+      })
     );
   };
 
@@ -66,7 +84,7 @@ export default function FollowPage() {
 
             <div className="flex gap-3 mt-5">
               <button
-                onClick={() => handleFollowToggle(index)}
+                onClick={() => handleFollowToggle(user.username)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full transition shadow 
                   ${
                     user.isFollowing
