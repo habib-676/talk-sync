@@ -15,6 +15,7 @@ import PrivateRoute from "../routes/PrivateRoute";
 import ProfilePage from "../pages/ProfilePage";
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/userProfile";
+import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -33,8 +34,8 @@ export const router = createBrowserRouter([
         Component: blogs, //added by amena
       },
       {
-       path: "/blogs/:id",
-       Component: BlogDetails,//added by amena
+        path: "/blogs/:id",
+        Component: BlogDetails, //added by amena
       },
       {
         path: "/inbox",
@@ -51,7 +52,17 @@ export const router = createBrowserRouter([
       {
         path:"/profile/:username",
         element:<UserProfile></UserProfile>
+      },
+      {
+        path: "/profile",
+        element: (
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>)
       }
+        
+        
+      
     ],
   },
   {
@@ -69,13 +80,14 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/profile",
+    path: "/profile/edit",
     element: (
       <PrivateRoute>
-        <ProfilePage />
+        <EditProfile />
       </PrivateRoute>
     ),
   },
+
   {
     path: "*",
     element: <NotFound />,

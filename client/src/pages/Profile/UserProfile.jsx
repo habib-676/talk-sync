@@ -86,9 +86,11 @@ export default function UserProfile() {
               {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
               {isFollowing ? "Following" : "Follow"}
             </button>
+            <Link to='/inbox'>
             <button className="flex items-center gap-2 px-5 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition shadow">
               <MessageCircle size={16} /> Message
             </button>
+            </Link>
           </div>
         </div>
 
