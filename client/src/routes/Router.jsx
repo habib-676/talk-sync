@@ -12,7 +12,6 @@ import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
 
 import PrivateRoute from "../routes/PrivateRoute";
-import ProfilePage from "../pages/ProfilePage";
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/userProfile";
 import Profile from "../pages/ProfilePage/Profile";
@@ -58,7 +57,7 @@ export const router = createBrowserRouter([
         path: "/profile",
         element: (
           <PrivateRoute>
-            <ProfilePage />
+            <Profile/>
           </PrivateRoute>)
       }
         
