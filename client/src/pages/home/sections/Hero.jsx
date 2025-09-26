@@ -24,7 +24,7 @@ const Hero = () => {
               Get Started
             </a>
             <a
-              href="/find-partner"
+              href="/follow"
               className="bg-indigo-700 text-white font-semibold px-6 py-3 rounded-2xl shadow hover:bg-indigo-800 transition"
             >
               Find a Partner
