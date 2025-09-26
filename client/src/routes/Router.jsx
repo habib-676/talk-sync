@@ -51,14 +51,6 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      {
-        path: "/profile/edit",
-        element: (
-          <PrivateRoute>
-            <EditProfile />
-          </PrivateRoute>
-        ),
-      },
     ],
   },
   {
@@ -74,6 +66,14 @@ export const router = createBrowserRouter([
         Component: SignUp,
       },
     ],
+  },
+  {
+    path: "/profile/edit",
+    element: (
+      <PrivateRoute>
+        <EditProfile />
+      </PrivateRoute>
+    ),
   },
 
   {

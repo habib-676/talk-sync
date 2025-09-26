@@ -10,7 +10,7 @@ const EditProfile = () => {
     console.log("Final form data", data);
   };
   return (
-    <div className="bg-base-300 p-6 min-h-screen mt-16">
+    <div className="bg-base-300 p-6 min-h-screen py-16">
       <FormProvider {...methods}>
         <form
           onSubmit={methods.handleSubmit(onsubmit)}
