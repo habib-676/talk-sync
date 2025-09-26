@@ -38,7 +38,7 @@ const BasicInfo = () => {
         {/* Open Modal Button */}
         <label
           htmlFor="changePasswordModal"
-          className="btn btn-sm btn-outline flex items-center gap-2 hover:bg-error hover:text-base-100 cursor-pointer"
+          className="btn btn-sm btn-outline hover:bg-error hover:text-base-100 transition-all duration-300 cursor-pointer"
         >
           <KeyRound size={16} />
           Change Password
@@ -53,7 +53,6 @@ const BasicInfo = () => {
         <div className="modal">
           <div className="modal-box">
             <h3 className="font-bold text-lg mb-4">Change Password</h3>
-
             <ChangePasswordForm />
           </div>
         </div>

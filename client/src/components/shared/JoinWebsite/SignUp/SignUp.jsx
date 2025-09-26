@@ -68,7 +68,7 @@ export default function SignUp() {
         <div className="flex flex-col justify-center p-10">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-10">
-            <TalkSyncLogo className="mx-auto" /> {/* ✅ matches login page */}
+            <TalkSyncLogo className="mx-auto" />
             <p className="text-gray-200 text-base mt-2 text-center">
               Create your account & start practicing 🌍
             </p>

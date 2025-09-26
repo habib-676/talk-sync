@@ -2,33 +2,48 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import useAuth from "../../../../hooks/useAuth";
+import { useState } from "react";
 
 const ChangePasswordForm = () => {
-  const { register, handleSubmit, reset } = useForm();
-  const { updateUserPassword } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    watch,
+  } = useForm();
+  const { updateUserPassword, loading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onsubmit = async (data) => {
-    console.log("Final form data", data);
-    if (data.newPassword !== data.confirmNewPassword) {
-      toast.error("New password and confirm new password do not match");
-      return;
-    }
+  const onSubmit = async (data) => {
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
-      await updateUserPassword(data.currentPassword, data.newPassword);
-      toast.success("Password updated successfully!");
-      reset();
-      document.getElementById("changePasswordModal").checked = false;
-    } catch (error) {
-      if (error.code === "auth/wrong-password") {
-        toast.error("Current password is incorrect");
+      const result = await updateUserPassword(
+        data.currentPassword,
+        data.newPassword
+      );
+
+      if (result.success) {
+        toast.success(result.message || "Password updated successfully!");
+        reset();
+        // Close modal
+        document.getElementById("changePasswordModal").checked = false;
       } else {
-        toast.error(error.message);
+        toast.error(result.message || "Failed to update password.");
       }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+      console.error("Password change error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onsubmit)}>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label className="block text-sm font-medium mb-1">
           Current Password
@@ -36,38 +51,75 @@ const ChangePasswordForm = () => {
         <input
           type="password"
           placeholder="Enter current password"
-          {...register("currentPassword", { required: true })}
+          {...register("currentPassword", {
+            required: "Current password is required",
+          })}
           className="input input-bordered w-full"
         />
+        {errors.currentPassword && (
+          <p className="text-error text-sm mt-1">
+            {errors.currentPassword.message}
+          </p>
+        )}
       </div>
+
       <div>
         <label className="block text-sm font-medium mb-1">New Password</label>
         <input
           type="password"
-          placeholder="Enter new password"
-          {...register("newPassword", { required: true })}
+          placeholder="Enter new password (min. 6 characters)"
+          {...register("newPassword", {
+            required: "New password is required",
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters",
+            },
+          })}
           className="input input-bordered w-full"
         />
+        {errors.newPassword && (
+          <p className="text-error text-sm mt-1">
+            {errors.newPassword.message}
+          </p>
+        )}
       </div>
+
       <div>
         <label className="block text-sm font-medium mb-1">
           Confirm New Password
         </label>
         <input
           type="password"
-          placeholder="Enter new password"
-          {...register("confirmNewPassword", { required: true })}
+          placeholder="Confirm new password"
+          {...register("confirmNewPassword", {
+            required: "Please confirm your new password",
+            validate: (value) =>
+              value === watch("newPassword") || "Passwords do not match",
+          })}
           className="input input-bordered w-full"
         />
+        {errors.confirmNewPassword && (
+          <p className="text-error text-sm mt-1">
+            {errors.confirmNewPassword.message}
+          </p>
+        )}
       </div>
 
       {/* Actions */}
       <div className="modal-action">
-        <label htmlFor="changePasswordModal" className="btn">
+        <label
+          htmlFor="changePasswordModal"
+          className="btn"
+          disabled={isSubmitting}
+        >
           Cancel
         </label>
-        <button type="submit" className="btn btn-primary">
-          Update Password
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={isSubmitting || loading}
+        >
+          {isSubmitting ? "Updating..." : "Update Password"}
         </button>
       </div>
     </form>
