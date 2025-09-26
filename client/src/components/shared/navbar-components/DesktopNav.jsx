@@ -8,14 +8,16 @@ const DesktopNav = ({ user }) => {
   const menuItems = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About Us" },
-    { to: "/inbox", label: "Inbox" },
     { to: "/blogs", label: "Blogs" },
     { to: "/contact-us", label: "Contact Us" },
   ];
 
   // Conditionally add Dashboard link if user is logged in
   if (user) {
-    menuItems.push({ to: "/dashboard", label: "Dashboard" });
+    menuItems.push(
+      { to: "/dashboard", label: "Dashboard" },
+      { to: "/inbox", label: "Inbox" }
+    );
   }
   return (
     <ul className="hidden lg:flex items-center">

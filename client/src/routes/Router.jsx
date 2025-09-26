@@ -12,7 +12,6 @@ import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
 
 import PrivateRoute from "../routes/PrivateRoute";
-
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/userProfile";
 import Profile from "../pages/ProfilePage/Profile";
@@ -41,30 +40,32 @@ export const router = createBrowserRouter([
       },
       {
         path: "/inbox",
-        element: <Inbox />,
+        element: (
+          <PrivateRoute>
+            <Inbox />
+          </PrivateRoute>
+        ),
       },
       {
         path: "contact-us",
         Component: ContactUs,
       },
       {
-        path:'/follow',  //added by jannatul
-        Component:FollowPage
+        path: "/follow", //added by jannatul
+        Component: FollowPage,
       },
       {
-        path:"/profile/:username",
-        element:<UserProfile></UserProfile>
+        path: "/profile/:username",
+        element: <UserProfile></UserProfile>,
       },
       {
         path: "/profile",
         element: (
           <PrivateRoute>
-            <ProfilePage />
-          </PrivateRoute>)
-      }
-        
-        
-      
+            <Profile />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
   {
