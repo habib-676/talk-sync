@@ -12,11 +12,12 @@ import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
 
 import PrivateRoute from "../routes/PrivateRoute";
-import ProfilePage from "../pages/ProfilePage";
+
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/userProfile";
 import Profile from "../pages/ProfilePage/Profile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
+import ProfilePage from "../pages/ProfilePage/ProfilePage";
 export const router = createBrowserRouter([
   {
     path: "/",

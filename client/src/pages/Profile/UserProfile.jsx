@@ -42,7 +42,7 @@ export default function UserProfile() {
   if (!user) return <p className="text-center py-20">Loading...</p>;
 
   return (
-    <section className="py-12 px-6 bg-gradient-to-br from-purple-600 via-blue-500 to-pink-500 min-h-screen text-white">
+    <section className="py-12 px-6 bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen text-white">
       <div className="max-w-4xl mx-auto bg-white text-gray-800 rounded-2xl shadow-xl overflow-hidden">
         {/* Cover Photo */}
         <div className="relative h-40 bg-gradient-to-r from-purple-400 to-pink-400">
