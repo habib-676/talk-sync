@@ -20,11 +20,11 @@ const PersonalDetails = () => {
             Country
           </label>
           <select
-            defaultValue="Pick a color"
+            defaultValue="Select a country"
             className="select appearance-none w-full"
             {...register("user_country", { required: true })}
           >
-            <option disabled={true}>Pick a color</option>
+            <option disabled={true}>Select your country</option>
             <option>United States</option>
             <option>Bangladesh</option>
             <option>UAE</option>
