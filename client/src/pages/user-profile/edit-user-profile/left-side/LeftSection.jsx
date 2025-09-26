@@ -2,6 +2,7 @@ import React from "react";
 import UploadPhoto from "./UploadPhoto";
 import BasicInfo from "./BasicInfo";
 import PersonalDetails from "./PersonalDetails";
+import StatusAndRole from "./StatusAndRole";
 
 const LeftSection = () => {
   return (
@@ -9,6 +10,7 @@ const LeftSection = () => {
       <UploadPhoto />
       <BasicInfo />
       <PersonalDetails />
+      <StatusAndRole />
     </section>
   );
 };
