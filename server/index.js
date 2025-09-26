@@ -42,8 +42,18 @@ async function run() {
       try {
         const { user_name, user_email, password } = req.body;
 
+        //step-1: prevent duplicate users.
+        const existingUser = await usersCollections.findOne({ user_email });
+        if (existingUser) {
+          return res
+            .status(400)
+            .send({ success: false, message: "Email already existed" });
+        }
+
+        //step -2
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        //step - 3: create user collection
         const newUser = {
           user_name,
           user_email,
@@ -65,10 +75,13 @@ async function run() {
           role: "user",
         };
 
+        //step - 4: send to  the database
         const result = await usersCollections.insertOne(newUser);
+
+        //step - 5: send success status in the front-end
         res.status(201).json({ success: true, userId: result.insertedId });
       } catch (error) {
-        res.status(500).send({ error: error.message });
+        res.status(500).json({ success: false, message: "Server error" });
       }
     });
 
