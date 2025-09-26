@@ -13,6 +13,8 @@ import Inbox from "../pages/inbox/Inbox";
 
 import PrivateRoute from "../routes/PrivateRoute";
 import ProfilePage from "../pages/ProfilePage";
+import FollowPage from "../pages/Follow.jsx/FollowPage";
+import UserProfile from "../pages/Profile/userProfile";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -42,11 +44,19 @@ export const router = createBrowserRouter([
         path: "contact-us",
         Component: ContactUs,
       },
+      {
+        path:'/follow',  //added by jannatul
+        Component:FollowPage
+      },
+      {
+        path:"/profile/:username",
+        element:<UserProfile></UserProfile>
+      }
     ],
   },
   {
     path: "/auth",
-    element: <AuthLayouts></AuthLayouts>,
+    element: <AuthLayouts></AuthLayouts>, //added by Jannatul
     children: [
       {
         path: "/auth/signin",
