@@ -53,7 +53,7 @@ export default function FollowPage() {
   };
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-purple-600 via-blue-500 to-pink-500 min-h-screen text-white">
+    <section className="py-20 px-6 bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen text-white">
       <h2 className="text-4xl font-extrabold text-center mb-12 drop-shadow-lg">
         Find People to Follow
       </h2>
