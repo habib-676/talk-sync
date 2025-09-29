@@ -73,11 +73,8 @@ export default function ProfilePage() {
   };
 
   return (
-<<<<<<< HEAD:client/src/pages/ProfilePage/ProfilePage.jsx
     <div className="my-15 min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-100 via-white to-pink-100">
-=======
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-100 via-white to-pink-100 mt-16">
->>>>>>> 80b7f0793a04cc60422ebe5e80679694c8dfb82e:client/src/pages/ProfilePage.jsx
       {/* Decorative floating blobs */}
       <div className="pointer-events-none absolute -right-20 -top-28 w-80 h-80 rounded-full bg-gradient-to-tr from-indigo-300 to-pink-300 opacity-30 blur-3xl transform rotate-45"></div>
       <div className="pointer-events-none absolute -left-28 -bottom-20 w-72 h-72 rounded-full bg-gradient-to-tr from-emerald-200 to-cyan-200 opacity-25 blur-2xl"></div>
@@ -277,6 +274,12 @@ export default function ProfilePage() {
                 Quick Actions
               </h4>
               <div className="mt-3 flex flex-col gap-3">
+                
+                <Link to='/follow' className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm text-center hover:brightness-105 transition">
+                Find a partner
+                </Link>
+                <a href="/schedule" className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center hover:shadow-sm transition">Schedule a session</a>
+                <a href="/badges" className="px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-300 to-orange-400 text-sm text-center hover:brightness-105 transition">View badges</a>
                 <a
                   href="/match"
                   className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm text-center hover:brightness-105 transition"
@@ -333,6 +336,7 @@ export default function ProfilePage() {
           </aside>
         </section>
       </main>
+    </div>
     </div>
   );
 }

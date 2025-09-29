@@ -12,6 +12,9 @@ import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
 
 import PrivateRoute from "../routes/PrivateRoute";
+import ProfilePage from "../pages/ProfilePage";
+import FollowPage from "../pages/Follow.jsx/FollowPage";
+import UserProfile from "../pages/Profile/userProfile";
 import Profile from "../pages/ProfilePage/Profile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 export const router = createBrowserRouter([
@@ -44,18 +47,28 @@ export const router = createBrowserRouter([
         Component: ContactUs,
       },
       {
+        path:'/follow',  //added by jannatul
+        Component:FollowPage
+      },
+      {
+        path:"/profile/:username",
+        element:<UserProfile></UserProfile>
+      },
+      {
         path: "/profile",
         element: (
           <PrivateRoute>
             <ProfilePage />
-          </PrivateRoute>
-        ),
-      },
+          </PrivateRoute>)
+      }
+        
+        
+      
     ],
   },
   {
     path: "/auth",
-    element: <AuthLayouts></AuthLayouts>,
+    element: <AuthLayouts></AuthLayouts>, //added by Jannatul
     children: [
       {
         path: "/auth/signin",
