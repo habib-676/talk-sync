@@ -1,14 +1,40 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { useCountryLanguage } from "../../../../hooks/useCountryLanguage";
 
 const PersonalDetails = () => {
-  const { register } = useFormContext();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
+  const { countries, loading, error } = useCountryLanguage();
 
   const genderOptions = [
     { value: "male", label: "Male" },
     { value: "female", label: "Female" },
     { value: "others", label: "Others" },
   ];
+
+  if (loading) {
+    return (
+      <section className="space-y-4 bg-base-300 p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold">Personal Details</h2>
+        <div className="skeleton h-12 w-full"></div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="space-y-4 bg-base-300 p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold">Personal Details</h2>
+        <div className="alert alert-error">
+          Failed to load countries: {error}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-4 bg-base-300 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold">Personal Details</h2>
@@ -22,15 +48,20 @@ const PersonalDetails = () => {
           <select
             defaultValue="Select a country"
             className="select appearance-none w-full"
-            {...register("user_country", { required: true })}
+            {...register("country", { required: "Country is required" })}
           >
-            <option disabled={true}>Select your country</option>
-            <option>United States</option>
-            <option>Bangladesh</option>
-            <option>UAE</option>
-            <option>Germany</option>
-            <option>China</option>
+            <option value={""}>Select your country</option>
+            {countries.map((country) => (
+              <option key={country.code} value={country.name}>
+                {country.name}
+              </option>
+            ))}
           </select>
+          {errors.country && (
+            <span className="text-error text-sm mt-1">
+              {errors.country.message}
+            </span>
+          )}
         </div>
 
         {/* date of birth */}
@@ -45,7 +76,7 @@ const PersonalDetails = () => {
             id="dob"
             type="date"
             className="input input-bordered w-full font-medium"
-            {...register("user_dob", {
+            {...register("date_of_birth", {
               required: "Date of birth is required",
               validate: {
                 pastDate: (value) => {
@@ -80,7 +111,7 @@ const PersonalDetails = () => {
                   type="radio"
                   value={option.value}
                   className="radio radio-primary"
-                  {...register("user_gender", {
+                  {...register("gender", {
                     required: "Gender is required",
                   })}
                 />

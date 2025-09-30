@@ -1,7 +1,9 @@
 import React from "react";
 import { X } from "lucide-react";
+import { useFormContext } from "react-hook-form";
 
 const AboutMe = () => {
+  const { register } = useFormContext();
   return (
     <section className="space-y-4 bg-base-300 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold">About Me</h2>
@@ -15,6 +17,7 @@ const AboutMe = () => {
           <textarea
             className="textarea w-full resize-none"
             placeholder="Bio"
+            {...register("bio", { required: true })}
           ></textarea>
         </div>
         {/* interests */}
@@ -42,6 +45,7 @@ const AboutMe = () => {
                 type="text"
                 className="input w-full font-semibold"
                 placeholder="Add an interest..."
+                {...register("interests", { required: true })}
               />
               <button className="btn btn-primary">Add +</button>
             </div>
