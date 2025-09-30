@@ -50,6 +50,7 @@ async function run() {
         }
 
         // Step 1: prevent duplicate users
+        const query = { email: userData?.email };
         const existingUser = await usersCollections.findOne({
           email: userData.email,
         });

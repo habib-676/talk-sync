@@ -12,6 +12,7 @@ import { updateProfile } from "firebase/auth";
 import { auth } from "../../../../firebase-config/firebase.config";
 import SocialLogin from "../social-login/SocialLogin";
 import { useForm } from "react-hook-form";
+import { setUserInDb } from "../../../../lib/utils";
 
 export default function SignUp() {
   const { createUser, setUser } = useAuth();
@@ -29,16 +30,27 @@ export default function SignUp() {
     watch,
   } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const { user_name, user_email, password } = data;
     setLoading(true);
 
     // create user with email and password - firebase
-    createUser(user_email, password)
-      .then((userCredential) => {
+    await createUser(user_email, password)
+      .then(async (userCredential) => {
         const user = userCredential.user;
         console.log("User created:", user);
-        return updateProfile(user, { displayName: user_name });
+        await updateProfile(user, { displayName: user_name });
+
+        // Build the user object for DB
+        const userData = {
+          uid: user.uid, // unique Firebase UID
+          name: user_name,
+          email: user_email,
+          createdAt: new Date().toISOString(),
+        };
+
+        // Save to DB
+        await setUserInDb(userData);
       })
       .then(() => {
         setUser(auth.currentUser);
