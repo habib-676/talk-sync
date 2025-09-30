@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import useAuth from "../../../../hooks/useAuth";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router";
+import { setUserInDb } from "../../../../lib/utils";
 
 const SocialLogin = () => {
   const { googleLogin, setUser } = useAuth();
@@ -21,6 +22,16 @@ const SocialLogin = () => {
 
       const { displayName, email, photoURL, uid } = user;
       setUser({ displayName, email, photoURL, uid });
+
+      // update user in db
+      const userData = {
+        name: res?.user?.displayName,
+        email: res?.user?.email,
+        image: res?.user?.photoURL,
+        uid,
+      };
+
+      await setUserInDb(userData);
 
       // const firebaseToken = await user.getIdToken();
       toast.success("Logged in successfully with Google 🎉");
