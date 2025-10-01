@@ -3,12 +3,26 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
 const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
 app.use(express.json());
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Setup socket.io
+const io = new Server(server, {
+  cors: {
+    origin: "*", //  frontend URL
+  },
+});
 
 const uri = process.env.MONGO_URI;
 
@@ -32,10 +46,37 @@ async function run() {
 
     const database = client.db("Talk-Sync-Data");
     const usersCollections = database.collection("users");
+    const messagesCollections = database.collection("messages");
 
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
     });
+
+    // socket.io
+    const userSocketMap = {}; // {userId: socketId}
+
+    io.on("connection", (socket) => {
+      console.log("🟢 User is connected", socket.id);
+      const userId = socket.handshake.query.uid;
+
+      if (userId) {
+        userSocketMap[userId] = socket.id;
+      }
+
+      // send events to all the connected clients
+      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+      socket.on("disconnect", () => {
+        console.log("🔴 User disconnected:", socket.id);
+        delete userSocketMap[userId];
+        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+      });
+    });
+
+    // receiver socket id
+    const getReceiverSocketId = (userId) => {
+      return userSocketMap[userId];
+    };
 
     // User related APIs
     app.post("/users", async (req, res) => {
@@ -104,6 +145,74 @@ async function run() {
       res.send(result);
     });
 
+    // message related api's
+    app.post("/messages", async (req, res) => {
+      try {
+        const messageData = req.body;
+        const { text, image } = messageData;
+        let imgUrl;
+
+        if (image) {
+          // upload image in the cloudinary
+          // imgUrl = link from cloudinary
+        }
+
+        const newMessage = {
+          senderId: messageData?.senderId,
+          receiverId: messageData?.receiverId,
+          text: messageData?.text,
+          image: imgUrl,
+          createdAt: new Date().toISOString(),
+        };
+
+        // save message in mongoDB
+        await messagesCollections.insertOne(newMessage);
+
+        // realtime functionality
+        const receiverSocketId = getReceiverSocketId(messageData?.receiverId);
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
+
+        res.status(200).send(newMessage);
+      } catch (error) {
+        console.log("Error in message: ", error.message);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    app.get("/messages", async (req, res) => {
+      try {
+        const { senderId, receiverId } = req.query;
+        if (!senderId || !receiverId) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: "senderId and receiverId are required",
+            });
+        }
+
+        const query = {
+          $or: [
+            { senderId: senderId, receiverId: receiverId },
+            { senderId: receiverId, receiverId: senderId },
+          ],
+        };
+
+        const messages = await messagesCollections
+          .find(query)
+          .sort({ createdAt: 1 })
+          .toArray();
+        res.status(200).json(messages);
+      } catch (err) {
+        console.error("GET /messages error:", err);
+        res
+          .status(500)
+          .json({ success: false, message: "Internal server error" });
+      }
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -118,6 +227,6 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`TalkSync server is running on port ${port}`);
 });

@@ -13,13 +13,49 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { auth } from "../firebase-config/firebase.config";
+import { useRef } from "react";
+import { io } from "socket.io-client";
 
 const googleProvider = new GoogleAuthProvider();
+const SOCKET_URL = `${import.meta.env.VITE_API_URL}`; // backend URL
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const socketRef = useRef(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
   console.log("user in auth provider:", user);
+
+  // -------- SOCKET HANDLERS --------
+  const connectSocket = (uid) => {
+    if (socketRef.current?.connected) return; // already connected
+
+    socketRef.current = io(SOCKET_URL, {
+      query: { uid },
+    });
+
+    socketRef.current.on("connect", () => {
+      console.log("🟢 Socket connected:", socketRef.current.id);
+    });
+
+    socketRef.current.on("disconnect", () => {
+      console.log("🔴 Socket disconnected");
+    });
+
+    // listen online users from server
+    socketRef.current.on("getOnlineUsers", (userIds) => {
+      console.log("Online users:", userIds);
+      setOnlineUsers(userIds);
+    });
+  };
+
+  const disconnectSocket = () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+  };
 
   // register/sign-up method for user
   const createUser = async (email, password) => {
@@ -35,22 +71,32 @@ const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     setLoading(true);
     try {
-      return await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      connectSocket(userCredential.user.uid); // connect socket on login
+      return userCredential;
     } finally {
       setLoading(false);
     }
   };
 
   //sign out method for user
-  const logOut = () => {
-    return signOut(auth);
+  const logOut = async () => {
+    await signOut(auth);
+    disconnectSocket(); // disconnect socket on logout
+    setUser(null);
   };
 
   //social login methods (Google, GitHub, etc.) can be added here
   const googleLogin = async () => {
     setLoading(true);
     try {
-      return await signInWithPopup(auth, googleProvider);
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      connectSocket(userCredential.user.uid); // connect socket on Google login
+      return userCredential;
     } finally {
       setLoading(false);
     }
@@ -111,6 +157,13 @@ const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setLoading(false);
       console.log("Auth state changed, current user:", currentUser);
+
+      // socket logic
+      if (currentUser) {
+        connectSocket(currentUser.uid); // auto-connect if user is already logged in
+      } else {
+        disconnectSocket();
+      }
     });
 
     return () => unsubscribe();
@@ -128,6 +181,8 @@ const AuthProvider = ({ children }) => {
     setLoading,
     updateUserPassword,
     reauthenticateUser,
+    socketRef,
+    onlineUsers,
   };
   return (
     <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
