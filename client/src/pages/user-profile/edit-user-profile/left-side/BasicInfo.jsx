@@ -12,6 +12,7 @@ const BasicInfo = () => {
     <section className="bg-base-300 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-6">Basic Information</h2>
       <div className="space-y-4">
+        {/* user name */}
         <div>
           <label htmlFor="displayName" className="block font-semibold mb-1">
             Full Name
@@ -23,6 +24,7 @@ const BasicInfo = () => {
             className="input w-full font-medium"
           />
         </div>
+        {/* user email */}
         <div>
           <label htmlFor="email" className="block font-semibold mb-1">
             Email

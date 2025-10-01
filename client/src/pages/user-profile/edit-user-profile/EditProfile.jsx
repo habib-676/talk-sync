@@ -14,7 +14,7 @@ const EditProfile = () => {
       <FormProvider {...methods}>
         <form
           onSubmit={methods.handleSubmit(onsubmit)}
-          className="max-w-7xl mx-auto space-y-8 bg-base-100 p-5"
+          className="max-w-7xl mx-auto space-y-8 bg-base-100 p-5 rounded-2xl"
         >
           <main className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <LeftSection></LeftSection>
