@@ -9,6 +9,7 @@ import useAuth from "../../../../hooks/useAuth";
 import { toast } from "react-hot-toast";
 import LoadingSpinner from "../../../loading/LoadingSpinner";
 import SocialLogin from "../social-login/SocialLogin";
+import { setUserInDb } from "../../../../lib/utils";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +19,7 @@ export default function Login() {
   //navigate to dashboard/homepage after login
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -28,11 +29,19 @@ export default function Login() {
 
     console.log({ email, password });
 
-    signIn(email, password)
-      .then((result) => {
+    await signIn(email, password)
+      .then(async (result) => {
         const loggedUser = result.user;
         console.log(loggedUser);
         setIsLoading(false);
+        const userData = {
+          uid: loggedUser?.uid,
+          name: loggedUser?.displayName || "Anonymous",
+          email: loggedUser?.email,
+        };
+
+        // Save or update user in DB
+        await setUserInDb(userData);
         form.reset();
         toast.success("Login Successful!");
         navigate("/");

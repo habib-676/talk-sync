@@ -40,49 +40,68 @@ async function run() {
     // User related APIs
     app.post("/users", async (req, res) => {
       try {
-        const { user_name, user_email, password } = req.body;
+        const userData = req.body;
+        console.log("Incoming userData:", userData);
 
-        //step-1: prevent duplicate users.
-        const existingUser = await usersCollections.findOne({ user_email });
-        if (existingUser) {
+        if (!userData?.email) {
           return res
             .status(400)
-            .send({ success: false, message: "Email already existed" });
+            .json({ success: false, message: "Email is required" });
         }
 
-        //step -2
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Step 1: prevent duplicate users
+        const query = { email: userData?.email };
+        const existingUser = await usersCollections.findOne({
+          email: userData.email,
+        });
+        if (existingUser) {
+          const result = await usersCollections.updateOne(query, {
+            $set: { last_loggedIn: new Date().toISOString() },
+          });
+          return res.status(200).send(result);
+        }
 
-        //step - 3: create user collection
+        // Step 2: only hash password if it's provided
+        let hashedPassword = null;
+        if (userData.password) {
+          hashedPassword = await bcrypt.hash(userData.password, 10);
+        }
+
+        // Step 3: build new user object
         const newUser = {
-          user_name,
-          user_email,
-          password: hashedPassword,
-          user_country,
-          photo,
-          bio,
-          date_of_birth,
-          native_language,
-          learning_language,
-          gender,
+          name: userData.name || "",
+          email: userData.email,
+          password: hashedPassword, // null if Google user
+          image: userData.image || "",
+          role: userData.role || "learner",
+          uid: userData.uid || "",
+          bio: "",
+          user_country: "",
+          date_of_birth: "",
+          native_language: "",
+          learning_language: "",
+          gender: "",
           interests: [],
-          proficiency_level,
+          proficiency_level: "",
           status: "Offline",
           friends: [],
           feedback: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          role: "user",
+          createdAt: new Date().toISOString(),
+          last_loggedIn: new Date().toISOString(),
         };
 
-        //step - 4: send to  the database
+        // Step 4: insert user
         const result = await usersCollections.insertOne(newUser);
-
-        //step - 5: send success status in the front-end
         res.status(201).json({ success: true, userId: result.insertedId });
       } catch (error) {
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error("❌ Error in /users:", error);
+        res.status(500).json({ success: false, message: error.message });
       }
+    });
+
+    app.get("/users", async (req, res) => {
+      const result = await usersCollections.find().toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
