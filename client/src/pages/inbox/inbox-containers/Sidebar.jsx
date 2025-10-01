@@ -1,9 +1,28 @@
 import logo from "../../../assets/logo/logo.png";
-import { userDummyData } from "../../../assets/dummy-data/dummyData";
 import { CiMenuKebab } from "react-icons/ci";
 import { IoSearchOutline } from "react-icons/io5";
+import useAuth from "../../../hooks/useAuth";
+import { useState } from "react";
+import { useEffect } from "react";
 
 const Sidebar = ({ selectedUser, setSelectedUser }) => {
+  const { onlineUsers, user } = useAuth();
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/users`);
+        const data = await res.json();
+        // optional: filter yourself out if you want
+        const others = data.filter((u) => u.uid !== user?.uid);
+        setUsers(others);
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+      }
+    };
+    fetchUsers();
+  }, [user]);
   return (
     <div
       className={`backdrop-blur-lg  h-full p-5 rounded-r-xl overflow-y-scroll ${
@@ -15,7 +34,6 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
           <p className="font-bold text-lg text-secondary">
             Talk<span className="text-primary">Sync</span>
           </p>
-
           <div className="relative py-2 group">
             <span className="max-h-5 cursor-pointer">
               <CiMenuKebab />
@@ -32,32 +50,35 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
           />
         </div>
       </div>
+
       <div className="flex flex-col">
-        {userDummyData.map((user, index) => (
+        {users.map((u, index) => (
           <div
-            key={index}
-            onClick={() => {
-              setSelectedUser(user);
-            }}
+            key={u._id || u.uid || index}
+            onClick={() => setSelectedUser(u)}
             className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${
-              selectedUser?._id === user._id && "bg-primary/20"
+              selectedUser?._id === u._id && "bg-primary/20"
             }`}
           >
             <img
-              src={user.profilePic || logo}
+              src={u.image || logo}
               alt=""
               className="w-[35px] aspect-[1/1] object-cover rounded-full"
             />
             <div className="flex flex-col leading-5">
-              <p>{user.fullName}</p>
-              {index < 3 ? (
-                <span className="text-green-400 text-xs">Online</span>
-              ) : (
-                <span className="text-neutral-500 text-xs">Offline</span>
-              )}
+              <p>{u.name || u.fullName}</p>
+              <span
+                className={`${
+                  onlineUsers.includes(u.uid)
+                    ? "text-green-400"
+                    : "text-neutral-500"
+                } text-xs`}
+              >
+                {onlineUsers.includes(u.uid) ? "Online" : "Offline"}
+              </span>
             </div>
 
-            {index > 2 && (
+            {!onlineUsers.includes(u.uid) && (
               <p className="absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50">
                 {index}
               </p>
