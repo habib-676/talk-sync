@@ -1,27 +1,85 @@
-import React from "react";
+import React, { useEffect } from "react";
 import LeftSection from "./left-side/LeftSection";
 import RightSection from "./right-side/RightSection";
 import { FormProvider, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import useAuth from "../../../hooks/useAuth";
 import { updateUserProfile } from "../../../lib/updateUserDB";
+import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
+import { getUserByEmail } from "../../../lib/utils";
 
 const EditProfile = () => {
-const methods = useForm();
+  const methods = useForm();
   const navigate = useNavigate();
   const { user } = useAuth();
-  console.log("user from edit-profile", user.email);
+
+  //fetch user data
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ["user", user?.email],
+    queryFn: () => getUserByEmail(user?.email),
+    enabled: !!user?.email, // it will run when email is exist
+  });
+
+  //reset the form
+  useEffect(() => {
+    if (userData) {
+      methods.reset({
+        user_name: userData.name || "",
+        photo: userData.image || "",
+        bio: userData.bio || "",
+        country: userData.user_country || "",
+        date_of_birth: userData.date_of_birth || "",
+        native_language: userData.native_language || "",
+        learning_languages: userData.learning_language || "",
+        gender: userData.gender || "",
+        interests: userData.interests || [],
+        proficiency_level: userData.proficiency_level || "",
+      });
+    }
+  }, [methods, userData]);
 
   const onsubmit = async (data) => {
     console.log("Final form data", data);
+    const {
+      bio,
+      country,
+      date_of_birth,
+      gender,
+      interests,
+      learning_languages,
+      native_language,
+      proficiency_level,
+      user_name,
+      photo,
+    } = data;
+
+    const userData = {
+      name: user_name,
+      image: photo,
+      bio,
+      user_country: country,
+      date_of_birth,
+      native_language,
+      learning_language: learning_languages,
+      gender,
+      interests,
+      proficiency_level,
+    };
     try {
       const userEmail = user.email;
-      const res = await updateUserProfile(userEmail, data);
+      const res = await updateUserProfile(userEmail, userData);
       console.log("Profile updated", res);
+      if (res.modifiedCount) {
+        toast.success("Your profile is updated successfully");
+      }
     } catch (error) {
       console.error("❌ Failed to update:", error);
     }
   };
+
+  if (isLoading) return <p className="text-center">Loading profile...</p>;
+
   return (
     <div className="bg-base-300 p-6 min-h-screen py-16">
       <FormProvider {...methods}>
