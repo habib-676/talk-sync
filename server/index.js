@@ -99,6 +99,48 @@ async function run() {
       }
     });
 
+    // API: for update user  details
+    app.put("/users/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const updatedData = req.body;
+
+        console.log(updatedData);
+
+        if (!email) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Email is required" });
+        }
+
+        const result = await usersCollections.updateOne(
+          { email },
+          {
+            $set: {
+              ...updatedData,
+              updatedAt: new Date().toISOString(),
+            },
+          },
+          { upsert: false }
+        );
+
+        if (result.matchedCount === 0) {
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
+        }
+
+        res.status(200).json({
+          success: true,
+          message: "Profile updated successfully",
+          result,
+        });
+      } catch (error) {
+        console.error("❌ Error updating user:", error);
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
     app.get("/users", async (req, res) => {
       const result = await usersCollections.find().toArray();
       res.send(result);
