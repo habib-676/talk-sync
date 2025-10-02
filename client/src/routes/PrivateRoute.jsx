@@ -19,7 +19,7 @@ export default function PrivateRoute({ children }) {
 
   if (!user) {
     // Not logged in -> redirect to login and preserve current location
-    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+    return <Navigate to="/auth/signin" state={{ from: location }} replace />;
   }
 
   // User present -> render children (the protected page)

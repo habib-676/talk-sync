@@ -2,12 +2,25 @@ import React from "react";
 import LeftSection from "./left-side/LeftSection";
 import RightSection from "./right-side/RightSection";
 import { FormProvider, useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router";
+import useAuth from "../../../hooks/useAuth";
+import { updateUserProfile } from "../../../lib/updateUserDB";
 
 const EditProfile = () => {
-  const methods = useForm();
+const methods = useForm();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  console.log("user from edit-profile", user.email);
 
-  const onsubmit = (data) => {
+  const onsubmit = async (data) => {
     console.log("Final form data", data);
+    try {
+      const userEmail = user.email;
+      const res = await updateUserProfile(userEmail, data);
+      console.log("Profile updated", res);
+    } catch (error) {
+      console.error("❌ Failed to update:", error);
+    }
   };
   return (
     <div className="bg-base-300 p-6 min-h-screen py-16">
@@ -24,11 +37,27 @@ const EditProfile = () => {
           {/* divider */}
           <div className="divider"></div>
 
-          <div className="flex justify-end gap-4 col-span-full">
-            <button type="submit" className="btn btn-success">
-              Save Changes
-            </button>
-            <button className="btn btn-error">Cancel</button>
+          <div className="flex items-center justify-between">
+            <div className="space-x-3">
+              <Link to={"/"} className="btn btn-primary">
+                Home
+              </Link>
+              <button
+                type="button"
+                className="btn btn-warning"
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </button>
+            </div>
+            <div className="flex justify-end gap-4 col-span-full">
+              <button type="submit" className="btn btn-success">
+                Save Changes
+              </button>
+              <button type="button" className="btn btn-error">
+                Cancel
+              </button>
+            </div>
           </div>
         </form>
       </FormProvider>
