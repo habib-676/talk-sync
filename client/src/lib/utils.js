@@ -16,3 +16,11 @@ export const setUserInDb = async (user) => {
   console.log(data);
   // return data;
 };
+
+//get a specific user data
+export const getUserByEmail = async (email) => {
+  const { data } = await axios.get(
+    `${import.meta.env.VITE_API_URL}/users/${email}`
+  );
+  return data.user;
+};

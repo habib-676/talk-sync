@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import photo from "../../../../assets/about-page/mission-1.jpg";
 import { Camera } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import useAuth from "../../../../hooks/useAuth";
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
@@ -12,13 +12,13 @@ const UploadPhoto = () => {
   const { setValue, watch } = useFormContext();
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
-
+  const { user } = useAuth();
   const currentPhoto = watch("photo");
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
     if (!file) {
-      e.target.value = ""; // Clear the input even if no file was selected
+      e.target.value = "";
       return;
     }
 
@@ -26,12 +26,12 @@ const UploadPhoto = () => {
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!allowedTypes.includes(file.type)) {
       toast.error("Please select a valid image file (JPG, PNG, GIF).");
-      e.target.value = ""; // Clear input after error and return
+      e.target.value = "";
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
       toast.error("File size exceeds 2MB.");
-      e.target.value = ""; // Clear input after error
+      e.target.value = "";
       return;
     }
 
@@ -96,7 +96,7 @@ const UploadPhoto = () => {
       <h2 className="text-2xl font-semibold mb-6">Profile Photo</h2>
       <div className="flex flex-col lg:flex-row items-center gap-4">
         <img
-          src={preview || currentPhoto || photo}
+          src={preview || currentPhoto || user.photoURL}
           alt="Upload Preview"
           className="w-52 h-52 object-cover object-center rounded-full"
         />

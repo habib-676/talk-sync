@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "@tanstack/react-query": "^5.90.2",
     "axios": "^1.12.2",
     "firebase": "^12.3.0",
     "framer-motion": "^12.23.20",
