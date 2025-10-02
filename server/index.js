@@ -79,6 +79,28 @@ async function run() {
     };
 
     // User related APIs
+
+    app.get("/users/:email", async (req, res) => {
+      try {
+        const email = req?.params?.email;
+        if (!email) {
+          res
+            .status(400)
+            .json({ success: false, message: "Email is required" });
+        }
+
+        const user = await usersCollections.findOne({ email });
+
+        if (!user) {
+          res.status(404).json({ success: false, message: "User not found" });
+        }
+        res.status(200).json({ success: true, user });
+      } catch (error) {
+        console.error("❌ Error in GET /users/:email:", error);
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
     app.post("/users", async (req, res) => {
       try {
         const userData = req.body;
@@ -227,12 +249,10 @@ async function run() {
       try {
         const { senderId, receiverId } = req.query;
         if (!senderId || !receiverId) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "senderId and receiverId are required",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "senderId and receiverId are required",
+          });
         }
 
         const query = {
