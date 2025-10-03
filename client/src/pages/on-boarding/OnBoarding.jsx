@@ -6,7 +6,7 @@ import AvatarGenerator from "../../components/avatar-generator/AvatarGenerator";
 import useAuth from "../../hooks/useAuth";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 const OnBoarding = () => {
   const methods = useForm();
@@ -20,8 +20,12 @@ const OnBoarding = () => {
 
   const [isCompleting, setIsCompleting] = useState(false);
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { languages } = useCountryLanguage();
+
+  //redirect user
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     if (!user?.email) return toast.error("User not found");
@@ -58,7 +62,7 @@ const OnBoarding = () => {
       if (res.data?.success && res.data?.modifiedCount > 0) {
         toast.success("Onboarding complete!");
         reset();
-        navigate("/");
+        navigate(from, { replace: true });
       } else {
         toast.error("Profile update failed");
       }

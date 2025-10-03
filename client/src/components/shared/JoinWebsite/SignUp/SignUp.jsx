@@ -85,9 +85,6 @@ export default function SignUp() {
               Create your account & start practicing 🌍
             </p>
           </div>
-
-          <SocialLogin />
-
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Name */}
             <div className="relative">
@@ -199,6 +196,10 @@ export default function SignUp() {
               {loading ? <LoadingSpinner /> : "Create Account"}
             </button>
           </form>
+
+
+          {/* social login */}
+          <SocialLogin />
 
           {/* Login link */}
           <p className="text-center text-gray-700 mt-6">
