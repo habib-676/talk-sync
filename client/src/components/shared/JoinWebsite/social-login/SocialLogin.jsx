@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useAuth from "../../../../hooks/useAuth";
 import toast from "react-hot-toast";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { setUserInDb } from "../../../../lib/utils";
 
 const SocialLogin = () => {
@@ -9,8 +9,8 @@ const SocialLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   //navigate user
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  // const location = useLocation();
+  // const from = location.state?.from?.pathname || "/";
   const navigate = useNavigate();
 
   const handleGoogleLogin = async () => {
@@ -36,7 +36,7 @@ const SocialLogin = () => {
       // const firebaseToken = await user.getIdToken();
       toast.success("Logged in successfully with Google 🎉");
 
-      navigate(from, { replace: true });
+      navigate("/onboarding");
     } catch (error) {
       console.error("Google login error:", error);
       toast.error(error.message || "Google login failed. Please try again.");

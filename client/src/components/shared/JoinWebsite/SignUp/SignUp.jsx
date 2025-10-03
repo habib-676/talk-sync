@@ -56,7 +56,7 @@ export default function SignUp() {
         setUser(auth.currentUser);
         reset();
         toast.success("Registration Successful");
-        navigate("/auth/signin");
+        navigate("/onboarding");
       })
       .catch((error) => {
         console.error("Registration error:", error);
