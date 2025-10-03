@@ -163,7 +163,7 @@ async function run() {
     });
 
     // API: for update user  details
-    app.put("/users/:email", async (req, res) => {
+    app.patch("/users/:email", async (req, res) => {
       try {
         const email = req.params.email;
         const updatedData = req.body;
