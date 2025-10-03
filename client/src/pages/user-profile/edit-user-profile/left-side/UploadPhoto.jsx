@@ -13,7 +13,7 @@ const UploadPhoto = () => {
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
-  const currentPhoto = watch("photo");
+  const currentPhoto = watch("image");
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
@@ -62,7 +62,7 @@ const UploadPhoto = () => {
       );
 
       if (res.data.secure_url) {
-        setValue("photo", res.data.secure_url, { shouldValidate: true }); //shouldValidate is a react-hook-form method
+        setValue("image", res.data.secure_url, { shouldValidate: true }); //shouldValidate is a react-hook-form method
         toast.success("Photo uploaded successfully!");
       } else {
         toast.error("Failed to get image URL from Cloudinary.");
@@ -74,7 +74,7 @@ const UploadPhoto = () => {
       setUploading(false);
       e.target.value = "";
 
-      if (localPreviewUrl && !currentPhoto && !watch("photo")) {
+      if (localPreviewUrl && !currentPhoto && !watch("image")) {
         // if no new photo is set
         URL.revokeObjectURL(localPreviewUrl);
         setPreview(null);

@@ -25,13 +25,13 @@ const EditProfile = () => {
   useEffect(() => {
     if (userData) {
       methods.reset({
-        user_name: userData.name || "",
-        photo: userData.image || "",
+        name: userData.name || "",
+        image: userData.image || "",
         bio: userData.bio || "",
         country: userData.user_country || "",
         date_of_birth: userData.date_of_birth || "",
         native_language: userData.native_language || "",
-        learning_languages: userData.learning_language || "",
+        learning_language: userData.learning_language || [],
         gender: userData.gender || "",
         interests: userData.interests || [],
         proficiency_level: userData.proficiency_level || "",
@@ -40,6 +40,7 @@ const EditProfile = () => {
   }, [methods, userData]);
 
   const onsubmit = async (data) => {
+    console.log(data);
     //destructuring form data
     const {
       bio,
@@ -71,7 +72,7 @@ const EditProfile = () => {
       const userEmail = user.email; //from auth provider
       const res = await updateUserProfile(userEmail, userData);
       console.log("Profile updated", res);
-      if ( res.result.modifiedCount > 0) {
+      if (res.result.modifiedCount > 0) {
         toast.success("Your profile is updated successfully");
       }
     } catch (error) {
