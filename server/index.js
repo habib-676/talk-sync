@@ -142,7 +142,7 @@ async function run() {
           user_country: "",
           date_of_birth: "",
           native_language: "",
-          learning_language: "",
+          learning_language: [],
           gender: "",
           interests: [],
           proficiency_level: "",
@@ -201,6 +201,27 @@ async function run() {
       } catch (error) {
         console.error("❌ Error updating user:", error);
         res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    app.patch("/onboarding/:email", async (req, res) => {
+      try {
+        const { email } = req.params;
+        const updatedData = req.body;
+        console.log(updatedData);
+
+        const result = await usersCollections.updateOne(
+          { email },
+          { $set: updatedData }
+        );
+
+        res.json({
+          success: true,
+          modifiedCount: result.modifiedCount,
+          result,
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to update user" });
       }
     });
 
