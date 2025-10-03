@@ -3,7 +3,12 @@ require("dotenv").config();
 const express = require("express");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const cors = require("cors");
-const bcrypt = require("bcrypt"); // or bcryptjs if you prefer
+require("dotenv").config();
+const bcrypt = require("bcrypt");
+
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -13,7 +18,16 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Ensure MONGO_URI exists
+// Create HTTP server
+const server = http.createServer(app);
+
+// Setup socket.io
+const io = new Server(server, {
+  cors: {
+    origin: "*", //  frontend URL
+  },
+});
+
 const uri = process.env.MONGO_URI;
 if (!uri) {
   console.error("MONGO_URI is missing in .env");
@@ -36,21 +50,61 @@ async function run() {
     const DB_NAME = process.env.DB_NAME || "Talk-Sync-Data";
     const database = client.db(DB_NAME);
     const usersCollections = database.collection("users");
+    const messagesCollections = database.collection("messages");
 
-    // Create unique index on email for safety (idempotent)
-    await usersCollections.createIndex({ email: 1 }, { unique: true });
-
-    // Root
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
     });
 
-    /**
-     * POST /users
-     * Register or upsert a user.
-     * Accepts body with at least { email }.
-     * If user exists, it updates last_loggedIn and returns 200.
-     */
+    // socket.io
+    const userSocketMap = {}; // {userId: socketId}
+
+    io.on("connection", (socket) => {
+      console.log("🟢 User is connected", socket.id);
+      const userId = socket.handshake.query.uid;
+
+      if (userId) {
+        userSocketMap[userId] = socket.id;
+      }
+
+      // send events to all the connected clients
+      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+      socket.on("disconnect", () => {
+        console.log("🔴 User disconnected:", socket.id);
+        delete userSocketMap[userId];
+        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+      });
+    });
+
+    // receiver socket id
+    const getReceiverSocketId = (userId) => {
+      return userSocketMap[userId];
+    };
+
+    // User related APIs
+
+    app.get("/users/:email", async (req, res) => {
+      try {
+        const email = req?.params?.email;
+        if (!email) {
+          res
+            .status(400)
+            .json({ success: false, message: "Email is required" });
+        }
+
+        const user = await usersCollections.findOne({ email });
+
+        if (!user) {
+          res.status(404).json({ success: false, message: "User not found" });
+        }
+        res.status(200).json({ success: true, user });
+      } catch (error) {
+        console.error("❌ Error in GET /users/:email:", error);
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
     app.post("/users", async (req, res) => {
       try {
         const userData = req.body || {};
@@ -104,14 +158,52 @@ async function run() {
         };
 
         const result = await usersCollections.insertOne(newUser);
-        const publicUser = await usersCollections.findOne({ _id: result.insertedId }, { projection: { password: 0 } });
-        return res.status(201).json({ success: true, user: publicUser });
-      } catch (err) {
-        console.error("Error in POST /users:", err);
-        if (err.code === 11000) {
-          return res.status(409).json({ success: false, message: "Email already exists" });
+        res.status(201).json({ success: true, userId: result.insertedId });
+      } catch (error) {
+        console.error("❌ Error in /users:", error);
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    // API: for update user  details
+    app.put("/users/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const updatedData = req.body;
+
+        console.log(updatedData);
+
+        if (!email) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Email is required" });
         }
-        return res.status(500).json({ success: false, message: err.message || "Internal server error" });
+
+        const result = await usersCollections.updateOne(
+          { email },
+          {
+            $set: {
+              ...updatedData,
+              updatedAt: new Date().toISOString(),
+            },
+          },
+          { upsert: false }
+        );
+
+        if (result.matchedCount === 0) {
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
+        }
+
+        res.status(200).json({
+          success: true,
+          message: "Profile updated successfully",
+          result,
+        });
+      } catch (error) {
+        console.error("❌ Error updating user:", error);
+        res.status(500).json({ success: false, message: error.message });
       }
     });
 
@@ -120,87 +212,77 @@ async function run() {
      * List users (for admin/dev).
      */
     app.get("/users", async (req, res) => {
-      try {
-        const docs = await usersCollections.find({}, { projection: { password: 0 } }).toArray();
-        res.json(docs);
-      } catch (err) {
-        console.error("GET /users error:", err);
-        res.status(500).json({ error: "Server error" });
-      }
+      const result = await usersCollections.find().toArray();
+      res.send(result);
     });
 
-    /**
-     * GET /users/:email
-     * Return a user by email (public fields only).
-     */
-    app.get("/users/:email", async (req, res) => {
+    // message related api's
+    app.post("/messages", async (req, res) => {
       try {
-        const email = (req.params.email || "").toLowerCase();
-        if (!email) return res.status(400).json({ error: "Email required" });
-        const user = await usersCollections.findOne({ email }, { projection: { password: 0 } });
-        if (!user) return res.status(404).json({ error: "User not found" });
-        res.json(user);
-      } catch (err) {
-        console.error("GET /users/:email error:", err);
-        res.status(500).json({ error: "Server error" });
-      }
-    });
+        const messageData = req.body;
+        const { text, image } = messageData;
+        let imgUrl;
 
-    /**
-     * GET /api/me?email=...
-     * Simple dev mode endpoint: returns profile for a given email.
-     * In production replace this with an authenticated endpoint that derives the user from the token.
-     */
-    app.get("/api/me", async (req, res) => {
-      try {
-        const email = (req.query.email || "").toLowerCase().trim();
-        if (!email) return res.status(400).json({ error: "email query required (dev mode)" });
-
-        const user = await usersCollections.findOne({ email }, { projection: { password: 0 } });
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        return res.json(user);
-      } catch (err) {
-        console.error("GET /api/me error:", err);
-        return res.status(500).json({ error: "Server error" });
-      }
-    });
-
-    /**
-     * PATCH /api/me
-     * Body: { email: string, updates: { field: value, ... } }
-     * Updates the user and returns updated user (no password).
-     * For demo mode we accept email in body; change to token-based auth in production.
-     */
-    app.patch("/api/me", async (req, res) => {
-      try {
-        const { email, updates } = req.body || {};
-        if (!email || !updates) return res.status(400).json({ error: "email and updates are required" });
-
-        // Do not allow updating password through this endpoint. If needed, create a separate password flow.
-        if (updates.password) delete updates.password;
-
-        // normalize some fields
-        if (updates.learning && !Array.isArray(updates.learning)) {
-          updates.learning = [updates.learning];
+        if (image) {
+          // upload image in the cloudinary
+          // imgUrl = link from cloudinary
         }
-        if (typeof updates.email === "string") delete updates.email; // don't allow changing email here (or handle separately)
 
-        const result = await usersCollections.findOneAndUpdate(
-          { email: email.toLowerCase().trim() },
-          { $set: { ...updates, updatedAt: new Date().toISOString() } },
-          { returnDocument: "after", projection: { password: 0 } }
-        );
+        const newMessage = {
+          senderId: messageData?.senderId,
+          receiverId: messageData?.receiverId,
+          text: messageData?.text,
+          image: imgUrl,
+          createdAt: new Date().toISOString(),
+        };
 
-        if (!result.value) return res.status(404).json({ error: "User not found" });
-        return res.json(result.value);
-      } catch (err) {
-        console.error("PATCH /api/me error:", err);
-        return res.status(500).json({ error: "Server error" });
+        // save message in mongoDB
+        await messagesCollections.insertOne(newMessage);
+
+        // realtime functionality
+        const receiverSocketId = getReceiverSocketId(messageData?.receiverId);
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
+
+        res.status(200).send(newMessage);
+      } catch (error) {
+        console.log("Error in message: ", error.message);
+        res.status(500).json({ error: "Internal server error" });
       }
     });
 
-    // Ping DB
+    app.get("/messages", async (req, res) => {
+      try {
+        const { senderId, receiverId } = req.query;
+        if (!senderId || !receiverId) {
+          return res.status(400).json({
+            success: false,
+            message: "senderId and receiverId are required",
+          });
+        }
+
+        const query = {
+          $or: [
+            { senderId: senderId, receiverId: receiverId },
+            { senderId: receiverId, receiverId: senderId },
+          ],
+        };
+
+        const messages = await messagesCollections
+          .find(query)
+          .sort({ createdAt: 1 })
+          .toArray();
+        res.status(200).json(messages);
+      } catch (err) {
+        console.error("GET /messages error:", err);
+        res
+          .status(500)
+          .json({ success: false, message: "Internal server error" });
+      }
+    });
+
+    // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
@@ -211,8 +293,7 @@ async function run() {
 
 run().catch(console.dir);
 
-// Start server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`TalkSync server is running on port ${port}`);
 });
 
