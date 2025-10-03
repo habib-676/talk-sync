@@ -3,12 +3,14 @@ import useAuth from "../../hooks/useAuth";
 import { Link } from "react-router";
 
 /**
- * ProfilePage.jsx
- * - Robust fetch for /api/me
- * - Prefer user.image (Cloudinary) -> user.photoURL -> initials
- * - AbortController to avoid race conditions
- * - Accessible progress role and sensible fallbacks
+ * ProfilePage (robust)
+ * - First tries same-origin /api/me (uses token if present)
+ * - If response is non-JSON (HTML), retries against BACKEND_ORIGIN (default http://localhost:5000)
+ * - If still failing, tries backend /api/me?email=... fallback
+ * - Shows helpful diagnostic message in UI
  */
+
+const BACKEND_ORIGIN = (import.meta.env && import.meta.env.VITE_BACKEND_ORIGIN) || "http://localhost:5000";
 
 export default function ProfilePage() {
   const { user: authUser } = useAuth();
@@ -16,46 +18,114 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(!authUser);
   const [error, setError] = useState(null);
 
-  // small helper: fetch JSON but detect non-JSON (avoids Unexpected token '<' errors)
-  async function fetchJson(url, opts = {}) {
+  // helper: fetch and return parsed JSON or throw with helpful info
+  async function safeFetchJson(url, opts = {}) {
     const res = await fetch(url, opts);
     const ct = res.headers.get("content-type") || "";
     const text = await res.text();
+
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${text}`);
+      const msg = `HTTP ${res.status} ${res.statusText} - ${text.slice(0, 1000)}`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.body = text;
+      throw err;
     }
-    if (!ct.includes("application/json")) {
-      console.error("Non-JSON response", text.slice(0, 1000));
-      throw new Error("Server returned non-JSON response");
+
+    if (ct.includes("application/json")) {
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        const err = new Error("Failed to parse JSON response");
+        err.body = text;
+        throw err;
+      }
     }
-    return JSON.parse(text);
+
+    // Not JSON (likely HTML or text)
+    const err = new Error("Server returned non-JSON response");
+    err.body = text;
+    err.contentType = ct;
+    throw err;
+  }
+
+  // Build headers (include token if present in localStorage)
+  function buildHeaders() {
+    const token = localStorage.getItem("token");
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
   }
 
   useEffect(() => {
-    // if authUser already has server profile fields, use it
+    // If authUser already contains server profile fields, use it
     if (authUser && authUser.native) {
       setUser(authUser);
       setLoading(false);
       return;
     }
 
-    const ac = new AbortController();
     let mounted = true;
+    const ac = new AbortController();
 
     (async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const headers = {
-          "Content-Type": "application/json",
-          ...(localStorage.getItem("token")
-            ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
-            : {}),
-        };
+        const headers = buildHeaders();
 
-        const json = await fetchJson("/api/me", { method: "GET", headers, signal: ac.signal });
-        if (mounted) setUser(json);
+        // 1) Try same-origin /api/me first
+        try {
+          const json = await safeFetchJson("/api/me", { method: "GET", headers, signal: ac.signal });
+          if (mounted) setUser(json);
+          return;
+        } catch (firstErr) {
+          console.warn("Primary /api/me failed:", firstErr.message);
+
+          // If the body looks like HTML (index.html from frontend dev server), note it
+          const bodyPreview = firstErr.body ? String(firstErr.body).slice(0, 200) : "";
+
+          // 2) If primary failed due to non-JSON (prob dev-proxy), try backend origin directly
+          let backendAttemptError = null;
+          try {
+            const backendUrl = `${BACKEND_ORIGIN.replace(/\/$/, "")}/api/me`;
+            const json2 = await safeFetchJson(backendUrl, { method: "GET", headers, signal: ac.signal });
+            if (mounted) setUser(json2);
+            return;
+          } catch (backendErr) {
+            backendAttemptError = backendErr;
+            console.warn(`Backend ${BACKEND_ORIGIN}/api/me attempt failed:`, backendErr.message);
+          }
+
+          // 3) If backend origin also failed, try fallback using email (from authUser or demoEmail)
+          const emailFromAuth = authUser?.email;
+          const demoEmail = localStorage.getItem("demoEmail");
+          const fallbackEmail = emailFromAuth || demoEmail;
+
+          if (!fallbackEmail) {
+            // No email to try - return a diagnostic error including the primary and backend attempts
+            const p = firstErr.message || "primary failed";
+            const b = backendAttemptError ? backendAttemptError.message : "backend attempt not made";
+            throw new Error(`Primary /api/me error: ${p}\nBackend ${BACKEND_ORIGIN}/api/me error: ${b}\nBody preview (primary): ${bodyPreview}\nNo fallback email found. Set localStorage 'demoEmail' or fix proxy/backend.`);
+          }
+
+          // 4) Try backend fallback with ?email=...
+          try {
+            const fallbackUrl = `${BACKEND_ORIGIN.replace(/\/$/, "")}/api/me?email=${encodeURIComponent(fallbackEmail)}`;
+            const json3 = await safeFetchJson(fallbackUrl, { method: "GET", headers, signal: ac.signal });
+            if (mounted) setUser(json3);
+            return;
+          } catch (fallbackErr) {
+            const msg = [
+              `Primary /api/me error: ${firstErr.message}`,
+              `Backend ${BACKEND_ORIGIN}/api/me error: ${backendAttemptError ? backendAttemptError.message : "no attempt info"}`,
+              `Fallback ${fallbackEmail} error: ${fallbackErr.message}`,
+            ].join("\n\n");
+            throw new Error(msg);
+          }
+        }
       } catch (err) {
         if (err.name === "AbortError") return;
         console.error("Failed to load profile:", err);
@@ -81,10 +151,20 @@ export default function ProfilePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen grid place-items-center bg-gradient-to-br from-indigo-50 via-white to-pink-50">
-        <div className="text-center">
-          <p className="text-lg text-red-600">Error loading profile: {error}</p>
-          <p className="text-sm text-gray-600 mt-2">Check backend or authentication token.</p>
+      <div className="min-h-screen grid place-items-center bg-gradient-to-br from-indigo-50 via-white to-pink-50 p-6">
+        <div className="max-w-2xl text-center">
+          <p className="text-lg text-red-600">Error loading profile</p>
+          <pre className="text-sm text-gray-700 bg-white/80 p-3 rounded mt-3 text-left overflow-auto" style={{ whiteSpace: "pre-wrap" }}>
+            {error}
+          </pre>
+          <p className="text-sm text-gray-600 mt-3">
+            Tips:
+            <ul className="list-disc list-inside text-left mt-2">
+              <li>Ensure your backend at <code>{BACKEND_ORIGIN}</code> is running and `/api/me` returns JSON.</li>
+              <li>For dev only: set a demo email: <code>localStorage.setItem('demoEmail','your@example.com')</code>.</li>
+              <li>Better long-term: add a dev proxy in Vite/CRA so requests to <code>/api</code> go to the backend.</li>
+            </ul>
+          </p>
         </div>
       </div>
     );
@@ -108,10 +188,7 @@ export default function ProfilePage() {
     .join("");
   const points = Number(user.points ?? 85);
   const progressPct = Math.min(100, Math.round((points / 200) * 100)); // example scale
-  const donutStyle = {
-    background: `conic-gradient(#7C3AED ${progressPct * 3.6}deg, rgba(0,0,0,0.06) ${progressPct * 3.6}deg)`,
-  };
-
+  const donutStyle = { background: `conic-gradient(#7C3AED ${progressPct * 3.6}deg, rgba(0,0,0,0.06) ${progressPct * 3.6}deg)` };
   const avatarSrc = user.image || user.photoURL || null;
 
   return (
@@ -123,23 +200,11 @@ export default function ProfilePage() {
       <main className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         <header className="mb-8 flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div
-              className="relative w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-indigo-600 to-pink-500 shadow-xl transform transition-transform hover:scale-105"
-              aria-hidden
-            >
-              {/* avatar circle */}
+            <div className="relative w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-indigo-600 to-pink-500 shadow-xl transform transition-transform hover:scale-105" aria-hidden>
               <div className="w-full h-full rounded-full bg-white grid place-items-center text-4xl font-extrabold text-indigo-700 overflow-hidden">
-                {avatarSrc ? (
-                  <img src={avatarSrc} alt={user.name || user.email || "User avatar"} className="w-full h-full object-cover" />
-                ) : (
-                  initials
-                )}
+                {avatarSrc ? <img src={avatarSrc} alt={user.name || user.email || "User avatar"} className="w-full h-full object-cover" /> : initials}
               </div>
-
-              {/* small badge */}
-              <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold shadow-sm text-indigo-700">
-                {user.badges?.[0] ?? "New"}
-              </div>
+              <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold shadow-sm text-indigo-700">{user.badges?.[0] ?? "New"}</div>
             </div>
 
             <div>
@@ -147,15 +212,12 @@ export default function ProfilePage() {
               <p className="text-sm text-slate-500 mt-1">{user.email}</p>
               <div className="mt-3 flex items-center gap-3">
                 <span className="text-xs text-slate-600 bg-white/60 px-3 py-1 rounded-full shadow-sm">Available: {user.availability || "Not set"}</span>
-                <Link to="/profile/edit" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm shadow hover:brightness-105 transition" aria-label="Edit profile">
-                  Edit Profile
-                </Link>
+                <Link to="/profile/edit" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm shadow hover:brightness-105 transition" aria-label="Edit profile">Edit Profile</Link>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
-            {/* small stats */}
             <div className="bg-white/80 backdrop-blur-md px-4 py-3 rounded-2xl shadow-sm text-center">
               <div className="text-xs text-slate-500">Sessions this week</div>
               <div className="text-xl font-bold text-indigo-600">{user.sessionsThisWeek ?? 5}</div>
@@ -166,22 +228,18 @@ export default function ProfilePage() {
               <div className="text-xl font-bold text-pink-600">{points}</div>
             </div>
 
-            {/* donut progress */}
             <div className="flex flex-col items-center">
               <div className="w-20 h-20 rounded-full grid place-items-center shadow-inner" style={donutStyle} aria-hidden>
                 <div className="w-12 h-12 rounded-full bg-white grid place-items-center text-sm font-semibold">{progressPct}%</div>
               </div>
               <div className="text-xs text-slate-500 mt-2">Progress</div>
-              <div role="progressbar" aria-valuenow={progressPct} aria-valuemin="0" aria-valuemax="100" className="sr-only">
-                {progressPct}% complete
-              </div>
+              <div role="progressbar" aria-valuenow={progressPct} aria-valuemin="0" aria-valuemax="100" className="sr-only">{progressPct}% complete</div>
             </div>
           </div>
         </header>
 
-        {/* main content two-column */}
+        {/* main content columns */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* left column: about & languages */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition">
               <h2 className="text-lg font-semibold text-indigo-600 mb-3">About</h2>
@@ -194,9 +252,7 @@ export default function ProfilePage() {
                 <div className="mt-3 flex flex-wrap gap-3">
                   <span className="px-3 py-1 rounded-full bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 text-sm">Native: {user.native || "Not specified"}</span>
                   {(user.learning && user.learning.length ? user.learning : ["Not specified"]).map((l) => (
-                    <span key={l} className="px-3 py-1 rounded-full bg-gradient-to-r from-indigo-50 to-pink-50 text-indigo-700 text-sm shadow-sm">
-                      {l}
-                    </span>
+                    <span key={l} className="px-3 py-1 rounded-full bg-gradient-to-r from-indigo-50 to-pink-50 text-indigo-700 text-sm shadow-sm">{l}</span>
                   ))}
                 </div>
               </div>
@@ -214,7 +270,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* recent sessions */}
             <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-indigo-600">Recent Sessions</h3>
@@ -238,7 +293,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* right column: quick actions & communities */}
           <aside className="space-y-6">
             <div className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition">
               <h4 className="text-sm text-indigo-600 font-semibold">Quick Actions</h4>
@@ -274,4 +328,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
