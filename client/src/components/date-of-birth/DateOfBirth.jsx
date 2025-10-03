@@ -37,7 +37,7 @@ const DateOfBirth = () => {
         {/* Day */}
         <div className="form-control">
           <select
-            {...register("dob_day", { required: "Day is required" })}
+            {...register("dob_day", { required: false })}
             className={`select select-bordered w-full ${
               errors.dob_day ? "select-error" : ""
             }`}
@@ -57,7 +57,7 @@ const DateOfBirth = () => {
         {/* Month */}
         <div className="form-control">
           <select
-            {...register("dob_month", { required: "Month is required" })}
+            {...register("dob_month", { required: false })}
             className={`select select-bordered w-full ${
               errors.dob_month ? "select-error" : ""
             }`}
@@ -90,7 +90,7 @@ const DateOfBirth = () => {
         {/* Year */}
         <div className="form-control">
           <select
-            {...register("dob_year", { required: "Year is required" })}
+            {...register("dob_year", { required: false })}
             className={`select select-bordered w-full ${
               errors.dob_year ? "select-error" : ""
             }`}

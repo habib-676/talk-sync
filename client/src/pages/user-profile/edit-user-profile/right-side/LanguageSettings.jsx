@@ -115,8 +115,8 @@ const LanguageSettings = () => {
               Select language to learn
             </option>
             {languages
-              .filter((language) => language !== nativeLanguage) // Don't show native language
-              .filter((language) => !learningLanguages.includes(language)) // Don't show already selected
+              .filter((language) => language !== nativeLanguage)
+              .filter((language) => !learningLanguages.includes(language))
               .map((language, index) => (
                 <option key={`${language}-${index}`} value={language}>
                   {language}

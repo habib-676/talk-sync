@@ -85,7 +85,7 @@ const PersonalDetails = () => {
                 ${errors.country ? "select-error" : ""}
                 ${selectedCountry ? "text-gray-800" : "text-gray-500"}
               `}
-              {...register("country", { required: "Country is required" })}
+              {...register("country", { required: false })}
               defaultValue=""
             >
               <option value="" disabled className="text-gray-400">
@@ -97,7 +97,7 @@ const PersonalDetails = () => {
                   value={country.name}
                   className="flex items-center gap-2"
                 >
-                  {country.flagEmoji} {country.name}
+                  {country.name}
                 </option>
               ))}
             </select>

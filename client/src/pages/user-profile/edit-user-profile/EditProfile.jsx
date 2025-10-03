@@ -18,10 +18,10 @@ const EditProfile = () => {
   const { data: userData, isLoading } = useQuery({
     queryKey: ["user", user?.email],
     queryFn: () => getUserByEmail(user?.email),
-    enabled: !!user?.email, // it will run when email is exist
+    enabled: !!user?.email,
   });
 
-  //reset the form
+  //reset the form with updated data
   useEffect(() => {
     if (userData) {
       methods.reset({
@@ -40,7 +40,7 @@ const EditProfile = () => {
   }, [methods, userData]);
 
   const onsubmit = async (data) => {
-    console.log("Final form data", data);
+    //destructuring form data
     const {
       bio,
       country,
@@ -54,6 +54,7 @@ const EditProfile = () => {
       photo,
     } = data;
 
+    //user data obj
     const userData = {
       name: user_name,
       image: photo,
@@ -67,10 +68,10 @@ const EditProfile = () => {
       proficiency_level,
     };
     try {
-      const userEmail = user.email;
+      const userEmail = user.email; //from auth provider
       const res = await updateUserProfile(userEmail, userData);
       console.log("Profile updated", res);
-      if (res.modifiedCount) {
+      if ( res.result.modifiedCount > 0) {
         toast.success("Your profile is updated successfully");
       }
     } catch (error) {
