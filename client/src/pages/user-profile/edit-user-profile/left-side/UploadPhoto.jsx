@@ -65,7 +65,6 @@ const UploadPhoto = () => {
         setValue("photo", res.data.secure_url, { shouldValidate: true }); //shouldValidate is a react-hook-form method
         toast.success("Photo uploaded successfully!");
       } else {
-        // if cloudinary not response with secure url
         toast.error("Failed to get image URL from Cloudinary.");
       }
     } catch (error) {
@@ -73,9 +72,8 @@ const UploadPhoto = () => {
       console.error("Cloudinary Upload Error:", error);
     } finally {
       setUploading(false);
-      e.target.value = ""; // clear the input after process completes
+      e.target.value = "";
 
-      // Clean up local URL if an error occurred before setting it to a new valid photo
       if (localPreviewUrl && !currentPhoto && !watch("photo")) {
         // if no new photo is set
         URL.revokeObjectURL(localPreviewUrl);

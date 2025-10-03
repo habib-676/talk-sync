@@ -107,8 +107,6 @@ const AuthProvider = ({ children }) => {
     return sendPasswordResetEmail(auth, email);
   };
 
-  //update password methods can be added here
-
   //step - 1:re-authenticate user
   const reauthenticateUser = async (password) => {
     if (!auth.currentUser) throw new Error("No user is signed in");

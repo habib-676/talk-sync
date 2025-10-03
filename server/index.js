@@ -1,7 +1,7 @@
 // server.js
 require("dotenv").config();
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -88,16 +88,20 @@ async function run() {
       try {
         const email = req?.params?.email;
         if (!email) {
-          res
+          return res
             .status(400)
             .json({ success: false, message: "Email is required" });
         }
 
         const user = await usersCollections.findOne({ email });
+        // console.log("Found user for email:", email, user); // Debug log
 
         if (!user) {
-          res.status(404).json({ success: false, message: "User not found" });
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
         }
+
         res.status(200).json({ success: true, user });
       } catch (error) {
         console.error("❌ Error in GET /users/:email:", error);
@@ -137,15 +141,14 @@ async function run() {
           image: userData.image || "",
           role: userData.role || "learner",
           uid: userData.uid || "",
-          bio: userData.bio || "",
-          user_country: userData.user_country || "",
-          date_of_birth: userData.date_of_birth || "",
-          native: userData.native || "", // renamed to 'native' to match frontend
-          learning: Array.isArray(userData.learning) ? userData.learning : (userData.learning ? [userData.learning] : []),
-          gender: userData.gender || "",
-          interests: Array.isArray(userData.interests) ? userData.interests : [],
-          proficiency_level: userData.proficiency_level || "",
-          availability: userData.availability || "",
+          bio: "",
+          user_country: "",
+          date_of_birth: "",
+          native_language: "",
+          learning_language: [],
+          gender: "",
+          interests: [],
+          proficiency_level: "",
           status: "Offline",
           friends: [],
           feedback: [],
@@ -207,13 +210,212 @@ async function run() {
       }
     });
 
-    /**
-     * GET /users
-     * List users (for admin/dev).
-     */
+    // onboarding -->
+
+    app.patch("/onboarding/:email", async (req, res) => {
+      try {
+        const { email } = req.params;
+        const updatedData = req.body;
+        console.log(updatedData);
+
+        const result = await usersCollections.updateOne(
+          { email },
+          { $set: updatedData }
+        );
+
+        res.json({
+          success: true,
+          modifiedCount: result.modifiedCount,
+          result,
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to update user" });
+      }
+    });
+
+    // all users --->
     app.get("/users", async (req, res) => {
-      const result = await usersCollections.find().toArray();
-      res.send(result);
+      try {
+        const users = await usersCollections.find().toArray();
+        res.send(users);
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    // Get user by ID
+    app.get("/users/id/:id", async (req, res) => {
+      try {
+        const userId = req.params.id;
+        if (!userId) {
+          return res
+            .status(400)
+            .json({ success: false, message: "User ID is required" });
+        }
+
+        const user = await usersCollections.findOne({
+          _id: new ObjectId(userId),
+        });
+        if (!user) {
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
+        }
+
+        res.status(200).json({ success: true, user });
+      } catch (error) {
+        console.error("❌ Error in GET /users/id/:id:", error);
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    // Check relationship status
+    app.get("/relationship/:currentUserId/:targetUserId", async (req, res) => {
+      try {
+        const { currentUserId, targetUserId } = req.params;
+
+        const currentUser = await usersCollections.findOne({
+          _id: new ObjectId(currentUserId),
+        });
+        const targetUser = await usersCollections.findOne({
+          _id: new ObjectId(targetUserId),
+        });
+
+        if (!currentUser || !targetUser) {
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
+        }
+
+        const currentUserFollowing = currentUser.following || [];
+        const targetUserFollowing = targetUser.following || [];
+        const currentUserFriends = currentUser.friends || [];
+        const targetUserFriends = targetUser.friends || [];
+
+        const iFollow = currentUserFollowing.includes(targetUserId);
+        const followsMe = targetUserFollowing.includes(currentUserId);
+        const isFriend =
+          currentUserFriends.includes(targetUserId) &&
+          targetUserFriends.includes(currentUserId);
+
+        res.json({
+          success: true,
+          relationship: {
+            iFollow,
+            followsMe,
+            isFriend,
+          },
+        });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    // Updated Follow endpoint with friendship logic
+    app.post("/users/:id/follow", async (req, res) => {
+      try {
+        const targetUserId = req.params.id;
+        const { currentUserId } = req.body;
+
+        if (!currentUserId || !targetUserId) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Both IDs required" });
+        }
+        if (currentUserId === targetUserId) {
+          return res
+            .status(400)
+            .json({ success: false, message: "You can't follow yourself" });
+        }
+
+        // Get both users
+        const currentUser = await usersCollections.findOne({
+          _id: new ObjectId(currentUserId),
+        });
+        const targetUser = await usersCollections.findOne({
+          _id: new ObjectId(targetUserId),
+        });
+
+        if (!currentUser || !targetUser) {
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
+        }
+
+        // Update following for current user
+        await usersCollections.updateOne(
+          { _id: new ObjectId(currentUserId) },
+          { $addToSet: { following: targetUserId } }
+        );
+
+        // Update followers for target user
+        await usersCollections.updateOne(
+          { _id: new ObjectId(targetUserId) },
+          { $addToSet: { followers: currentUserId } }
+        );
+
+        // Check if mutual follow (friendship)
+        const targetUserFollowing = targetUser.following || [];
+        if (targetUserFollowing.includes(currentUserId)) {
+          // Both are following each other - make friends
+          await usersCollections.updateOne(
+            { _id: new ObjectId(currentUserId) },
+            { $addToSet: { friends: targetUserId } }
+          );
+          await usersCollections.updateOne(
+            { _id: new ObjectId(targetUserId) },
+            { $addToSet: { friends: currentUserId } }
+          );
+        }
+
+        res.json({
+          success: true,
+          message: "Followed successfully",
+          becameFriends: targetUserFollowing.includes(currentUserId),
+        });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    // Updated Unfollow endpoint with friendship logic
+    app.post("/users/:id/unfollow", async (req, res) => {
+      try {
+        const targetUserId = req.params.id;
+        const { currentUserId } = req.body;
+
+        if (!currentUserId || !targetUserId) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Both IDs required" });
+        }
+
+        // Update following for current user
+        await usersCollections.updateOne(
+          { _id: new ObjectId(currentUserId) },
+          { $pull: { following: targetUserId } }
+        );
+
+        // Update followers for target user
+        await usersCollections.updateOne(
+          { _id: new ObjectId(targetUserId) },
+          { $pull: { followers: currentUserId } }
+        );
+
+        // Remove from friends if they were friends
+        await usersCollections.updateOne(
+          { _id: new ObjectId(currentUserId) },
+          { $pull: { friends: targetUserId } }
+        );
+        await usersCollections.updateOne(
+          { _id: new ObjectId(targetUserId) },
+          { $pull: { friends: currentUserId } }
+        );
+
+        res.json({ success: true, message: "Unfollowed successfully" });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
     });
 
     // message related api's

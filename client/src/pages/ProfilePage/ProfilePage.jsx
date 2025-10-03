@@ -70,62 +70,25 @@ export default function ProfilePage() {
     const ac = new AbortController();
 
     (async () => {
+      if (!authUser?.email) return;
+
       try {
         setLoading(true);
-        setError(null);
-
-        const headers = buildHeaders();
-
-        // 1) Try same-origin /api/me first
-        try {
-          const json = await safeFetchJson("/api/me", { method: "GET", headers, signal: ac.signal });
-          if (mounted) setUser(json);
-          return;
-        } catch (firstErr) {
-          console.warn("Primary /api/me failed:", firstErr.message);
-
-          // If the body looks like HTML (index.html from frontend dev server), note it
-          const bodyPreview = firstErr.body ? String(firstErr.body).slice(0, 200) : "";
-
-          // 2) If primary failed due to non-JSON (prob dev-proxy), try backend origin directly
-          let backendAttemptError = null;
-          try {
-            const backendUrl = `${BACKEND_ORIGIN.replace(/\/$/, "")}/api/me`;
-            const json2 = await safeFetchJson(backendUrl, { method: "GET", headers, signal: ac.signal });
-            if (mounted) setUser(json2);
-            return;
-          } catch (backendErr) {
-            backendAttemptError = backendErr;
-            console.warn(`Backend ${BACKEND_ORIGIN}/api/me attempt failed:`, backendErr.message);
+        const res = await fetch(
+          `http://localhost:5000/users/${authUser.email}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              ...(localStorage.getItem("token")
+                ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                : {}),
+            },
           }
+        );
 
-          // 3) If backend origin also failed, try fallback using email (from authUser or demoEmail)
-          const emailFromAuth = authUser?.email;
-          const demoEmail = localStorage.getItem("demoEmail");
-          const fallbackEmail = emailFromAuth || demoEmail;
-
-          if (!fallbackEmail) {
-            // No email to try - return a diagnostic error including the primary and backend attempts
-            const p = firstErr.message || "primary failed";
-            const b = backendAttemptError ? backendAttemptError.message : "backend attempt not made";
-            throw new Error(`Primary /api/me error: ${p}\nBackend ${BACKEND_ORIGIN}/api/me error: ${b}\nBody preview (primary): ${bodyPreview}\nNo fallback email found. Set localStorage 'demoEmail' or fix proxy/backend.`);
-          }
-
-          // 4) Try backend fallback with ?email=...
-          try {
-            const fallbackUrl = `${BACKEND_ORIGIN.replace(/\/$/, "")}/api/me?email=${encodeURIComponent(fallbackEmail)}`;
-            const json3 = await safeFetchJson(fallbackUrl, { method: "GET", headers, signal: ac.signal });
-            if (mounted) setUser(json3);
-            return;
-          } catch (fallbackErr) {
-            const msg = [
-              `Primary /api/me error: ${firstErr.message}`,
-              `Backend ${BACKEND_ORIGIN}/api/me error: ${backendAttemptError ? backendAttemptError.message : "no attempt info"}`,
-              `Fallback ${fallbackEmail} error: ${fallbackErr.message}`,
-            ].join("\n\n");
-            throw new Error(msg);
-          }
-        }
+        if (!res.ok) throw new Error("Failed to load profile");
+        const json = await res.json();
+        if (mounted) setUser(json.user || json);
       } catch (err) {
         if (err.name === "AbortError") return;
         console.error("Failed to load profile:", err);
@@ -186,10 +149,13 @@ export default function ProfilePage() {
     .map((p) => p[0])
     .slice(0, 2)
     .join("");
-  const points = Number(user.points ?? 85);
-  const progressPct = Math.min(100, Math.round((points / 200) * 100)); // example scale
-  const donutStyle = { background: `conic-gradient(#7C3AED ${progressPct * 3.6}deg, rgba(0,0,0,0.06) ${progressPct * 3.6}deg)` };
-  const avatarSrc = user.image || user.photoURL || null;
+  const points = user.points ?? 85;
+  const progressPct = Math.min(100, Math.round((points / 200) * 100));
+  const donutStyle = {
+    background: `conic-gradient(#7C3AED ${
+      progressPct * 3.6
+    }deg, rgba(0,0,0,0.06) ${progressPct * 3.6}deg)`,
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-100 via-white to-pink-100 mt-16">
@@ -200,11 +166,24 @@ export default function ProfilePage() {
       <main className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         <header className="mb-8 flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="relative w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-indigo-600 to-pink-500 shadow-xl transform transition-transform hover:scale-105" aria-hidden>
+            <div
+              className="relative w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-indigo-600 to-pink-500 shadow-xl transform transition-transform hover:scale-105"
+              aria-hidden
+            >
               <div className="w-full h-full rounded-full bg-white grid place-items-center text-4xl font-extrabold text-indigo-700 overflow-hidden">
-                {avatarSrc ? <img src={avatarSrc} alt={user.name || user.email || "User avatar"} className="w-full h-full object-cover" /> : initials}
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || "User avatar"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
               </div>
-              <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold shadow-sm text-indigo-700">{user.badges?.[0] ?? "New"}</div>
+              <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold shadow-sm text-indigo-700">
+                {user.badges?.[0] ?? "New"}
+              </div>
             </div>
 
             <div>
@@ -220,7 +199,9 @@ export default function ProfilePage() {
           <div className="flex items-center gap-6">
             <div className="bg-white/80 backdrop-blur-md px-4 py-3 rounded-2xl shadow-sm text-center">
               <div className="text-xs text-slate-500">Sessions this week</div>
-              <div className="text-xl font-bold text-indigo-600">{user.sessionsThisWeek ?? 5}</div>
+              <div className="text-xl font-bold text-indigo-600">
+                {user.sessionsThisWeek ?? 5}
+              </div>
             </div>
 
             <div className="bg-white/80 backdrop-blur-md px-4 py-3 rounded-2xl shadow-sm text-center">
@@ -272,8 +253,12 @@ export default function ProfilePage() {
 
             <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-indigo-600">Recent Sessions</h3>
-                <Link to="/sessions" className="text-sm text-indigo-500">View all</Link>
+                <h3 className="text-lg font-semibold text-indigo-600">
+                  Recent Sessions
+                </h3>
+                <Link to="/sessions" className="text-sm text-indigo-500">
+                  View all
+                </Link>
               </div>
 
               <ul className="mt-4 space-y-3">
@@ -297,9 +282,24 @@ export default function ProfilePage() {
             <div className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition">
               <h4 className="text-sm text-indigo-600 font-semibold">Quick Actions</h4>
               <div className="mt-3 flex flex-col gap-3">
-                <Link to="/follow" className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm text-center hover:brightness-105 transition">Find a partner</Link>
-                <Link to="/schedule" className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center hover:shadow-sm transition">Schedule a session</Link>
-                <Link to="/badges" className="px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-300 to-orange-400 text-sm text-center hover:brightness-105 transition">View badges</Link>
+                <Link
+                  to="/follow"
+                  className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-pink-500 text-white text-sm text-center hover:brightness-105 transition"
+                >
+                  Find a partner
+                </Link>
+                <Link
+                  to="/schedule"
+                  className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center hover:shadow-sm transition"
+                >
+                  Schedule a session
+                </Link>
+                <Link
+                  to="/badges"
+                  className="px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-300 to-orange-400 text-sm text-center hover:brightness-105 transition"
+                >
+                  View badges
+                </Link>
               </div>
             </div>
 

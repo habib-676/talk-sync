@@ -17,6 +17,7 @@ import UserProfile from "../pages/Profile/userProfile";
 import Profile from "../pages/ProfilePage/Profile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
+import OnBoarding from "../pages/on-boarding/OnBoarding";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -97,6 +98,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <EditProfile />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/onboarding",
+    element: (
+      <PrivateRoute>
+        <OnBoarding />
       </PrivateRoute>
     ),
   },
