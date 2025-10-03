@@ -16,20 +16,25 @@ export default function ProfilePage() {
 
     let mounted = true;
     (async () => {
+      if (!authUser?.email) return;
+
       try {
         setLoading(true);
-        const res = await fetch("/api/me", {
-          headers: {
-            "Content-Type": "application/json",
-            ...(localStorage.getItem("token")
-              ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
-              : {}),
-          },
-        });
+        const res = await fetch(
+          `http://localhost:5000/users/${authUser.email}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              ...(localStorage.getItem("token")
+                ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                : {}),
+            },
+          }
+        );
 
         if (!res.ok) throw new Error("Failed to load profile");
         const json = await res.json();
-        if (mounted) setUser(json);
+        if (mounted) setUser(json.user || json);
       } catch (err) {
         console.error(err);
       } finally {
@@ -65,7 +70,7 @@ export default function ProfilePage() {
     .slice(0, 2)
     .join("");
   const points = user.points ?? 85;
-  const progressPct = Math.min(100, Math.round((points / 200) * 100)); // example scale
+  const progressPct = Math.min(100, Math.round((points / 200) * 100));
   const donutStyle = {
     background: `conic-gradient(#7C3AED ${
       progressPct * 3.6
@@ -85,10 +90,8 @@ export default function ProfilePage() {
               className="relative w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-indigo-600 to-pink-500 shadow-xl transform transition-transform hover:scale-105"
               aria-hidden
             >
-              {/* avatar circle */}
               <div className="w-full h-full rounded-full bg-white grid place-items-center text-4xl font-extrabold text-indigo-700 overflow-hidden">
                 {user.photoURL ? (
-                  // show image if available
                   <img
                     src={user.photoURL}
                     alt={user.displayName || "User avatar"}
@@ -98,7 +101,6 @@ export default function ProfilePage() {
                   initials
                 )}
               </div>
-              {/* small badge */}
               <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold shadow-sm text-indigo-700">
                 {user.badges?.[0] ?? "New"}
               </div>
@@ -124,12 +126,10 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex items-center gap-6">
-            {/* small stats */}
             <div className="bg-white/80 backdrop-blur-md px-4 py-3 rounded-2xl shadow-sm text-center">
               <div className="text-xs text-slate-500">Sessions this week</div>
               <div className="text-xl font-bold text-indigo-600">
-                {" "}
-                {user.sessionsThisWeek ?? 5}{" "}
+                {user.sessionsThisWeek ?? 5}
               </div>
             </div>
 
@@ -138,7 +138,6 @@ export default function ProfilePage() {
               <div className="text-xl font-bold text-pink-600">{points}</div>
             </div>
 
-            {/* donut progress */}
             <div className="flex flex-col items-center">
               <div
                 className="w-20 h-20 rounded-full grid place-items-center shadow-inner"
@@ -220,9 +219,9 @@ export default function ProfilePage() {
                 <h3 className="text-lg font-semibold text-indigo-600">
                   Recent Sessions
                 </h3>
-                <a href="/sessions" className="text-sm text-indigo-500">
+                <Link to="/sessions" className="text-sm text-indigo-500">
                   View all
-                </a>
+                </Link>
               </div>
 
               <ul className="mt-4 space-y-3">
@@ -279,18 +278,18 @@ export default function ProfilePage() {
                 >
                   Find a partner
                 </Link>
-                <a
-                  href="/schedule"
+                <Link
+                  to="/schedule"
                   className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center hover:shadow-sm transition"
                 >
                   Schedule a session
-                </a>
-                <a
-                  href="/badges"
+                </Link>
+                <Link
+                  to="/badges"
                   className="px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-300 to-orange-400 text-sm text-center hover:brightness-105 transition"
                 >
                   View badges
-                </a>
+                </Link>
               </div>
             </div>
 
