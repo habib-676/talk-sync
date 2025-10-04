@@ -295,7 +295,7 @@ export default function UserProfile() {
                 <Users className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">User Profile</h1>
+                <h1 className="text-lg font-semibold text-gray-900">Find More Partners</h1>
                 <p className="text-sm text-gray-500">Discover and connect</p>
               </div>
             </div>
