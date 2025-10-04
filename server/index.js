@@ -79,7 +79,7 @@ async function run() {
     };
 
     // User related APIs
-// Backend এ /users/:email endpoint ঠিক আছে কিনা check করুন
+
 app.get("/users/:email", async (req, res) => {
   try {
     const email = req?.params?.email;
@@ -362,6 +362,43 @@ app.post("/users/:id/unfollow", async (req, res) => {
   }
 });
 
+// New endpoint to remove follower (decline follow request)
+app.post("/users/:id/remove-follower", async (req, res) => {
+  try {
+    const targetUserId = req.params.id;
+    const { currentUserId } = req.body;
+
+    if (!currentUserId || !targetUserId) {
+      return res.status(400).json({ success: false, message: "Both IDs required" });
+    }
+
+    // Remove from current user's followers
+    await usersCollections.updateOne(
+      { _id: new ObjectId(currentUserId) },
+      { $pull: { followers: targetUserId } }
+    );
+
+    // Remove from target user's following
+    await usersCollections.updateOne(
+      { _id: new ObjectId(targetUserId) },
+      { $pull: { following: currentUserId } }
+    );
+
+    // Remove from friends if they were friends
+    await usersCollections.updateOne(
+      { _id: new ObjectId(currentUserId) },
+      { $pull: { friends: targetUserId } }
+    );
+    await usersCollections.updateOne(
+      { _id: new ObjectId(targetUserId) },
+      { $pull: { friends: currentUserId } }
+    );
+
+    res.json({ success: true, message: "Follower removed successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
     // message related api's
     app.post("/messages", async (req, res) => {
       try {
