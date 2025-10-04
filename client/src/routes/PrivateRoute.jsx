@@ -10,14 +10,16 @@ export default function PrivateRoute({ children }) {
   if (loading) {
     return (
       <div className="min-h-screen grid place-items-center">
-        <div className="animate-pulse text-gray-500">Checking authentication...</div>
+        <div className="animate-pulse text-gray-500">
+          Checking authentication...
+        </div>
       </div>
     );
   }
 
   if (!user) {
     // Not logged in -> redirect to login and preserve current location
-    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+    return <Navigate to="/auth/signin" state={{ from: location }} replace />;
   }
 
   // User present -> render children (the protected page)

@@ -12,6 +12,7 @@ import { updateProfile } from "firebase/auth";
 import { auth } from "../../../../firebase-config/firebase.config";
 import SocialLogin from "../social-login/SocialLogin";
 import { useForm } from "react-hook-form";
+import { setUserInDb } from "../../../../lib/utils";
 
 export default function SignUp() {
   const { createUser, setUser } = useAuth();
@@ -29,22 +30,33 @@ export default function SignUp() {
     watch,
   } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const { user_name, user_email, password } = data;
     setLoading(true);
 
     // create user with email and password - firebase
-    createUser(user_email, password)
-      .then((userCredential) => {
+    await createUser(user_email, password)
+      .then(async (userCredential) => {
         const user = userCredential.user;
         console.log("User created:", user);
-        return updateProfile(user, { displayName: user_name });
+        await updateProfile(user, { displayName: user_name });
+
+        // Build the user object for DB
+        const userData = {
+          uid: user.uid, // unique Firebase UID
+          name: user_name,
+          email: user_email,
+          createdAt: new Date().toISOString(),
+        };
+
+        // Save to DB
+        await setUserInDb(userData);
       })
       .then(() => {
         setUser(auth.currentUser);
         reset();
         toast.success("Registration Successful");
-        navigate("/auth/signin");
+        navigate("/onboarding");
       })
       .catch((error) => {
         console.error("Registration error:", error);
@@ -68,14 +80,11 @@ export default function SignUp() {
         <div className="flex flex-col justify-center p-10">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-10">
-            <TalkSyncLogo className="mx-auto" /> {/* ✅ matches login page */}
+            <TalkSyncLogo className="mx-auto" />
             <p className="text-gray-200 text-base mt-2 text-center">
               Create your account & start practicing 🌍
             </p>
           </div>
-
-          <SocialLogin />
-
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Name */}
             <div className="relative">
@@ -187,6 +196,10 @@ export default function SignUp() {
               {loading ? <LoadingSpinner /> : "Create Account"}
             </button>
           </form>
+
+
+          {/* social login */}
+          <SocialLogin />
 
           {/* Login link */}
           <p className="text-center text-gray-700 mt-6">

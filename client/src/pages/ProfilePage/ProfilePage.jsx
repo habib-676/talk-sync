@@ -55,9 +55,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen grid place-items-center 
-      bg-gradient-to-br 
-      from-indigo-50 via-white to-pink-50">
+      <div className="min-h-screen grid place-items-center bg-gradient-to-br from-indigo-50 via-white to-pink-50">
         <div className="text-center">
           <p className="text-lg">No profile found. Please sign in.</p>
         </div>
@@ -65,7 +63,7 @@ export default function ProfilePage() {
     );
   }
 
-  // derived 
+  // derived values
   const initials = (user.name || user.displayName || user.email || "U")
     .split(" ")
     .map((p) => p[0])
