@@ -17,6 +17,7 @@ import UserProfile from "../pages/Profile/userProfile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
+import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -62,12 +63,10 @@ export const router = createBrowserRouter([
         path: "/profile",
         element: (
           <PrivateRoute>
-            <ProfilePage/>
-          </PrivateRoute>)
-      }
-        
-        
-      
+            <ProfilePage />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
   {
@@ -83,6 +82,16 @@ export const router = createBrowserRouter([
         Component: SignUp,
       },
     ],
+  },
+  // dashboard layout and child start
+  {
+    path: "/dashboard",
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
+    children: [],
   },
   {
     path: "/profile",
