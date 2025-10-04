@@ -1,5 +1,4 @@
 // server.js
-require("dotenv").config();
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
@@ -15,9 +14,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || true, // set to frontend origin in production
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173", // set to frontend origin in production
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -58,7 +60,8 @@ async function run() {
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN, {
+      const payload = { email: user.email, role: user.role };
+      const token = jwt.sign(payload, process.env.JWT_ACCESS_TOKEN, {
         expiresIn: "7d",
       });
 
@@ -66,20 +69,20 @@ async function run() {
         .cookie("token", token, {
           httpOnly: true,
           secure: false,
-          sameSite: "none",
+          sameSite: "lax",
         })
         .send({ success: true });
     });
 
     //jwt verification middleware
     const verifyToken = (req, res, next) => {
-      const token = req.cookies.token;
+      const token =
+        req.cookies?.token || req.headers.authorization?.split(" ")[1];
       if (!token)
         return res.status(401).send({ message: "Unauthorized access" });
 
       jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, decoded) => {
         if (err) return res.status(403).send({ message: "Forbidden access" });
-
         req.decoded = decoded;
         next();
       });
@@ -201,6 +204,29 @@ async function run() {
     };
 
     // User related APIs
+    app.get("/user-role/:email", verifyToken, async (req, res) => {
+      try {
+        const emailFromToken = req.decoded?.email;
+        const requestedEmail = req.params.email;
+
+        if (emailFromToken !== requestedEmail) {
+          return res
+            .status(403)
+            .send({ message: "Forbidden access: Email mismatch" });
+        }
+
+        const user = await usersCollections.findOne({ email: emailFromToken });
+
+        if (!user) {
+          return res.status(404).send({ message: "User not found" });
+        }
+
+        res.send({ role: user.role });
+      } catch (error) {
+        console.error("Error getting user role:", error);
+        res.status(500).send({ message: "Server error during role retrieval" });
+      }
+    });
 
     // ✅ FIXED: Removed nested duplicate route
     app.get("/users/:email", async (req, res) => {
@@ -233,15 +259,23 @@ async function run() {
         const email = (userData.email || "").toLowerCase().trim();
 
         if (!email) {
-          return res.status(400).json({ success: false, message: "Email is required" });
+          return res
+            .status(400)
+            .json({ success: false, message: "Email is required" });
         }
 
         // If user exists, update last_loggedIn and return existing
         const existing = await usersCollections.findOne({ email });
         if (existing) {
-          await usersCollections.updateOne({ email }, { $set: { last_loggedIn: new Date().toISOString() } });
+          await usersCollections.updateOne(
+            { email },
+            { $set: { last_loggedIn: new Date().toISOString() } }
+          );
           // return the public user object (without password)
-          const publicUser = await usersCollections.findOne({ email }, { projection: { password: 0 } });
+          const publicUser = await usersCollections.findOne(
+            { email },
+            { projection: { password: 0 } }
+          );
           return res.status(200).json({ success: true, user: publicUser });
         }
 
@@ -642,4 +676,3 @@ run().catch(console.dir);
 server.listen(port, () => {
   console.log(`TalkSync server is running on port ${port}`);
 });
-
