@@ -1,3 +1,5 @@
+// server.js
+require("dotenv").config();
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
@@ -10,8 +12,10 @@ const { Server } = require("socket.io");
 const app = express();
 const port = process.env.PORT || 5000;
 
-//middleware
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || true, // set to frontend origin in production
+}));
 app.use(express.json());
 
 // Create HTTP server
@@ -25,12 +29,11 @@ const io = new Server(server, {
 });
 
 const uri = process.env.MONGO_URI;
-
 if (!uri) {
-  throw new Error("MONGO_URI is missing in .env file");
+  console.error("MONGO_URI is missing in .env");
+  process.exit(1);
 }
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -42,8 +45,10 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    console.log("Connected to MongoDB");
 
-    const database = client.db("Talk-Sync-Data");
+    const DB_NAME = process.env.DB_NAME || "Talk-Sync-Data";
+    const database = client.db(DB_NAME);
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
 
@@ -152,38 +157,33 @@ async function run() {
 
     app.post("/users", async (req, res) => {
       try {
-        const userData = req.body;
-        console.log("Incoming userData:", userData);
+        const userData = req.body || {};
+        const email = (userData.email || "").toLowerCase().trim();
 
-        if (!userData?.email) {
-          return res
-            .status(400)
-            .json({ success: false, message: "Email is required" });
+        if (!email) {
+          return res.status(400).json({ success: false, message: "Email is required" });
         }
 
-        // Step 1: prevent duplicate users
-        const query = { email: userData?.email };
-        const existingUser = await usersCollections.findOne({
-          email: userData.email,
-        });
-        if (existingUser) {
-          const result = await usersCollections.updateOne(query, {
-            $set: { last_loggedIn: new Date().toISOString() },
-          });
-          return res.status(200).send(result);
+        // If user exists, update last_loggedIn and return existing
+        const existing = await usersCollections.findOne({ email });
+        if (existing) {
+          await usersCollections.updateOne({ email }, { $set: { last_loggedIn: new Date().toISOString() } });
+          // return the public user object (without password)
+          const publicUser = await usersCollections.findOne({ email }, { projection: { password: 0 } });
+          return res.status(200).json({ success: true, user: publicUser });
         }
 
-        // Step 2: only hash password if it's provided
+        // Hash password only if provided
         let hashedPassword = null;
         if (userData.password) {
           hashedPassword = await bcrypt.hash(userData.password, 10);
         }
 
-        // Step 3: build new user object
+        // Construct new user with safe defaults
         const newUser = {
           name: userData.name || "",
-          email: userData.email,
-          password: hashedPassword, // null if Google user
+          email,
+          password: hashedPassword, // null for social logins
           image: userData.image || "",
           role: userData.role || "learner",
           uid: userData.uid || "",
@@ -198,11 +198,14 @@ async function run() {
           status: "Offline",
           friends: [],
           feedback: [],
+          points: userData.points || 0,
+          badges: userData.badges || [],
+          recent: userData.recent || [],
+          stats: userData.stats || {},
           createdAt: new Date().toISOString(),
           last_loggedIn: new Date().toISOString(),
         };
 
-        // Step 4: insert user
         const result = await usersCollections.insertOne(newUser);
         res.status(201).json({ success: true, userId: result.insertedId });
       } catch (error) {
@@ -567,3 +570,4 @@ run().catch(console.dir);
 server.listen(port, () => {
   console.log(`TalkSync server is running on port ${port}`);
 });
+
