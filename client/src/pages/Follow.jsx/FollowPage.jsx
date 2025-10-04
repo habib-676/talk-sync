@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { UserPlus, UserCheck, UserX, Users, Search, Filter, Users as UsersIcon, Sparkles } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
-import { useNavigate } from "react-router"; // Import useNavigate
+import { useNavigate } from "react-router";
 
 export default function FollowPage() {
-  const { mongoUser, loadingMongo } = useAuth();
+  const { mongoUser, loadingMongo, refreshMongoUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [updatingUser, setUpdatingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const navigate = useNavigate(); // useNavigate hook
+  const navigate = useNavigate();
 
   const defaultAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face";
 
@@ -52,7 +52,6 @@ export default function FollowPage() {
               console.error(`Error fetching relationship for user ${user._id}:`, error);
             }
             
-            // const userFollowing = user.following || [];
             const userFollowers = user.followers || [];
             const userFriends = user.friends || [];
             const myFollowing = mongoUser.following || [];
@@ -122,18 +121,21 @@ export default function FollowPage() {
       });
       const result = await response.json();
       if (result.success) {
+        await refreshMongoUser();
+        
         setUsers(prev =>
           prev.map(user => {
             if (user._id === targetId) {
               const newRelationship = {
                 iFollow: true,
                 followsMe: user.relationship.followsMe,
-                isFriend: result.becameFriends || (user.relationship.followsMe && true)
+                isFriend: result.becameFriends || false
               };
               return {
                 ...user,
                 relationship: newRelationship,
-                followers: [...(user.followers || []), mongoUser._id]
+                followers: [...(user.followers || []), mongoUser._id],
+                friends: result.becameFriends ? [...(user.friends || []), mongoUser._id] : user.friends
               };
             }
             return user;
@@ -156,6 +158,9 @@ export default function FollowPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentUserId: mongoUser._id }),
       });
+      
+      await refreshMongoUser();
+      
       setUsers(prev =>
         prev.map(user => {
           if (user._id === targetId) {
@@ -166,7 +171,8 @@ export default function FollowPage() {
                 followsMe: user.relationship.followsMe,
                 isFriend: false
               },
-              followers: (user.followers || []).filter(id => id !== mongoUser._id)
+              followers: (user.followers || []).filter(id => id !== mongoUser._id),
+              friends: (user.friends || []).filter(id => id !== mongoUser._id)
             };
           }
           return user;
@@ -179,44 +185,101 @@ export default function FollowPage() {
     }
   };
 
-  
+  const handleRemoveFollower = async (targetId) => {
+    if (!mongoUser?._id || updatingUser) return;
+    try {
+      setUpdatingUser(targetId);
+      await fetch(`http://localhost:5000/users/${targetId}/remove-follower`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentUserId: mongoUser._id }),
+      });
+      
+      await refreshMongoUser();
+      
+      setUsers(prev =>
+        prev.map(user => {
+          if (user._id === targetId) {
+            return {
+              ...user,
+              relationship: {
+                iFollow: user.relationship.iFollow,
+                followsMe: false,
+                isFriend: false
+              },
+              following: (user.following || []).filter(id => id !== mongoUser._id),
+              friends: (user.friends || []).filter(id => id !== mongoUser._id)
+            };
+          }
+          return user;
+        })
+      );
+    } catch (error) {
+      console.error("Error removing follower:", error);
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
   const handleUserClick = (userId) => {
     navigate(`/profile/${userId}`);
   };
 
   const getButtonConfig = (user) => {
     const { iFollow, followsMe, isFriend } = user.relationship;
+    
     if (isFriend) {
       return {
-        text: "Friends",
-        icon: <Users size={16} />,
-        className: "bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-200 hover:border-purple-300",
-        onClick: () => handleUnfollow(user._id),
-        disabled: updatingUser === user._id
+        primary: {
+          text: "Friends",
+          icon: <Users size={16} />,
+          className: "bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200",
+        },
+        // secondary: {
+        //   text: "Unfriend",
+        //   icon: <UserX size={16} />,
+        //   className: "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
+        //   onClick: () => handleUnfollow(user._id),
+        // }
       };
     } else if (iFollow) {
       return {
-        text: "Unfollow",
-        icon: <UserX size={16} />,
-        className: "bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200 hover:border-gray-300",
-        onClick: () => handleUnfollow(user._id),
-        disabled: updatingUser === user._id
+        primary: {
+          text: "Following",
+          icon: <UserCheck size={16} />,
+          className: "bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200",
+        },
+        secondary: {
+          text: "Unfollow",
+          icon: <UserX size={16} />,
+          className: "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
+          onClick: () => handleUnfollow(user._id),
+        }
       };
     } else if (followsMe) {
       return {
-        text: "Follow Back",
-        icon: <UserCheck size={16} />,
-        className: "bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 hover:border-blue-300",
-        onClick: () => handleFollow(user._id),
-        disabled: updatingUser === user._id
+        primary: {
+          text: "Follow Back",
+          icon: <UserCheck size={16} />,
+          className: "bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 hover:border-blue-300",
+          onClick: () => handleFollow(user._id),
+        },
+        secondary: {
+          text: "Delete",
+          icon: <UserX size={16} />,
+          className: "bg-white border border-red-200 text-red-600 hover:bg-red-50",
+          onClick: () => handleRemoveFollower(user._id),
+        }
       };
     } else {
       return {
-        text: "Follow",
-        icon: <UserPlus size={16} />,
-        className: "bg-pink-100 hover:bg-pink-200 text-pink-700 border-pink-200 hover:border-pink-300",
-        onClick: () => handleFollow(user._id),
-        disabled: updatingUser === user._id
+        primary: {
+          text: "Follow",
+          icon: <UserPlus size={16} />,
+          className: "bg-pink-100 hover:bg-pink-200 text-pink-700 border border-gray-300",
+          onClick: () => handleFollow(user._id),
+        },
+        secondary: null
       };
     }
   };
@@ -432,19 +495,38 @@ export default function FollowPage() {
                       </div>
                     )}
 
-                    {/* Action Button - NOT Clickable for navigation */}
-                    <button
-                      onClick={buttonConfig.onClick}
-                      disabled={buttonConfig.disabled}
-                      className={`w-full py-2.5 px-4 rounded-lg border font-medium transition-all flex items-center justify-center gap-2 ${
-                        buttonConfig.disabled 
-                          ? 'opacity-50 cursor-not-allowed' 
-                          : 'hover:shadow-sm'
-                      } ${buttonConfig.className}`}
-                    >
-                      {buttonConfig.icon}
-                      {buttonConfig.disabled ? "..." : buttonConfig.text}
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {/* Primary Action Button */}
+                      <button
+                        onClick={buttonConfig.primary.onClick || (() => {})}
+                        disabled={updatingUser === user._id || !buttonConfig.primary.onClick}
+                        className={`flex-1 py-2.5 px-4 rounded-lg border font-medium transition-all flex items-center justify-center gap-2 ${
+                          updatingUser === user._id 
+                            ? 'opacity-50 cursor-not-allowed' 
+                            : 'hover:shadow-sm'
+                        } ${buttonConfig.primary.className}`}
+                      >
+                        {buttonConfig.primary.icon}
+                        {updatingUser === user._id ? "..." : buttonConfig.primary.text}
+                      </button>
+
+                      {/* Secondary Action Button (if exists) */}
+                      {buttonConfig.secondary && (
+                        <button
+                          onClick={buttonConfig.secondary.onClick}
+                          disabled={updatingUser === user._id}
+                          className={`py-2 px-4 rounded-lg border font-medium transition-all flex items-center justify-center gap-2 ${
+                            updatingUser === user._id 
+                              ? 'opacity-50 cursor-not-allowed' 
+                              : 'hover:shadow-sm'
+                          } ${buttonConfig.secondary.className}`}
+                        >
+                          {buttonConfig.secondary.icon}
+                          {updatingUser === user._id ? "..." : buttonConfig.secondary.text}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })
