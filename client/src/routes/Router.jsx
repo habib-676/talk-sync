@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
         Component: FollowPage,
       },
       {
-        path: "/profile/:username",
+        path: "/profile/:userId",
         element: <UserProfile></UserProfile>,
       },
       {
