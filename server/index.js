@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -84,22 +84,12 @@ async function run() {
       try {
         const email = req?.params?.email;
         if (!email) {
-<<<<<<< HEAD
-          res
-=======
           return res
->>>>>>> c2a889f887d5c0c42d459005827e8ed44452180c
             .status(400)
             .json({ success: false, message: "Email is required" });
         }
 
         const user = await usersCollections.findOne({ email });
-<<<<<<< HEAD
-
-        if (!user) {
-          res.status(404).json({ success: false, message: "User not found" });
-        }
-=======
         // console.log("Found user for email:", email, user); // Debug log
 
         if (!user) {
@@ -108,7 +98,6 @@ async function run() {
             .json({ success: false, message: "User not found" });
         }
 
->>>>>>> c2a889f887d5c0c42d459005827e8ed44452180c
         res.status(200).json({ success: true, user });
       } catch (error) {
         console.error("❌ Error in GET /users/:email:", error);
@@ -178,7 +167,7 @@ async function run() {
     });
 
     // API: for update user  details
-    app.patch("/users/:email", async (req, res) => {
+    app.put("/users/:email", async (req, res) => {
       try {
         const email = req.params.email;
         const updatedData = req.body;
@@ -244,11 +233,6 @@ async function run() {
 
     // all users --->
     app.get("/users", async (req, res) => {
-<<<<<<< HEAD
-      const result = await usersCollections.find().toArray();
-      res.send(result);
-    });
-=======
       try {
         const users = await usersCollections.find().toArray();
         res.send(users);
@@ -431,7 +415,6 @@ async function run() {
         res.status(500).json({ success: false, message: error.message });
       }
     });
->>>>>>> c2a889f887d5c0c42d459005827e8ed44452180c
 
     // message related api's
     app.post("/messages", async (req, res) => {
