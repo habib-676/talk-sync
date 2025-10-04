@@ -82,8 +82,6 @@ export default function Login() {
             </p>
           </div>
 
-          <SocialLogin />
-
           <form onSubmit={handleLogin} className="space-y-5">
             {/* Email */}
             <div className="relative">
@@ -137,6 +135,8 @@ export default function Login() {
               {isLoading ? <LoadingSpinner /> : "Login"}
             </button>
           </form>
+
+          <SocialLogin />
 
           {/* Signup link */}
           <p className="text-center text-gray-800 mt-6">
