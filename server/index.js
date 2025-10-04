@@ -65,6 +65,52 @@ async function run() {
       // send events to all the connected clients
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
+      // ----------- VIDEO CALL EVENTS -----------
+
+      // when a user calls someone
+      socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+        const receiverSocketId = userSocketMap[userToCall];
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("incomingCall", {
+            from,
+            name,
+            signal: signalData,
+          });
+        }
+      });
+
+      // When user accepts a call
+      socket.on("acceptCall", ({ to, signal }) => {
+        const callerSocketId = userSocketMap[to];
+        if (callerSocketId) {
+          io.to(callerSocketId).emit("callAccepted", signal);
+        }
+      });
+
+      // When user declines a call
+      socket.on("declineCall", ({ to }) => {
+        const callerSocketId = userSocketMap[to];
+        if (callerSocketId) {
+          io.to(callerSocketId).emit("callDeclined");
+        }
+      });
+
+      // Exchange ICE candidates
+      socket.on("iceCandidate", ({ to, candidate }) => {
+        const targetSocketId = userSocketMap[to];
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("iceCandidate", candidate);
+        }
+      });
+
+      // End call
+      socket.on("endCall", ({ to }) => {
+        const targetSocketId = userSocketMap[to];
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("endCall");
+        }
+      });
+
       socket.on("disconnect", () => {
         console.log("🔴 User disconnected:", socket.id);
         delete userSocketMap[userId];
