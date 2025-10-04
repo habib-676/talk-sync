@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { UserPlus, UserCheck, UserX, Users, Search, Filter, Users as UsersIcon, Sparkles } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import { useNavigate } from "react-router"; // Import useNavigate
 
 export default function FollowPage() {
   const { mongoUser, loadingMongo } = useAuth();
@@ -10,6 +11,7 @@ export default function FollowPage() {
   const [updatingUser, setUpdatingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const navigate = useNavigate(); // useNavigate hook
 
   const defaultAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face";
 
@@ -50,7 +52,7 @@ export default function FollowPage() {
               console.error(`Error fetching relationship for user ${user._id}:`, error);
             }
             
-            const userFollowing = user.following || [];
+            // const userFollowing = user.following || [];
             const userFollowers = user.followers || [];
             const userFriends = user.friends || [];
             const myFollowing = mongoUser.following || [];
@@ -177,6 +179,11 @@ export default function FollowPage() {
     }
   };
 
+  
+  const handleUserClick = (userId) => {
+    navigate(`/profile/${userId}`);
+  };
+
   const getButtonConfig = (user) => {
     const { iFollow, followsMe, isFriend } = user.relationship;
     if (isFriend) {
@@ -246,7 +253,7 @@ export default function FollowPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-15 pt-25">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-12">
@@ -347,14 +354,17 @@ export default function FollowPage() {
 
                 return (
                   <div key={user._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300">
-                    {/* User Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
+                    {/* User Header - Clickable Area */}
+                    <div 
+                      className="flex items-start justify-between mb-4 cursor-pointer"
+                      onClick={() => handleUserClick(user._id)}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
                         <div className="relative">
                           <img
                             src={user.image || defaultAvatar}
                             alt={user.name}
-                            className="w-12 h-12 rounded-xl object-cover border border-gray-200"
+                            className="w-12 h-12 rounded-xl object-cover border border-gray-200 hover:border-purple-300 transition-colors"
                             onError={(e) => {
                               e.target.src = defaultAvatar;
                             }}
@@ -363,11 +373,11 @@ export default function FollowPage() {
                             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                           )}
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 hover:text-purple-600 transition-colors">
                             {user.name}
                           </h3>
-                          <p className="text-sm text-gray-500">{user.email}</p>
+                          <p className="text-sm text-gray-500 truncate">{user.email}</p>
                         </div>
                       </div>
                       
@@ -382,9 +392,14 @@ export default function FollowPage() {
                       </div>
                     </div>
 
-                    {/* User Bio */}
+                    {/* User Bio - Also Clickable */}
                     {user.bio && (
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{user.bio}</p>
+                      <div 
+                        className="text-sm text-gray-600 mb-4 line-clamp-2 cursor-pointer hover:text-gray-700 transition-colors"
+                        onClick={() => handleUserClick(user._id)}
+                      >
+                        {user.bio}
+                      </div>
                     )}
 
                     {/* User Stats */}
@@ -417,7 +432,7 @@ export default function FollowPage() {
                       </div>
                     )}
 
-                    {/* Action Button */}
+                    {/* Action Button - NOT Clickable for navigation */}
                     <button
                       onClick={buttonConfig.onClick}
                       disabled={buttonConfig.disabled}
