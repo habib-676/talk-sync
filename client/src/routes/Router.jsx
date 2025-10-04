@@ -14,7 +14,6 @@ import Inbox from "../pages/inbox/Inbox";
 import PrivateRoute from "../routes/PrivateRoute";
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/userProfile";
-import Profile from "../pages/ProfilePage/Profile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
@@ -63,10 +62,12 @@ export const router = createBrowserRouter([
         path: "/profile",
         element: (
           <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        ),
-      },
+            <ProfilePage/>
+          </PrivateRoute>)
+      }
+        
+        
+      
     ],
   },
   {
@@ -87,7 +88,7 @@ export const router = createBrowserRouter([
     path: "/profile",
     element: (
       <PrivateRoute>
-        <Profile />
+        <ProfilePage />
       </PrivateRoute>
     ),
   },
