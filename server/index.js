@@ -3,6 +3,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -13,6 +15,7 @@ const port = process.env.PORT || 5000;
 //middleware
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -46,6 +49,75 @@ async function run() {
     const database = client.db("Talk-Sync-Data");
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
+
+    // jwt related APIs ----->
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN, {
+        expiresIn: "7d",
+      });
+
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false,
+          sameSite: "none",
+        })
+        .send({ success: true });
+    });
+
+    //jwt verification middleware
+    const verifyToken = (req, res, next) => {
+      const token = req.cookies.token;
+      if (!token)
+        return res.status(401).send({ message: "Unauthorized access" });
+
+      jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, decoded) => {
+        if (err) return res.status(403).send({ message: "Forbidden access" });
+
+        req.decoded = decoded;
+        next();
+      });
+    };
+
+    //role checking middleware
+    const verifyAdmin = async (req, res, next) => {
+      try {
+        const email = req.decoded?.email;
+        if (!email) {
+          return res.status(401).send({ message: "Unauthorized access" });
+        }
+
+        const user = await usersCollections.findOne({ email });
+        if (!user) {
+          return res.status(404).send({ message: "User not found" });
+        }
+
+        if (user.role !== "admin") {
+          return res
+            .status(403)
+            .send({ message: "Access denied: Admins only" });
+        }
+
+        req.user = user;
+        next();
+      } catch (error) {
+        console.error("Admin verification error:", error);
+        res
+          .status(500)
+          .send({ message: "Server error during role verification" });
+      }
+    };
+
+    //  Learner dashboard route
+    app.get("/dashboard/learner", verifyToken, async (req, res) => {
+      res.send({ message: "Welcome Learner Dashboard!" });
+    });
+
+    //  Admin dashboard route
+    app.get("/dashboard/admin", verifyToken, verifyAdmin, async (req, res) => {
+      res.send({ message: "Welcome Admin Dashboard!" });
+    });
 
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
