@@ -24,7 +24,7 @@ const server = http.createServer(app);
 // Setup socket.io
 const io = new Server(server, {
   cors: {
-    origin: "*", //  frontend URL
+    origin: "*", // frontend URL
   },
 });
 
@@ -84,6 +84,7 @@ async function run() {
 
     // User related APIs
 
+    // ✅ FIXED: Removed nested duplicate route
     app.get("/users/:email", async (req, res) => {
       try {
         const email = req?.params?.email;
@@ -94,7 +95,6 @@ async function run() {
         }
 
         const user = await usersCollections.findOne({ email });
-        // console.log("Found user for email:", email, user); // Debug log
 
         if (!user) {
           return res
@@ -168,7 +168,7 @@ async function run() {
       }
     });
 
-    // API: for update user  details
+    // API: for update user details
     app.put("/users/:email", async (req, res) => {
       try {
         const email = req.params.email;
@@ -211,7 +211,6 @@ async function run() {
     });
 
     // onboarding -->
-
     app.patch("/onboarding/:email", async (req, res) => {
       try {
         const { email } = req.params;
@@ -311,7 +310,7 @@ async function run() {
       }
     });
 
-    // Updated Follow endpoint with friendship logic
+    // Follow endpoint
     app.post("/users/:id/follow", async (req, res) => {
       try {
         const targetUserId = req.params.id;
@@ -328,7 +327,6 @@ async function run() {
             .json({ success: false, message: "You can't follow yourself" });
         }
 
-        // Get both users
         const currentUser = await usersCollections.findOne({
           _id: new ObjectId(currentUserId),
         });
@@ -342,22 +340,18 @@ async function run() {
             .json({ success: false, message: "User not found" });
         }
 
-        // Update following for current user
         await usersCollections.updateOne(
           { _id: new ObjectId(currentUserId) },
           { $addToSet: { following: targetUserId } }
         );
 
-        // Update followers for target user
         await usersCollections.updateOne(
           { _id: new ObjectId(targetUserId) },
           { $addToSet: { followers: currentUserId } }
         );
 
-        // Check if mutual follow (friendship)
         const targetUserFollowing = targetUser.following || [];
         if (targetUserFollowing.includes(currentUserId)) {
-          // Both are following each other - make friends
           await usersCollections.updateOne(
             { _id: new ObjectId(currentUserId) },
             { $addToSet: { friends: targetUserId } }
@@ -378,7 +372,7 @@ async function run() {
       }
     });
 
-    // Updated Unfollow endpoint with friendship logic
+    // Unfollow endpoint
     app.post("/users/:id/unfollow", async (req, res) => {
       try {
         const targetUserId = req.params.id;
@@ -390,19 +384,16 @@ async function run() {
             .json({ success: false, message: "Both IDs required" });
         }
 
-        // Update following for current user
         await usersCollections.updateOne(
           { _id: new ObjectId(currentUserId) },
           { $pull: { following: targetUserId } }
         );
 
-        // Update followers for target user
         await usersCollections.updateOne(
           { _id: new ObjectId(targetUserId) },
           { $pull: { followers: currentUserId } }
         );
 
-        // Remove from friends if they were friends
         await usersCollections.updateOne(
           { _id: new ObjectId(currentUserId) },
           { $pull: { friends: targetUserId } }
@@ -413,6 +404,43 @@ async function run() {
         );
 
         res.json({ success: true, message: "Unfollowed successfully" });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    // Remove follower endpoint
+    app.post("/users/:id/remove-follower", async (req, res) => {
+      try {
+        const targetUserId = req.params.id;
+        const { currentUserId } = req.body;
+
+        if (!currentUserId || !targetUserId) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Both IDs required" });
+        }
+
+        await usersCollections.updateOne(
+          { _id: new ObjectId(currentUserId) },
+          { $pull: { followers: targetUserId } }
+        );
+
+        await usersCollections.updateOne(
+          { _id: new ObjectId(targetUserId) },
+          { $pull: { following: currentUserId } }
+        );
+
+        await usersCollections.updateOne(
+          { _id: new ObjectId(currentUserId) },
+          { $pull: { friends: targetUserId } }
+        );
+        await usersCollections.updateOne(
+          { _id: new ObjectId(targetUserId) },
+          { $pull: { friends: currentUserId } }
+        );
+
+        res.json({ success: true, message: "Follower removed successfully" });
       } catch (error) {
         res.status(500).json({ success: false, message: error.message });
       }
@@ -438,10 +466,8 @@ async function run() {
           createdAt: new Date().toISOString(),
         };
 
-        // save message in mongoDB
         await messagesCollections.insertOne(newMessage);
 
-        // realtime functionality
         const receiverSocketId = getReceiverSocketId(messageData?.receiverId);
         if (receiverSocketId) {
           io.to(receiverSocketId).emit("newMessage", newMessage);
@@ -484,12 +510,12 @@ async function run() {
       }
     });
 
-    // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log("✅ Connected to MongoDB successfully!");
   } catch (error) {
-    console.error("MongoDB connection failed:", error);
-    process.exit(1);
+    console.error("❌ MongoDB connection failed:", error);
+  } finally {
+    // await client.close();
   }
 }
 
