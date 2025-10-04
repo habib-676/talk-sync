@@ -16,9 +16,11 @@ const useAuth = () => {
 
     try {
       setLoadingMongo(true);
-      const response = await fetch(`http://localhost:5000/users/${authInfo.user.email}`);
+      const response = await fetch(
+        `http://localhost:5000/users/${authInfo.user.email}`
+      );
       const data = await response.json();
-      
+
       if (data.success) {
         setMongoUser(data.user);
       } else {
@@ -40,7 +42,7 @@ const useAuth = () => {
     ...authInfo,
     mongoUser,
     loadingMongo,
-    refreshMongoUser
+    refreshMongoUser,
   };
 };
 
