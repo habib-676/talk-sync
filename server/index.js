@@ -509,7 +509,7 @@ async function run() {
           .json({ success: false, message: "Internal server error" });
       }
     });
-    app.get("/dashboard/summary", async (req, res) => {
+    app.get("/dashboard/overview", async (req, res) => {
       try {
         const email = (req.query.email || "").toLowerCase().trim();
         if (!email) return res.status(400).json({ success: false, message: "email is required" });
