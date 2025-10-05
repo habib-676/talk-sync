@@ -5,7 +5,7 @@ import ProgressDonut from "../../components/dashboard/widgets/ProgressDonut";
 import SuggestedPartners from "../../components/dashboard/widgets/SuggestedPartners";
 import useAuth from "../../hooks/useAuth";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Overview() {
   const { user: authUser } = useAuth();
@@ -25,7 +25,7 @@ export default function Overview() {
       try {
         setLoading(true);
         setError(null);
-        const url = `${BACKEND.replace(/\/$/, "")}/dashboard/summary?email=${encodeURIComponent(email)}`;
+        const url = `${BACKEND.replace(/\/$/, "")}/dashboard/overview?email=${encodeURIComponent(email)}`;
         const res = await fetch(url);
         const json = await res.json();
         if (!json.success) throw new Error(json.message || "Failed to fetch summary");
