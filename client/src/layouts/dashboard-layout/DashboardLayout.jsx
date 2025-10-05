@@ -1,84 +1,65 @@
-import React from "react";
-import { Outlet, Link } from "react-router";
+import React, { useState } from "react";
+import { Outlet } from "react-router";
 import useRole from "../../hooks/useRole";
+import DashboardSidebar from "../../components/dashboard-components/DashboardSidebar";
+import TopNav from "../../components/dashboard-components/TopNav";
+import useAuth from "../../hooks/useAuth";
 
 const DashboardLayout = () => {
   const { role, isLoading } = useRole();
-  console.log("role from dash", role);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // const [darkMode, setDarkMode] = useState(false);
+  const { user } = useAuth();
 
+  // simple loader
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!role) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Unable to determine role
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-2">⚠️</div>
+          <p className="text-gray-700">Unable to determine role</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md p-5 flex flex-col">
-        <h2 className="text-2xl font-bold mb-5">TalkSync Dashboard</h2>
+    <div className={`flex h-screen overflow-hidden `}>
+      {/* coming from dashboard-components */}
+      <DashboardSidebar
+        role={role}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        // darkMode={darkMode}
+        // setDarkMode={setDarkMode}
+      />
 
-        {role === "admin" && (
-          <>
-            <Link to="/dashboard/admin" className="mb-2 hover:text-blue-500">
-              Admin Home
-            </Link>
-            <Link
-              to="/dashboard/admin/users"
-              className="mb-2 hover:text-blue-500"
-            >
-              Manage Users
-            </Link>
-            <Link
-              to="/dashboard/admin/reports"
-              className="mb-2 hover:text-blue-500"
-            >
-              Reports
-            </Link>
-            <Link
-              to="/dashboard/admin/announcements"
-              className="mb-2 hover:text-blue-500"
-            >
-              Announcements
-            </Link>
-          </>
-        )}
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        <TopNav
+          role={role}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          // darkMode={darkMode}
+          // setDarkMode={setDarkMode}
+          user={user}
+        />
 
-        {role === "learner" && (
-          <>
-            <Link to="/dashboard/learner" className="mb-2 hover:text-green-500">
-              Learner Home
-            </Link>
-            <Link
-              to="/dashboard/learner/my-courses"
-              className="mb-2 hover:text-green-500"
-            >
-              My Conversations
-            </Link>
-            <Link
-              to="/dashboard/learner/settings"
-              className="mb-2 hover:text-green-500"
-            >
-              Settings
-            </Link>
-          </>
-        )}
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 p-6">
-        <Outlet />
-      </div>
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            <Outlet />
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

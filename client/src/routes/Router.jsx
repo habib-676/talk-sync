@@ -40,20 +40,8 @@ export const router = createBrowserRouter([
         Component: BlogDetails, //added by amena
       },
       {
-        path: "/inbox",
-        element: (
-          <PrivateRoute>
-            <Inbox />
-          </PrivateRoute>
-        ),
-      },
-      {
         path: "contact-us",
         Component: ContactUs,
-      },
-      {
-        path: "/follow", //added by jannatul
-        Component: FollowPage,
       },
       {
         path: "/profile/:userId",
@@ -91,23 +79,28 @@ export const router = createBrowserRouter([
         <DashboardLayout />
       </PrivateRoute>
     ),
-    children: [],
-  },
-  {
-    path: "/profile",
-    element: (
-      <PrivateRoute>
-        <ProfilePage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: "/profile/edit",
-    element: (
-      <PrivateRoute>
-        <EditProfile />
-      </PrivateRoute>
-    ),
+    children: [
+      {
+        index: true,
+        // Will be added dashboard home
+      },
+      {
+        path: "/dashboard/profile",
+        element: <ProfilePage />,
+      },
+      {
+        path: "/dashboard/profile/edit",
+        element: <EditProfile />,
+      },
+      {
+        path: "/dashboard/inbox",
+        element: <Inbox />,
+      },
+      {
+        path: "/dashboard/follow",
+        element: <FollowPage />, //added by jannatul
+      },
+    ],
   },
   {
     path: "/onboarding",
