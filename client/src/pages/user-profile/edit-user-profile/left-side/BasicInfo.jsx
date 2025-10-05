@@ -19,7 +19,7 @@ const BasicInfo = () => {
           </label>
           <input
             type="text"
-            {...register("user_name", { required: false })}
+            {...register("name", { required: false })}
             defaultValue={user?.displayName}
             className="input w-full font-medium"
           />

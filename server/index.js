@@ -1,10 +1,11 @@
 // server.js
-require("dotenv").config();
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -13,10 +14,14 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || true, // set to frontend origin in production
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173", // set to frontend origin in production
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -52,6 +57,76 @@ async function run() {
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
 
+    // jwt related APIs ----->
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const payload = { email: user.email, role: user.role };
+      const token = jwt.sign(payload, process.env.JWT_ACCESS_TOKEN, {
+        expiresIn: "7d",
+      });
+
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false,
+          sameSite: "lax",
+        })
+        .send({ success: true });
+    });
+
+    //jwt verification middleware
+    const verifyToken = (req, res, next) => {
+      const token =
+        req.cookies?.token || req.headers.authorization?.split(" ")[1];
+      if (!token)
+        return res.status(401).send({ message: "Unauthorized access" });
+
+      jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, decoded) => {
+        if (err) return res.status(403).send({ message: "Forbidden access" });
+        req.decoded = decoded;
+        next();
+      });
+    };
+
+    //role checking middleware
+    const verifyAdmin = async (req, res, next) => {
+      try {
+        const email = req.decoded?.email;
+        if (!email) {
+          return res.status(401).send({ message: "Unauthorized access" });
+        }
+
+        const user = await usersCollections.findOne({ email });
+        if (!user) {
+          return res.status(404).send({ message: "User not found" });
+        }
+
+        if (user.role !== "admin") {
+          return res
+            .status(403)
+            .send({ message: "Access denied: Admins only" });
+        }
+
+        req.user = user;
+        next();
+      } catch (error) {
+        console.error("Admin verification error:", error);
+        res
+          .status(500)
+          .send({ message: "Server error during role verification" });
+      }
+    };
+
+    //  Learner dashboard route
+    app.get("/dashboard/learner", verifyToken, async (req, res) => {
+      res.send({ message: "Welcome Learner Dashboard!" });
+    });
+
+    //  Admin dashboard route
+    app.get("/dashboard/admin", verifyToken, verifyAdmin, async (req, res) => {
+      res.send({ message: "Welcome Admin Dashboard!" });
+    });
+
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
     });
@@ -70,6 +145,52 @@ async function run() {
       // send events to all the connected clients
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
+      // ----------- VIDEO CALL EVENTS -----------
+
+      // when a user calls someone
+      socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+        const receiverSocketId = userSocketMap[userToCall];
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("incomingCall", {
+            from,
+            name,
+            signal: signalData,
+          });
+        }
+      });
+
+      // When user accepts a call
+      socket.on("acceptCall", ({ to, signal }) => {
+        const callerSocketId = userSocketMap[to];
+        if (callerSocketId) {
+          io.to(callerSocketId).emit("callAccepted", signal);
+        }
+      });
+
+      // When user declines a call
+      socket.on("declineCall", ({ to }) => {
+        const callerSocketId = userSocketMap[to];
+        if (callerSocketId) {
+          io.to(callerSocketId).emit("callDeclined");
+        }
+      });
+
+      // Exchange ICE candidates
+      socket.on("iceCandidate", ({ to, candidate }) => {
+        const targetSocketId = userSocketMap[to];
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("iceCandidate", candidate);
+        }
+      });
+
+      // End call
+      socket.on("endCall", ({ to }) => {
+        const targetSocketId = userSocketMap[to];
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("endCall");
+        }
+      });
+
       socket.on("disconnect", () => {
         console.log("🔴 User disconnected:", socket.id);
         delete userSocketMap[userId];
@@ -83,6 +204,29 @@ async function run() {
     };
 
     // User related APIs
+    app.get("/user-role/:email", verifyToken, async (req, res) => {
+      try {
+        const emailFromToken = req.decoded?.email;
+        const requestedEmail = req.params.email;
+
+        if (emailFromToken !== requestedEmail) {
+          return res
+            .status(403)
+            .send({ message: "Forbidden access: Email mismatch" });
+        }
+
+        const user = await usersCollections.findOne({ email: emailFromToken });
+
+        if (!user) {
+          return res.status(404).send({ message: "User not found" });
+        }
+
+        res.send({ role: user.role });
+      } catch (error) {
+        console.error("Error getting user role:", error);
+        res.status(500).send({ message: "Server error during role retrieval" });
+      }
+    });
 
     // ✅ FIXED: Removed nested duplicate route
     app.get("/users/:email", async (req, res) => {
@@ -115,15 +259,23 @@ async function run() {
         const email = (userData.email || "").toLowerCase().trim();
 
         if (!email) {
-          return res.status(400).json({ success: false, message: "Email is required" });
+          return res
+            .status(400)
+            .json({ success: false, message: "Email is required" });
         }
 
         // If user exists, update last_loggedIn and return existing
         const existing = await usersCollections.findOne({ email });
         if (existing) {
-          await usersCollections.updateOne({ email }, { $set: { last_loggedIn: new Date().toISOString() } });
+          await usersCollections.updateOne(
+            { email },
+            { $set: { last_loggedIn: new Date().toISOString() } }
+          );
           // return the public user object (without password)
-          const publicUser = await usersCollections.findOne({ email }, { projection: { password: 0 } });
+          const publicUser = await usersCollections.findOne(
+            { email },
+            { projection: { password: 0 } }
+          );
           return res.status(200).json({ success: true, user: publicUser });
         }
 
@@ -592,4 +744,3 @@ run().catch(console.dir);
 server.listen(port, () => {
   console.log(`TalkSync server is running on port ${port}`);
 });
-

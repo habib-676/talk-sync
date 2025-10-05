@@ -12,20 +12,20 @@ const LanguageSettings = () => {
   } = useFormContext();
   const { languages, loading } = useCountryLanguage();
 
-  const learningLanguages = watch("learning_languages") || [];
+  const learningLanguages = watch("learning_language") || [];
   const nativeLanguage = watch("native_language");
 
   const addLearningLanguage = (e) => {
     const selectedLanguage = e.target.value;
     if (selectedLanguage && !learningLanguages.includes(selectedLanguage)) {
-      setValue("learning_languages", [...learningLanguages, selectedLanguage]);
+      setValue("learning_language", [...learningLanguages, selectedLanguage]);
     }
     e.target.value = "";
   };
 
   const removeLearningLanguage = (languageToRemove) => {
     setValue(
-      "learning_languages",
+      "learning_language",
       learningLanguages.filter((lang) => lang !== languageToRemove)
     );
   };
