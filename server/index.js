@@ -509,7 +509,6 @@ async function run() {
           .json({ success: false, message: "Internal server error" });
       }
     });
-    // paste inside run() after collections are defined (server.js)
     app.get("/dashboard/summary", async (req, res) => {
       try {
         const email = (req.query.email || "").toLowerCase().trim();
