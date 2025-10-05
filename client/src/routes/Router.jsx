@@ -18,6 +18,7 @@ import Profile from "../pages/ProfilePage/Profile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
+import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -55,6 +56,10 @@ export const router = createBrowserRouter([
         path: "/follow", //added by jannatul
         Component: FollowPage,
       },
+       {
+        path: "/schedule-session", //added by amena
+        Component: ScheduleSession,
+      },
       {
         path: "/profile/:userId",
         element: <UserProfile></UserProfile>,
@@ -91,6 +96,7 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
+ 
   {
     path: "/profile/edit",
     element: (
