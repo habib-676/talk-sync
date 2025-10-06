@@ -282,7 +282,7 @@ export default function ProfilePage() {
                   to="/schedule-session"
                   className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center hover:shadow-sm transition"
                 >
-                  Schedule a session
+                  Learning a session
                 </Link>
                 <Link
                   to="/badges"

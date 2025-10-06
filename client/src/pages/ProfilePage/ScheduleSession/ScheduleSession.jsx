@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-
+import { FaBookOpen, FaComments, FaGlobe, FaFont } from "react-icons/fa";
+import DailyChallenge from "./DailyChallenge";
 const ScheduleSession = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [wordsData, setWordsData] = useState([]);
@@ -28,7 +29,16 @@ const ScheduleSession = () => {
     setSelectedLesson(null);
   };
 
+  // ✅ Tab icons
+  const tabIcons = {
+    all: <FaGlobe className="inline-block mr-2" />,
+    speaking: <FaComments className="inline-block mr-2" />,
+    words: <FaFont className="inline-block mr-2" />,
+    reading: <FaBookOpen className="inline-block mr-2" />,
+  };
+
   return (
+    <div>
     <div className="mt-20 min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-10 px-5 md:px-20">
       {/* Header Section */}
       <section className="text-center mb-12">
@@ -38,72 +48,89 @@ const ScheduleSession = () => {
         <p className="text-gray-600 mb-6">
           Take a quick test or book a live class to improve your communication skills.
         </p>
-        <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full font-semibold hover:scale-105 transition-transform">
+        {/* <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full font-semibold hover:scale-105 transition-transform">
           Take Free Test
-        </button>
+        </button> */}
       </section>
 
       {/* Tabs */}
       <section className="flex justify-center flex-wrap gap-4 mb-10">
-        {["all", "speaking", "words", "reading"].map((tab) => (
+        {["all", "words", "reading","speaking"].map((tab) => (
           <button
             key={tab}
             onClick={() => {
               setActiveTab(tab);
               resetSelections();
             }}
-            className={`px-6 py-2 rounded-full font-semibold capitalize transition-all ${
+            className={`px-6 py-2 rounded-full font-semibold capitalize transition-all flex items-center ${
               activeTab === tab
                 ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md"
                 : "bg-white border border-gray-300 hover:bg-gray-100"
             }`}
           >
+            {tabIcons[tab]}
             {tab}
           </button>
         ))}
       </section>
 
-      {/* Content */}
-      <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* SPEAKING */}
-        {activeTab === "speaking" && (
+        {/* Dynamic Title & Description */}
+      <div className="text-center mb-10">
+        {activeTab === "words" && (
           <>
-            <div className="bg-white shadow-lg rounded-xl p-5 hover:shadow-2xl transition">
-              <h3 className="font-bold text-xl text-indigo-700 mb-2">
-                Personalized Live Class
-              </h3>
-              <p className="text-gray-600 mb-3">
-                Book your personal tutor for live speaking practice.
-              </p>
-              <button className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600">
-                Book Tutor
-              </button>
-            </div>
-
-            <div className="bg-white shadow-lg rounded-xl p-5 hover:shadow-2xl transition">
-              <h3 className="font-bold text-xl text-indigo-700 mb-2">
-                Pro Partner Speaking Practice
-              </h3>
-              <p className="text-gray-600 mb-3">
-                Practice with an English Pro Partner and enhance fluency.
-              </p>
-              <button className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600">
-                Start Now
-              </button>
-            </div>
+            <h2 className="text-3xl font-bold text-indigo-700">
+              Improve Your English with Words 💬
+            </h2>
+            <p className="text-gray-600 mt-2">
+              Build your vocabulary one level at a time — simple, fun, and effective!
+            </p>
           </>
         )}
+        {activeTab === "reading" && (
+          <>
+            <h2 className="text-3xl font-bold text-indigo-700">
+              Master Reading, Master English 📖
+            </h2>
+            <p className="text-gray-600 mt-2">
+              Sharpen your comprehension and enjoy engaging English passages.
+            </p>
+          </>
+        )}
+        {activeTab === "speaking" && (
+          <>
+            <h2 className="text-3xl font-bold text-indigo-700">
+              Speak English with Confidence 🎤
+            </h2>
+            <p className="text-gray-600 mt-2">
+              Practice real conversations, express naturally, and sound fluent!
+            </p>
+          </>
+        )}
+        {activeTab === "all" && (
+          <>
+            <h2 className="text-3xl font-bold text-indigo-700">
+              Explore All English Learning Levels 🌍
+            </h2>
+            <p className="text-gray-600 mt-2">
+              Begin your English journey — choose a level and start learning instantly.
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* Content */}
+      <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
 
         {/* WORDS */}
         {activeTab === "words" && (
           <>
-            {/* STEP 1: Level Selection */}
             {!selectedLevel &&
               wordsData.map((level) => (
                 <div
                   key={level.id}
                   onClick={() => setSelectedLevel(level)}
-                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl transition-transform transform hover:-translate-y-2"
+                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-indigo-300"
                 >
                   <img
                     src={level.image}
@@ -117,23 +144,20 @@ const ScheduleSession = () => {
                 </div>
               ))}
 
-            {/* STEP 2: Category Selection */}
-            {selectedLevel && !selectedCategory && (
+            {selectedLevel && !selectedCategory &&
               selectedLevel.categories.map((cat) => (
                 <div
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat)}
-                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-transform transform hover:-translate-y-2"
+                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform text-center border-t-4 border-purple-300"
                 >
                   <div className="text-4xl mb-3">{cat.icon}</div>
                   <h4 className="text-lg font-semibold text-indigo-700">
                     {cat.name}
                   </h4>
                 </div>
-              ))
-            )}
+              ))}
 
-            {/* STEP 3: Word Details */}
             {selectedCategory && (
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg">
                 <button
@@ -149,7 +173,7 @@ const ScheduleSession = () => {
                   {selectedCategory.words.map((w, idx) => (
                     <li
                       key={idx}
-                      className="border rounded-lg p-4 shadow-sm hover:shadow-md transition"
+                      className="border rounded-lg p-4 shadow-sm hover:shadow-md transition bg-gray-50"
                     >
                       <p className="font-semibold text-gray-800">{w.word}</p>
                       <p className="text-sm text-gray-600 italic">{w.meaning}</p>
@@ -165,20 +189,32 @@ const ScheduleSession = () => {
         {/* READING */}
         {activeTab === "reading" && (
           <>
+          
             {/* STEP 1: Level Selection */}
             {!selectedLevel &&
               readingData.map((level, idx) => (
                 <div
                   key={idx}
                   onClick={() => setSelectedLevel(level)}
-                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl transition-transform transform hover:-translate-y-2"
+                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-indigo-300"
                 >
-                  <img
-                    src={`/images/level-${idx + 1}.jpg`}
-                    alt={level.level}
-                    className="w-24 h-24 mx-auto mb-4 rounded-full shadow"
-                  />
-                  <h3 className="text-xl font-semibold text-indigo-700">
+                  {(() => {
+  const levelImages = [
+    "https://i.ibb.co.com/jZQsT1WP/Reading-glasses-bro.png",
+    "https://i.ibb.co.com/DDrCdZWY/Webinar-pana.png",
+    "https://i.ibb.co.com/xqdY75G0/Instruction-manual-cuate.png",
+  ];
+  return (
+    <img
+      src={levelImages[idx % levelImages.length]}
+      alt={level.level}
+      className="w-full h-48 object-contain rounded-lg mb-4 bg-white"
+    />
+  );
+})
+()}
+
+   <h3 className="text-xl font-semibold text-indigo-700">
                     {level.level}
                   </h3>
                   <p className="text-gray-600 mt-2">
@@ -187,13 +223,23 @@ const ScheduleSession = () => {
                 </div>
               ))}
 
-            {/* STEP 2: Set (Category) Selection */}
+            {/* Back Button for Level */}
             {selectedLevel && !selectedCategory && (
+              <button
+                onClick={() => setSelectedLevel(null)}
+                className="col-span-full mb-5 text-sm text-indigo-600 underline"
+              >
+                ← Back to Levels
+              </button>
+            )}
+
+            {/* STEP 2: Set Selection */}
+            {selectedLevel && !selectedCategory &&
               selectedLevel.sets.map((set, idx) => (
                 <div
                   key={idx}
                   onClick={() => setSelectedCategory(set)}
-                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-transform transform hover:-translate-y-2"
+                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-purple-300"
                 >
                   <h4 className="text-lg font-semibold text-indigo-700">
                     {set.set}
@@ -202,8 +248,7 @@ const ScheduleSession = () => {
                     {set.lessons.length} lessons available
                   </p>
                 </div>
-              ))
-            )}
+              ))}
 
             {/* STEP 3: Lesson Details */}
             {selectedCategory && !selectedLesson && (
@@ -283,6 +328,34 @@ const ScheduleSession = () => {
             )}
           </>
         )}
+{/* SPEAKING */}
+        {activeTab === "speaking" && (
+          <>
+            <div className="bg-white shadow-xl rounded-xl p-6 hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-indigo-400">
+              <h3 className="font-bold text-xl text-indigo-700 mb-2">
+                Personalized Live Class
+              </h3>
+              <p className="text-gray-600 mb-3">
+                Book your personal tutor for live speaking practice.
+              </p>
+              <button className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600">
+                Book Tutor
+              </button>
+            </div>
+
+            <div className="bg-white shadow-xl rounded-xl p-6 hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-purple-400">
+              <h3 className="font-bold text-xl text-indigo-700 mb-2">
+                Pro Partner Speaking Practice
+              </h3>
+              <p className="text-gray-600 mb-3">
+                Practice with an English Pro Partner and enhance fluency.
+              </p>
+              <button className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600">
+                Start Now
+              </button>
+            </div>
+          </>
+        )}
 
         {/* DEFAULT */}
         {activeTab === "all" && (
@@ -291,7 +364,16 @@ const ScheduleSession = () => {
           </div>
         )}
       </section>
+      <section className="mt-20">
+<DailyChallenge/>
+</section>
+
     </div>
+
+
+    </div>
+
+  
   );
 };
 

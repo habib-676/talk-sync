@@ -2,7 +2,7 @@
   {
     "id": 1,
     "level": "Basic",
-    "image": "https://i.ibb.co/3kP9YFh/basic-level.jpg",
+    "image": "https://i.ibb.co.com/7tYfDPp3/Learning-languages-rafiki.png",
     "description": "Simple everyday vocabulary for beginners to build confidence.",
     "categories": [
       {
@@ -102,7 +102,7 @@
   {
     "id": 2,
     "level": "Medium",
-    "image": "https://i.ibb.co/Mn5ZXtG/medium-level.jpg",
+    "image": "https://i.ibb.co.com/wFczVwbq/Learning-languages-bro.png",
     "description": "Broaden your vocabulary with intermediate words and topics.",
     "categories": [
       {
@@ -200,7 +200,7 @@
   {
     "id": 3,
     "level": "Advanced",
-    "image": "https://i.ibb.co/VxPjY3k/advanced-level.jpg",
+    "image": "https://i.ibb.co.com/gZ422Zxv/Learning-languages-pana.png",
     "description": "Learn advanced vocabulary to express ideas precisely and fluently.",
     "categories": [
       {

@@ -1,6 +1,7 @@
 [
   {
     "level": "Level 1",
+    "image": "https://i.ibb.co.com/gZ422Zxv/Learning-languages-pana.png",
     "sets": [
       {
         "set": "Set 1",
@@ -9,42 +10,26 @@
             "id": 101,
             "title": "The Little Prince",
             "description": "A young prince explores planets and learns about love and friendship.",
-            "image": "/images/little-prince.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=V5mJ7NqUj1I",
+            "image": "https://i.ibb.co.com/KxVt5KZK/l1-1PNG.png",
+            "youtubeLink": "https://youtu.be/BKJBiFhCEmw",
             "pdfLink": "https://www.planetebook.com/free-ebooks/the-little-prince.pdf"
           },
           {
             "id": 102,
-            "title": "The Happy Prince",
-            "description": "A statue and a swallow help the poor with kindness and sacrifice.",
-            "image": "/images/happy-prince.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=IvzshYV2PMA",
-            "pdfLink": "https://www.globalgreyebooks.com/happy-prince-ebook.pdf"
+            "title": "Robinson Crusoe - Level 1",
+            "description": "MY NAME IS ROB INSON. I AM FROM ENGLAND. ",
+            "image": "https://i.ibb.co.com/Y4X52wp2/l1-2.png",
+            "youtubeLink": "https://youtu.be/F2w1FBg4CuM?si=1prgz7_53p2zlUDM",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2020/12/Robinson-Crusoe-in-Levels-PDF.pdf"
           },
           {
             "id": 103,
-            "title": "The Ugly Duckling",
-            "description": "A little duckling is teased until he becomes a beautiful swan.",
-            "image": "/images/ugly-duckling.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=MCelhJdW_nM",
-            "pdfLink": "https://www.childrenslibrary.org/books/duckling.pdf"
-          },
-          {
-            "id": 104,
-            "title": "Cinderella",
-            "description": "A kind girl finds happiness with her fairy godmother’s magic.",
-            "image": "/images/cinderella.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=0FZ_2XjVwzQ",
-            "pdfLink": "https://www.storyberries.com/fairy-tales-cinderella-pdf/"
-          },
-          {
-            "id": 105,
-            "title": "The Brave Little Tailor",
-            "description": "A clever tailor defeats giants and wins a kingdom.",
-            "image": "/images/brave-tailor.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=GlLBICyZ2Z8",
-            "pdfLink": "https://www.storynory.com/brave-little-tailor.pdf"
-          }
+            "title": "Rich Man, Poor Man",
+            "description": "One day a postman came to my village....",
+            "image": "https://i.ibb.co.com/RpgFhqNt/l1-3.png",
+            "youtubeLink": "https://youtu.be/tELWkyJdUto?si=cnTq6wufKTAthmil",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/03/Short-story-in-english-Rich-Man-Poor-Man.pdf"
+          } 
         ]
       },
       {
@@ -52,44 +37,29 @@
         "lessons": [
           {
             "id": 106,
-            "title": "Alice in Wonderland",
-            "description": "A curious girl falls into a magical world full of wonder.",
-            "image": "/images/alice-wonderland.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=9FZkp7q19f0",
-            "pdfLink": "https://www.gutenberg.org/files/11/11-h/11-h.htm"
+            "title": "THE YOUNG KING",
+            "description": "THERE WAS ONCE AN OLD KING.HE HAD NO SON....",
+            "image": "https://i.ibb.co.com/cSBY8RWc/l1-4.png",
+            "youtubeLink": "https://youtu.be/_urA6QPHXEo?si=CEUtiMxC2SP9wWJO",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/10/The-Young-King-and-Other-Stories-by-Oscar-Wilde-book-PDF.pdf"
           },
           {
             "id": 107,
-            "title": "Peter Pan",
-            "description": "A boy who never grows up takes children to Neverland.",
-            "image": "/images/peter-pan.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=gi4cU3gJwcA",
-            "pdfLink": "https://www.gutenberg.org/ebooks/16"
+            "title": "SISTER LOVE",
+            "description": "Marcia met Howard Collins at church...",
+            "image": "https://i.ibb.co.com/ksH9vRt9/L1-5.png",
+            "youtubeLink": "https://youtu.be/BeVva7i8vl8?si=s6_TPo0aygIGjFaT",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/11/Sister-Love-By-John-Escott-book-PDF.pdf"
           },
           {
             "id": 108,
-            "title": "The Wizard of Oz",
-            "description": "Dorothy and her friends follow the Yellow Brick Road to find courage and home.",
-            "image": "/images/wizard-oz.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=6bTXx4Whd3g",
-            "pdfLink": "https://www.gutenberg.org/files/55/55-h/55-h.htm"
-          },
-          {
-            "id": 109,
-            "title": "Pinocchio",
-            "description": "A wooden puppet dreams of becoming a real boy.",
-            "image": "/images/pinocchio.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=ksnEB6QfD7M",
-            "pdfLink": "https://www.gutenberg.org/files/500/500-h/500-h.htm"
-          },
-          {
-            "id": 110,
-            "title": "Snow White",
-            "description": "A princess escapes from an evil queen with help from seven dwarfs.",
-            "image": "/images/snow-white.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=s3D2w3k1kG4",
-            "pdfLink": "https://www.storyberries.com/fairy-tales-snow-white-pdf/"
+            "title": "The Story of Doctor Dolittle",
+            "description": "There are some of us now reaching middle age who discover themselves....",
+            "image": "https://i.ibb.co.com/B2rXzqtK/l1-6PNG.png",
+            "youtubeLink": "https://youtu.be/uP1qQgvtgzc?si=ifIm3DhD3voteB26",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/11/The-Story-of-Doctor-Dolittle-book-PDF-httpslearnenglish-new.com_.pdf"
           }
+        
         ]
       },
       {
@@ -97,44 +67,21 @@
         "lessons": [
           {
             "id": 111,
-            "title": "Jack and the Beanstalk",
-            "description": "A boy climbs a beanstalk to outsmart a giant.",
-            "image": "/images/jack-beanstalk.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=9FZkp7q19f0",
-            "pdfLink": "https://www.storyberries.com/jack-and-the-beanstalk-pdf/"
+            "title": "Alice's Adventures in Wonderland",
+            "description": " Alice was beginning to get very bored. She and her sister...",
+            "image": "https://i.ibb.co.com/gMn4XRd2/l1-7.png",
+            "youtubeLink": "https://youtu.be/-BFS9lUupYY?si=5z25BlbEdEVNd3gE",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/12/Alices-Adventures-in-Wonderland-By-Lewis-Carroll-Retold-by-Jennifer-Bassett-book-PDF.pdf"
           },
           {
             "id": 112,
-            "title": "Rapunzel",
-            "description": "A girl with long golden hair is trapped in a tower by a witch.",
-            "image": "/images/rapunzel.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=H4UqMyldS7Q",
-            "pdfLink": "https://www.storyberries.com/rapunzel-pdf/"
-          },
-          {
-            "id": 113,
-            "title": "The Frog Prince",
-            "description": "A princess learns to keep her promise to a frog.",
-            "image": "/images/frog-prince.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=om5ZP3HhRzE",
-            "pdfLink": "https://www.storyberries.com/the-frog-prince-pdf/"
-          },
-          {
-            "id": 114,
-            "title": "Beauty and the Beast",
-            "description": "A girl learns to love a beast for his kind heart.",
-            "image": "/images/beauty-beast.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=tK0c1jR_Szk",
-            "pdfLink": "https://www.storyberries.com/beauty-and-the-beast-pdf/"
-          },
-          {
-            "id": 115,
-            "title": "The Velveteen Rabbit",
-            "description": "A toy becomes real through the love of a child.",
-            "image": "/images/velveteen-rabbit.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=AwvGmPZ0fok",
-            "pdfLink": "https://www.gutenberg.org/files/11757/11757-h/11757-h.htm"
+            "title": "The Thief of Smells",
+            "description": "The Thief of Smells....A tale from America",
+            "image": "https://i.ibb.co.com/BHy5w4m1/l1-8.png",
+            "youtubeLink": "https://youtu.be/yEOukylHnB4?si=Q5bs2ag5-JZSDZei",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/01/The-Thief-of-Smells-A-tale-from-America-book-PDF.pdf"
           }
+          
         ]
       }
     ]
@@ -147,44 +94,28 @@
         "lessons": [
           {
             "id": 201,
-            "title": "The Young King",
-            "description": "A young ruler learns the cost of luxury and compassion.",
-            "image": "/images/young-king.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=1gQ2RrM9e6I",
-            "pdfLink": "https://www.gutenberg.org/files/902/902-h/902-h.htm"
+            "title": "Gulliver’s Travels",
+            "description": "A Journey to Lilliput....",
+            "image": "https://i.ibb.co.com/vC0Qn5s0/l1-9.png",
+            "youtubeLink": "https://youtu.be/dcOdIDDi2K4?si=toKyU-AAtlTyfRwG",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2023/09/Gullivers-Travels-By-Jonathan-Swift-Retold-By-Pauline-Francis-Book-PDF.pdf"
           },
           {
             "id": 202,
-            "title": "The Nightingale and the Rose",
-            "description": "A bird sacrifices for true love.",
-            "image": "/images/nightingale-rose.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=9vPzSC7zr2A",
-            "pdfLink": "https://www.globalgreyebooks.com/nightingale-and-the-rose-ebook.pdf"
+            "title": "Alien at School",
+            "description": "The New Teacher.Jennifer Dale. My friends call me Jenny..",
+            "image": "https://i.ibb.co.com/tMyWFsxH/l1-10.png",
+            "youtubeLink": "https://youtu.be/t9apqj77oA4?si=VNxEN3xKy30xPCj3",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/02/Alien-at-School-by-Michelle-Brown-book-PDF.pdf"
           },
           {
             "id": 203,
-            "title": "The Selfish Giant",
-            "description": "A giant learns the joy of sharing his garden with children.",
-            "image": "/images/selfish-giant.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=-VwRZxJZpFw",
-            "pdfLink": "https://www.globalgreyebooks.com/selfish-giant-ebook.pdf"
-          },
-          {
-            "id": 204,
-            "title": "The Ant and the Grasshopper",
-            "description": "A tale about hard work and preparation.",
-            "image": "/images/ant-grasshopper.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=V5q6EVi8KpA",
-            "pdfLink": "https://www.storyberries.com/the-ant-and-the-grasshopper-pdf/"
-          },
-          {
-            "id": 205,
-            "title": "The Tortoise and the Hare",
-            "description": "Slow and steady wins the race.",
-            "image": "/images/tortoise-hare.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=SUngzUtFr7Q",
-            "pdfLink": "https://www.storyberries.com/the-tortoise-and-the-hare-pdf/"
-          }
+            "title": "Marcel and the Shakespeare Letters",
+            "description": "Marcel is a French mouse. He's a detective and he lives in Paris...",
+            "image": "https://i.ibb.co.com/LDCHNw6P/l1-11.png",
+            "youtubeLink": "https://youtu.be/OclKqF0tato?si=efrINYgHBv6gAUhL",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/11/Marcel-and-the-Shakespeare-Letters-By-Stephen-Rabley-book-PDF-httpslearnenglish-new.com_.pdf"
+          } 
         ]
       },
       {
@@ -194,86 +125,26 @@
             "id": 206,
             "title": "The Fox and the Grapes",
             "description": "A fox dismisses what he cannot have.",
-            "image": "/images/fox-grapes.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=qf4GfZVnSHM",
-            "pdfLink": "https://www.storyberries.com/the-fox-and-the-grapes-pdf/"
+            "image": "https://i.ibb.co.com/M5k1XV7n/l1-12.jpg",
+            "youtubeLink": "https://youtu.be/fhD9wxcrg94?si=OjS5ryeWtJKIkXKh",
+            "pdfLink": "https://teach.files.bbci.co.uk/schoolradio/08_fox_and_grapes.pdf"
           },
           {
             "id": 207,
             "title": "The Goose That Laid the Golden Eggs",
             "description": "Greed leads to loss of fortune.",
-            "image": "/images/golden-eggs.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=GxO1X9Gz5Y4",
-            "pdfLink": "https://www.storyberries.com/the-goose-that-laid-the-golden-eggs-pdf/"
+            "image": "https://i.ibb.co.com/j9w4L337/l1-12.png",
+            "youtubeLink": "https://youtu.be/KgAH866XHNo?si=xvDXJHUF58pTC6F0",
+            "pdfLink": "https://www.amnh.org/content/download/173919/2737219/file/silkroadfables.pdf"
           },
+
           {
             "id": 208,
             "title": "The Farmer and His Sons",
             "description": "Hard work is the real treasure.",
-            "image": "/images/farmer-sons.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=O1nH8QfIu5g",
-            "pdfLink": "https://www.storyberries.com/the-farmer-and-his-sons-pdf/"
-          },
-          {
-            "id": 209,
-            "title": "The Lion and the Mouse",
-            "description": "Even the smallest can help the mighty.",
-            "image": "/images/lion-mouse.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=GxcGVCEEdcU",
-            "pdfLink": "https://www.storyberries.com/the-lion-and-the-mouse-pdf/"
-          },
-          {
-            "id": 210,
-            "title": "The Boy Who Cried Wolf",
-            "description": "A lesson on honesty and trust.",
-            "image": "/images/boy-wolf.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=OqhaCGYqQkE",
-            "pdfLink": "https://www.storyberries.com/the-boy-who-cried-wolf-pdf/"
-          }
-        ]
-      },
-      {
-        "set": "Set 3",
-        "lessons": [
-          {
-            "id": 211,
-            "title": "The Rich Man and the Shoemaker",
-            "description": "A shoemaker finds joy beyond wealth.",
-            "image": "/images/rich-shoemaker.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=84PwLci7uCg",
-            "pdfLink": "https://www.gutenberg.org/files/3156/3156-h/3156-h.htm"
-          },
-          {
-            "id": 212,
-            "title": "The Wind and the Sun",
-            "description": "Gentleness wins where force fails.",
-            "image": "/images/wind-sun.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=ly2nU5AAJXw",
-            "pdfLink": "https://www.storyberries.com/the-wind-and-the-sun-pdf/"
-          },
-          {
-            "id": 213,
-            "title": "The Dog and His Reflection",
-            "description": "Greed makes one lose everything.",
-            "image": "/images/dog-reflection.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=RSOZT6Gs3Dg",
-            "pdfLink": "https://www.storyberries.com/the-dog-and-his-reflection-pdf/"
-          },
-          {
-            "id": 214,
-            "title": "The Crow and the Pitcher",
-            "description": "Intelligence solves tough problems.",
-            "image": "/images/crow-pitcher.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=WRh9vEXXG1Y",
-            "pdfLink": "https://www.storyberries.com/the-crow-and-the-pitcher-pdf/"
-          },
-          {
-            "id": 215,
-            "title": "The Wolf and the Crane",
-            "description": "Helping the ungrateful brings no reward.",
-            "image": "/images/wolf-crane.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=fyKMgxZo9hY",
-            "pdfLink": "https://www.storyberries.com/the-wolf-and-the-crane-pdf/"
+            "image": "https://i.ibb.co.com/23hCfq42/l1-13.jpg",
+            "youtubeLink": "https://youtu.be/mvwx-Ys4HIw?si=RX7utn_8AotRN_Lk",
+            "pdfLink": "https://www.kestonprimary.org.uk/wp-content/uploads/2020/04/English-Comprehension.pdf"
           }
         ]
       }
@@ -287,43 +158,35 @@
         "lessons": [
           {
             "id": 301,
-            "title": "The Gift of the Magi",
-            "description": "A poor couple sacrifice their most precious possessions for each other.",
-            "image": "/images/gift-magi.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=VxK2QfQjJkA",
+            "title": "Anne of Green Gables",
+            "description": "One fine spring afternoon in Avonlea, Mrs. Rachel Lynde sat by...",
+            "image": "https://i.ibb.co.com/mF2jZTT8/l1-14.png",
+            "youtubeLink": "https://youtu.be/PeClEPsTg5U?si=kTbsvqnnIX-9VSQg",
             "pdfLink": "https://www.gutenberg.org/ebooks/7256"
           },
           {
             "id": 302,
-            "title": "The Last Leaf",
-            "description": "An artist paints one final leaf to save a friend’s hope.",
-            "image": "/images/last-leaf.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=wvxN5aHMPPI",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1312"
+            "title": "The Adventures of Tom Sawyer",
+            "description": "Tom Sawyer likes adventures.When other people are sleeping in their beds, Tom Sawyer is climbing out...",
+            "image": "https://i.ibb.co.com/DPCR8PGq/l1-13.png",
+            "youtubeLink": "https://youtu.be/_GPjJ9GBbxM?si=HUnmR1MQp_p2imwq",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/02/The-Adventures-of-Tom-Sawyer-By-MARK-TWAIN-Retold-by-Nick-Bullard-Book-PDF.pdf"
           },
           {
             "id": 303,
-            "title": "The Open Window",
-            "description": "A story about imagination, deception, and a nervous visitor.",
-            "image": "/images/open-window.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=1gP2JXsyfQA",
-            "pdfLink": "https://www.gutenberg.org/files/138/138-h/138-h.htm"
+            "title": "A Little Princess",
+            "description": "Sara Crewe is a very rich little girl. She first comes to England when she seven, and her father takes her to Miss Minchin’s school in London..",
+            "image": "https://i.ibb.co.com/r2G766QC/l1-15.png",
+            "youtubeLink": "https://youtu.be/es9i3L5ffPw?si=VpqHMB_ORZ3WW7uk",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/02/A-Little-Princess-By-Frances-Hodgson-Burnett-Retold-by-Jennifer-Bassett-Book-PDF.pdf"
           },
           {
             "id": 304,
-            "title": "The Necklace",
-            "description": "A woman learns the cost of vanity after losing a borrowed necklace.",
-            "image": "/images/necklace.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=qzVuQ6YqPGU",
-            "pdfLink": "https://www.gutenberg.org/ebooks/3090"
-          },
-          {
-            "id": 305,
-            "title": "The Tell-Tale Heart",
-            "description": "A man confesses to murder driven by madness and guilt.",
-            "image": "/images/tell-tale-heart.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=W4s9V8aQu4c",
-            "pdfLink": "https://www.gutenberg.org/ebooks/2148"
+            "title": "Aladdin and the Enchanted Lamp",
+            "description": "Many years ago, in a city in Arabia, there was a boy called Aladdin. He lived with his mother in a little house near the market, and they were very poor. ",
+            "image": "https://i.ibb.co.com/1YHk12Yr/l1-15.jpg",
+            "youtubeLink": "https://youtu.be/Sr9oEq31afo?si=4pl_LMYZl8EEEDn5",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/03/Aladdin-and-the-Enchanted-Lamp-Retold-by-Judith-Dean-book-PDF.pdf"
           }
         ]
       },
@@ -332,44 +195,28 @@
         "lessons": [
           {
             "id": 306,
-            "title": "The Bet",
-            "description": "A banker and a lawyer make a strange bet about life in isolation.",
-            "image": "/images/the-bet.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=QpPHB8bK5sY",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1346"
+            "title": "Mr. Harris and the Night Train",
+            "description": "Mr. Harris liked trains. He was afraid of aeroplanes, and didn’t like buses. But trains –  they were big and noisy and exciting. ",
+            "image": "https://i.ibb.co.com/TBhF7qTh/l1-16.png",
+            "youtubeLink": "https://youtu.be/cip9ukbmpP0?si=RZja4H_xMPJf1WWm",
+            "pdfLink": "https://learnenglish-new.com/very-simple-short-stories-in-english/"
           },
           {
             "id": 307,
-            "title": "The Monkey’s Paw",
-            "description": "A magical paw grants wishes—with deadly consequences.",
-            "image": "/images/monkeys-paw.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=cn5iVQpO4TQ",
-            "pdfLink": "https://www.gutenberg.org/ebooks/12122"
+            "title": "Round the World in Eighty Days",
+            "description": "In 1872, the Reform Club in London's Pall Mall was a club for men only.Phileas Fogg went to the Preform Club every day. He left his house at 7 Savile Row...",
+            "image": "https://i.ibb.co.com/zVNSdPTW/l1-17.png",
+            "youtubeLink": "https://youtu.be/R8DK7dOr7bo?si=cSO4hprUefIMuZm5",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2023/07/Round-the-World-in-Eighty-Days-By-Jules-Verne-PDF.pdf"
           },
           {
             "id": 308,
-            "title": "The Model Millionaire",
-            "description": "A kind man’s generosity leads to a wonderful surprise.",
-            "image": "/images/model-millionaire.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=FE1Z9z9pHGM",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1372"
-          },
-          {
-            "id": 309,
-            "title": "A Piece of String",
-            "description": "A man’s honesty is doubted after a misunderstanding.",
-            "image": "/images/piece-string.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=dH4PY3QEqK8",
-            "pdfLink": "https://www.gutenberg.org/ebooks/3090"
-          },
-          {
-            "id": 310,
-            "title": "The Skylight Room",
-            "description": "A story of hope and kindness in a boarding house.",
-            "image": "/images/skylight-room.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=fQxXFGM0T5o",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1312"
-          }
+            "title": "The Lottery",
+            "description": "The morning of June 27th is a clear, warm summer day. There are many colorful flowers and the grass is beautiful and green. At about 10 o’clock in the morning, the people of the village begin to arrive in the town square, located between the post office and the bank.",
+            "image": "https://i.ibb.co.com/DgRv0nN8/l1-18.png",
+            "youtubeLink": "https://youtu.be/uI9iESNUj0g?si=j331WmV1NsuXIy2b",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2025/01/The-Lottery-By-Shirley-Jackson-Edited-By-Joshua-Cashill-PDF-Book.pdf"
+          }      
         ]
       },
       {
@@ -379,181 +226,17 @@
             "id": 311,
             "title": "The Adventure of the Speckled Band",
             "description": "Sherlock Holmes solves a mysterious death in a locked room.",
-            "image": "/images/speckled-band.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=v7iFjU1eV08",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1661"
+            "image": "https://i.ibb.co.com/Zpqy0YsG/l1-19.png",
+            "youtubeLink": "https://youtu.be/8ZR1OuNY8qY?si=_y8Zz1XfTOpa1lv-",
+            "pdfLink": "https://sherlock-holm.es/stories/pdf/letter/1-sided/spec.pdf"
           },
           {
             "id": 312,
             "title": "The Open Boat",
             "description": "Four shipwrecked men struggle against nature’s indifference.",
-            "image": "/images/open-boat.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=cQTTWjEAIp4",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1106"
-          },
-          {
-            "id": 313,
-            "title": "The Garden Party",
-            "description": "A young girl learns about class and compassion at a garden party.",
-            "image": "/images/garden-party.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=3c07CYpOED4",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1429"
-          },
-          {
-            "id": 314,
-            "title": "The Lottery",
-            "description": "A small town holds a shocking annual ritual.",
-            "image": "/images/lottery.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=FzXK1jG7PYM",
-            "pdfLink": "https://www.classicshorts.com/stories/lottery.html"
-          },
-          {
-            "id": 315,
-            "title": "The Lady or the Tiger?",
-            "description": "A choice between love and jealousy decides a man’s fate.",
-            "image": "/images/lady-tiger.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=9lB9m2sBScE",
-            "pdfLink": "https://www.gutenberg.org/ebooks/22022"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "level": "Level 4",
-    "sets": [
-      {
-        "set": "Set 1",
-        "lessons": [
-          {
-            "id": 401,
-            "title": "The Diamond Necklace",
-            "description": "A woman’s pride leads her to years of hardship.",
-            "image": "/images/diamond-necklace.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=qzVuQ6YqPGU",
-            "pdfLink": "https://www.gutenberg.org/ebooks/3090"
-          },
-          {
-            "id": 402,
-            "title": "The Secret Life of Walter Mitty",
-            "description": "A man escapes his dull life through vivid daydreams.",
-            "image": "/images/walter-mitty.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=7B8s3KXgQdA",
-            "pdfLink": "https://www.gutenberg.org/ebooks/837"
-          },
-          {
-            "id": 403,
-            "title": "The Curious Case of Benjamin Button",
-            "description": "A man lives his life in reverse, aging backward.",
-            "image": "/images/benjamin-button.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=6UgJc5nFucE",
-            "pdfLink": "https://www.gutenberg.org/ebooks/6695"
-          },
-          {
-            "id": 404,
-            "title": "The Secret Garden",
-            "description": "An orphan finds a magical garden that heals hearts.",
-            "image": "/images/secret-garden.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=msG9U1QxhAc",
-            "pdfLink": "https://www.gutenberg.org/ebooks/113"
-          },
-          {
-            "id": 405,
-            "title": "The Call of the Wild",
-            "description": "A dog discovers his primal instincts in the wilderness.",
-            "image": "/images/call-wild.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=jLhJ5JchVjM",
-            "pdfLink": "https://www.gutenberg.org/ebooks/215"
-          }
-        ]
-      },
-      {
-        "set": "Set 2",
-        "lessons": [
-          {
-            "id": 406,
-            "title": "The Old Man and the Sea",
-            "description": "An old fisherman battles the sea for one last great catch.",
-            "image": "/images/old-man-sea.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=f8zRzRg9cU4",
-            "pdfLink": "https://www.gutenberg.ca/ebooks/hemingways-oldmanandsea/hemingways-oldmanandsea-00-h.html"
-          },
-          {
-            "id": 407,
-            "title": "The Metamorphosis",
-            "description": "A man wakes up one day to find himself transformed into an insect.",
-            "image": "/images/metamorphosis.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=H6ozLJhcweA",
-            "pdfLink": "https://www.gutenberg.org/ebooks/5200"
-          },
-          {
-            "id": 408,
-            "title": "The Black Cat",
-            "description": "A chilling tale of guilt and madness.",
-            "image": "/images/black-cat.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=cUpCd_jb0d4",
-            "pdfLink": "https://www.gutenberg.org/ebooks/2148"
-          },
-          {
-            "id": 409,
-            "title": "A Scandal in Bohemia",
-            "description": "Sherlock Holmes meets his match in the clever Irene Adler.",
-            "image": "/images/scandal-bohemia.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=0dP6Pj9Fb4U",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1661"
-          },
-          {
-            "id": 410,
-            "title": "The Canterville Ghost",
-            "description": "A ghost’s haunting becomes a comedy of manners.",
-            "image": "/images/canterville-ghost.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=7ekKuC2jFaI",
-            "pdfLink": "https://www.gutenberg.org/ebooks/14522"
-          }
-        ]
-      },
-      {
-        "set": "Set 3",
-        "lessons": [
-          {
-            "id": 411,
-            "title": "The Signal-Man",
-            "description": "A railway worker is haunted by mysterious warnings.",
-            "image": "/images/signal-man.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=5_4P8kzDQTo",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1289"
-          },
-          {
-            "id": 412,
-            "title": "The Man Who Would Be King",
-            "description": "Two adventurers seek fortune and find fate in Afghanistan.",
-            "image": "/images/would-be-king.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=Rrw4F8b5r1g",
-            "pdfLink": "https://www.gutenberg.org/ebooks/8147"
-          },
-          {
-            "id": 413,
-            "title": "The Cask of Amontillado",
-            "description": "A dark tale of revenge beneath the catacombs.",
-            "image": "/images/cask-amontillado.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=Rd5-XaI0xVg",
-            "pdfLink": "https://www.gutenberg.org/ebooks/1063"
-          },
-          {
-            "id": 414,
-            "title": "The Story of an Hour",
-            "description": "A woman’s brief taste of freedom ends unexpectedly.",
-            "image": "/images/story-hour.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=ia2-pzA3r5U",
-            "pdfLink": "https://www.gutenberg.org/ebooks/160"
-          },
-          {
-            "id": 415,
-            "title": "A Sound of Thunder",
-            "description": "A time travel adventure that changes history forever.",
-            "image": "/images/sound-thunder.jpg",
-            "youtubeLink": "https://www.youtube.com/watch?v=IK1YyYwQxvE",
-            "pdfLink": "https://www.classicshorts.com/stories/thunder.html"
+            "image": "https://i.ibb.co.com/F45jLS3k/l1-20.png",
+            "youtubeLink": "https://youtu.be/79AKfXnfrpo?si=WO4gzsGrGQEAQrvv",
+            "pdfLink": "https://americanenglish.state.gov/files/ae/resource_files/the-open-boat.pdf"
           }
         ]
       }
