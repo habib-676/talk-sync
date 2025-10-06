@@ -666,10 +666,19 @@ async function run() {
     app.get("/dashboard/overview", async (req, res) => {
       try {
         const email = (req.query.email || "").toLowerCase().trim();
-        if (!email) return res.status(400).json({ success: false, message: "email is required" });
+        if (!email)
+          return res
+            .status(400)
+            .json({ success: false, message: "email is required" });
 
-        const user = await usersCollections.findOne({ email }, { projection: { password: 0 } });
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+        const user = await usersCollections.findOne(
+          { email },
+          { projection: { password: 0 } }
+        );
+        if (!user)
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
 
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -683,36 +692,56 @@ async function run() {
 
         let nextSession = user.nextSession || null;
         if (!nextSession) {
-          const future = recent.filter((s) => s.startTime && new Date(s.startTime) > now);
+          const future = recent.filter(
+            (s) => s.startTime && new Date(s.startTime) > now
+          );
           future.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
           nextSession = future.length ? future[0] : null;
         }
 
-        const learning = Array.isArray(user.learning_language) ? user.learning_language : (user.learning_language ? [user.learning_language] : []);
+        const learning = Array.isArray(user.learning_language)
+          ? user.learning_language
+          : user.learning_language
+          ? [user.learning_language]
+          : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
         const suggestedPartners = await usersCollections
-          .find(partnerQuery, { projection: { name: 1, email: 1, native_language: 1, image: 1, learning_language: 1 } })
+          .find(partnerQuery, {
+            projection: {
+              name: 1,
+              email: 1,
+              native_language: 1,
+              image: 1,
+              learning_language: 1,
+            },
+          })
           .limit(6)
           .toArray();
 
         const learners = await usersCollections.countDocuments();
 
         // ====== REPLACED distinct() with aggregation to be API strict compatible ======
-        const countryAgg = await usersCollections.aggregate([
-          { $match: { user_country: { $exists: true, $ne: "" } } },
-          { $group: { _id: "$user_country" } },
-          { $count: "distinctCountries" }
-        ]).toArray();
-        const countriesCount = (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
+        const countryAgg = await usersCollections
+          .aggregate([
+            { $match: { user_country: { $exists: true, $ne: "" } } },
+            { $group: { _id: "$user_country" } },
+            { $count: "distinctCountries" },
+          ])
+          .toArray();
+        const countriesCount =
+          (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
 
-        const langAgg = await usersCollections.aggregate([
-          { $match: { native_language: { $exists: true, $ne: "" } } },
-          { $group: { _id: "$native_language" } },
-          { $count: "distinctLanguages" }
-        ]).toArray();
-        const languagesCount = (langAgg[0] && langAgg[0].distinctLanguages) || 0;
+        const langAgg = await usersCollections
+          .aggregate([
+            { $match: { native_language: { $exists: true, $ne: "" } } },
+            { $group: { _id: "$native_language" } },
+            { $count: "distinctLanguages" },
+          ])
+          .toArray();
+        const languagesCount =
+          (langAgg[0] && langAgg[0].distinctLanguages) || 0;
 
         const summary = {
           nextSession,
