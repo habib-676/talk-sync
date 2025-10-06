@@ -279,7 +279,7 @@ export default function ProfilePage() {
                   Find a partner
                 </Link>
                 <Link
-                  to="/schedule-session"
+                  to="/schedule"
                   className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center hover:shadow-sm transition"
                 >
                   Learning a session

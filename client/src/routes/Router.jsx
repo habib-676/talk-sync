@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
         Component: FollowPage,
       },
        {
-        path: "/schedule-session", //added by amena
+        path: "/schedule", //added by amena
         Component: ScheduleSession,
       },
       {
