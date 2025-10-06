@@ -21,7 +21,7 @@ import Overview from "../pages/dashboard/Overview";
 import FriendsPage from "../pages/dashboard/FriendsPage";
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <DashboardLayout />, // sidebar layout
+        element: <DashboardLayout/>, // sidebar layout
         children: [
           { index: true, element: <Overview /> },
           { path: "overview", element: <Overview /> },
@@ -53,7 +53,7 @@ export const router = createBrowserRouter([
           { path: "friends", element: <FriendsPage/> },
           { path: "sessions", element: <SessionsPage/> },
           { path: "badges", element: <BadgesPage/> },
-          { path: "messages", element: <Inbox/> },
+          { path: "inbox", element: <Inbox/> },
         ],
       },
       {

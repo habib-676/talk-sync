@@ -61,6 +61,12 @@ export const LearnerSidebarLinks = () => {
   const location = useLocation();
   return (
     <>
+    <SidebarItem
+        to="/dashboard/overview"
+        icon={<LayoutDashboard size={20} />}
+        label="Overview"
+        isActive={location.pathname === "/dashboard/overview"}
+      />
       <SidebarItem
         to="/dashboard/profile"
         icon={<LayoutDashboard size={20} />}
@@ -74,10 +80,22 @@ export const LearnerSidebarLinks = () => {
         isActive={location.pathname.includes("/dashboard/inbox")}
       />
       <SidebarItem
-        to="/dashboard/follow"
-        icon={<Settings size={20} />}
-        label="Find A Partner"
-        isActive={location.pathname.includes("/dashboard/follow")}
+        to="/dashboard/friends"
+        icon={<BookOpen size={20} />}
+        label="Find Friends"
+        isActive={location.pathname.includes("/dashboard/friends")}
+      />
+      <SidebarItem
+        to="/dashboard/sessions"
+        icon={<BookOpen size={20} />}
+        label="Sessions"
+        isActive={location.pathname.includes("/dashboard/sessions")}
+      />
+      <SidebarItem
+        to="/dashboard/badges"
+        icon={<BookOpen size={20} />}
+        label="Badges"
+        isActive={location.pathname.includes("/dashboard/badges")}
       />
     </>
   );
