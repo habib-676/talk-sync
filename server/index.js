@@ -16,7 +16,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173", // set to frontend origin in production
+    origin: ["http://localhost:5173", "http://localhost:5174"], // set to frontend origin in production
     credentials: true,
   })
 );
@@ -29,7 +29,9 @@ const server = http.createServer(app);
 // Setup socket.io
 const io = new Server(server, {
   cors: {
-    origin: "*", // frontend URL
+    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend URL
+    credentials: true,
+    methods: ["GET", "POST"],
   },
 });
 
@@ -673,6 +675,6 @@ async function run() {
 
 run().catch(console.dir);
 
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`TalkSync server is running on port ${port}`);
 });
