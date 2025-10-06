@@ -82,18 +82,6 @@ const DashboardLayout = () => {
           >
             Messages
           </NavLink>
-          <NavLink
-            to="/dashboard/settings"
-            className={({ isActive }) =>
-              `block px-4 py-2 rounded-lg ${
-                isActive
-                  ? "bg-purple-500 text-white"
-                  : "text-gray-700 hover:bg-gray-200"
-              }`
-            }
-          >
-            Settings
-          </NavLink>
         </nav>
       </aside>
 

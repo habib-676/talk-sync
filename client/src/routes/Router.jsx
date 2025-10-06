@@ -21,8 +21,6 @@ import Overview from "../pages/dashboard/Overview";
 import FriendsPage from "../pages/dashboard/FriendsPage";
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
-import MessagesPage from "../pages/dashboard/MessagesPage";
-import SettingsPage from "../pages/dashboard/SettingsPage";
 import DashboardLayout from "../layouts/DashboardLayout";
 export const router = createBrowserRouter([
   {
@@ -55,8 +53,7 @@ export const router = createBrowserRouter([
           { path: "friends", element: <FriendsPage/> },
           { path: "sessions", element: <SessionsPage/> },
           { path: "badges", element: <BadgesPage/> },
-          { path: "messages", element: <MessagesPage/> },
-          { path: "settings", element: <SettingsPage/> },
+          { path: "messages", element: <Inbox/> },
         ],
       },
       {
