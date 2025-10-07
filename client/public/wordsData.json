@@ -1,0 +1,299 @@
+[
+  {
+    "id": 1,
+    "level": "Basic",
+    "image": "https://i.ibb.co.com/7tYfDPp3/Learning-languages-rafiki.png",
+    "description": "Simple everyday vocabulary for beginners to build confidence.",
+    "categories": [
+      {
+        "id": 1,
+        "name": "Animals",
+        "icon": "🐾",
+        "image": "https://i.ibb.co/1Ls7CsL/animals.jpg",
+        "description": "Learn names of common animals.",
+        "words": [
+          { "word": "Cat", 
+          "meaning": "A small pet animal that loves milk.", 
+          "example": "The cat sleeps on the bed." },
+          { "word": "Dog", "meaning": "A loyal animal often kept as a pet.", "example": "The dog is barking loudly." },
+          { "word": "Bird", "meaning": "An animal that can fly.", "example": "The bird sings every morning." },
+          { "word": "Cow", "meaning": "A farm animal that gives milk.", "example": "The cow is grazing in the field." },
+          { "word": "Horse", "meaning": "A strong animal used for riding.", "example": "The horse runs fast." },
+          { "word": "Fish", "meaning": "An animal that lives in water.", "example": "The fish swims in the pond." }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Fruits",
+        "icon": "🍎",
+        "image": "https://i.ibb.co/0MgHwty/fruits.jpg",
+        "description": "Learn fruit names and meanings.",
+        "words": [
+          { "word": "Apple", "meaning": "A red or green fruit that is sweet and juicy.", "example": "She eats an apple daily." },
+          { "word": "Banana", "meaning": "A long yellow fruit.", "example": "Monkeys love bananas." },
+          { "word": "Mango", "meaning": "A sweet tropical fruit.", "example": "Mango is my favorite fruit." },
+          { "word": "Orange", "meaning": "A round citrus fruit.", "example": "Orange juice is tasty." },
+          { "word": "Grapes", "meaning": "Small round fruits, green or purple.", "example": "Grapes grow in bunches." },
+          { "word": "Pineapple", "meaning": "A tropical fruit with spiky skin.", "example": "Pineapple is sweet and tangy." }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "Colors",
+        "icon": "🎨",
+        "image": "https://i.ibb.co/Qv6tNn8/colors.jpg",
+        "description": "Learn basic color words.",
+        "words": [
+          { "word": "Red", "meaning": "The color of blood or fire.", "example": "The rose is red." },
+          { "word": "Blue", "meaning": "The color of the sky.", "example": "The sea looks blue today." },
+          { "word": "Green", "meaning": "The color of grass and leaves.", "example": "The field is full of green grass." },
+          { "word": "Yellow", "meaning": "The color of the sun.", "example": "The banana is yellow." },
+          { "word": "Black", "meaning": "The darkest color.", "example": "The night is black." },
+          { "word": "White", "meaning": "The color of milk.", "example": "The snow is white." }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Family",
+        "icon": "👨‍👩‍👧",
+        "image": "https://i.ibb.co/Bq1tVXP/family.jpg",
+        "description": "Learn names of family members.",
+        "words": [
+          { "word": "Mother", "meaning": "A female parent.", "example": "My mother cooks delicious food." },
+          { "word": "Father", "meaning": "A male parent.", "example": "My father goes to work every day." },
+          { "word": "Brother", "meaning": "A male sibling.", "example": "I play football with my brother." },
+          { "word": "Sister", "meaning": "A female sibling.", "example": "My sister helps me study." },
+          { "word": "Grandmother", "meaning": "Mother of your parent.", "example": "My grandmother tells stories." },
+          { "word": "Grandfather", "meaning": "Father of your parent.", "example": "My grandfather walks daily." }
+        ]
+      },
+      {
+        "id": 5,
+        "name": "Food",
+        "icon": "🍲",
+        "image": "https://i.ibb.co/Xp4YkH8/food.jpg",
+        "description": "Common foods and drinks vocabulary.",
+        "words": [
+          { "word": "Rice", "meaning": "A staple food grain.", "example": "We eat rice every day." },
+          { "word": "Water", "meaning": "A liquid we drink to live.", "example": "Drink water to stay healthy." },
+          { "word": "Milk", "meaning": "A white liquid from cows or goats.", "example": "Children drink milk daily." },
+          { "word": "Bread", "meaning": "Food made from flour.", "example": "I like bread with butter." },
+          { "word": "Egg", "meaning": "Food from hens.", "example": "He eats an egg every morning." },
+          { "word": "Soup", "meaning": "A hot liquid food.", "example": "Chicken soup is tasty." }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "Actions",
+        "icon": "🏃",
+        "image": "https://i.ibb.co/SNmrxqn/actions.jpg",
+        "description": "Learn basic action verbs.",
+        "words": [
+          { "word": "Run", "meaning": "To move fast with your legs.", "example": "He runs every morning." },
+          { "word": "Eat", "meaning": "To take food into the mouth.", "example": "We eat lunch at noon." },
+          { "word": "Sleep", "meaning": "To rest with eyes closed.", "example": "I sleep eight hours a day." },
+          { "word": "Read", "meaning": "To look at and understand words.", "example": "I read a book daily." },
+          { "word": "Write", "meaning": "To put words on paper.", "example": "She writes a letter." },
+          { "word": "Play", "meaning": "To enjoy games or activities.", "example": "The kids play football." }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "level": "Medium",
+    "image": "https://i.ibb.co.com/wFczVwbq/Learning-languages-bro.png",
+    "description": "Broaden your vocabulary with intermediate words and topics.",
+    "categories": [
+      {
+        "id": 7,
+        "name": "Emotions",
+        "icon": "😊",
+        "image": "https://i.ibb.co/Jm6RWxK/emotions.jpg",
+        "description": "Learn words to describe feelings.",
+        "words": [
+          { "word": "Happy", "meaning": "Feeling good or pleased.", "example": "She is happy to see her friend." },
+          { "word": "Angry", "meaning": "Feeling strong displeasure.", "example": "He was angry at the mistake." },
+          { "word": "Surprised", "meaning": "Feeling astonished.", "example": "They were surprised by the news." },
+          { "word": "Sad", "meaning": "Feeling unhappy.", "example": "She felt sad after the movie." },
+          { "word": "Excited", "meaning": "Feeling very happy and eager.", "example": "The kids were excited for the trip." },
+          { "word": "Scared", "meaning": "Feeling afraid.", "example": "He was scared of the dark." }
+        ]
+      },
+      {
+        "id": 8,
+        "name": "Weather",
+        "icon": "⛅",
+        "image": "https://i.ibb.co/GxNR5Wn/weather.jpg",
+        "description": "Weather-related vocabulary.",
+        "words": [
+          { "word": "Sunny", "meaning": "Bright with sunlight.", "example": "It is sunny outside today." },
+          { "word": "Rainy", "meaning": "With lots of rain.", "example": "We use umbrellas on rainy days." },
+          { "word": "Windy", "meaning": "With strong winds.", "example": "It's too windy to go out." },
+          { "word": "Snowy", "meaning": "Covered with snow.", "example": "The mountains are snowy." },
+          { "word": "Cloudy", "meaning": "With many clouds.", "example": "The sky is cloudy today." },
+          { "word": "Stormy", "meaning": "With strong wind and rain.", "example": "It was a stormy night." }
+        ]
+      },
+      {
+        "id": 9,
+        "name": "Jobs",
+        "icon": "👔",
+        "image": "https://i.ibb.co/4g1dRks/jobs.jpg",
+        "description": "Words for professions and occupations.",
+        "words": [
+          { "word": "Teacher", "meaning": "A person who teaches students.", "example": "Our teacher explains clearly." },
+          { "word": "Doctor", "meaning": "A person who treats the sick.", "example": "The doctor helps patients." },
+          { "word": "Engineer", "meaning": "A person who designs or builds things.", "example": "He works as a software engineer." },
+          { "word": "Farmer", "meaning": "A person who grows crops.", "example": "The farmer works in the field." },
+          { "word": "Nurse", "meaning": "A person who helps doctors.", "example": "The nurse takes care of patients." },
+          { "word": "Driver", "meaning": "A person who drives vehicles.", "example": "The driver stopped the bus." }
+        ]
+      },
+      {
+        "id": 10,
+        "name": "Transport",
+        "icon": "🚗",
+        "image": "https://i.ibb.co/KLxr3qM/transport.jpg",
+        "description": "Learn words about transportation.",
+        "words": [
+          { "word": "Car", "meaning": "A vehicle with four wheels.", "example": "We travel to school by car." },
+          { "word": "Bus", "meaning": "A large vehicle for many passengers.", "example": "The bus is full today." },
+          { "word": "Train", "meaning": "A vehicle running on tracks.", "example": "The train arrives at 9 am." },
+          { "word": "Bicycle", "meaning": "A two-wheeled vehicle.", "example": "He rides a bicycle every day." },
+          { "word": "Airplane", "meaning": "A vehicle that flies in the air.", "example": "The airplane landed safely." },
+          { "word": "Boat", "meaning": "A vehicle used in water.", "example": "The boat is sailing on the river." }
+        ]
+      },
+      {
+        "id": 11,
+        "name": "Places",
+        "icon": "🏫",
+        "image": "https://i.ibb.co/bJfqGRb/places.jpg",
+        "description": "Learn about common public places.",
+        "words": [
+          { "word": "Library", "meaning": "A place with books to read.", "example": "We study in the library." },
+          { "word": "Hospital", "meaning": "A place for sick people.", "example": "She works in a hospital." },
+          { "word": "Market", "meaning": "A place to buy and sell things.", "example": "I bought vegetables at the market." },
+          { "word": "School", "meaning": "A place to study.", "example": "Children go to school every morning." },
+          { "word": "Park", "meaning": "A place with grass and trees for play.", "example": "We walked in the park." },
+          { "word": "Restaurant", "meaning": "A place to eat food.", "example": "They had dinner in a restaurant." }
+        ]
+      },
+      {
+        "id": 12,
+        "name": "Nature",
+        "icon": "🌿",
+        "image": "https://i.ibb.co/1QCH7bb/nature.jpg",
+        "description": "Learn words related to nature.",
+        "words": [
+          { "word": "Tree", "meaning": "A tall plant with leaves and branches.", "example": "The tree gives shade." },
+          { "word": "River", "meaning": "A large natural flow of water.", "example": "The river flows to the sea." },
+          { "word": "Mountain", "meaning": "A very high hill.", "example": "We climbed the mountain together." },
+          { "word": "Flower", "meaning": "A colorful plant part.", "example": "The flower smells sweet." },
+          { "word": "Forest", "meaning": "A large area of trees.", "example": "The forest is full of animals." },
+          { "word": "Desert", "meaning": "A dry sandy land.", "example": "Camels live in the desert." }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "level": "Advanced",
+    "image": "https://i.ibb.co.com/gZ422Zxv/Learning-languages-pana.png",
+    "description": "Learn advanced vocabulary to express ideas precisely and fluently.",
+    "categories": [
+      {
+        "id": 13,
+        "name": "Technology",
+        "icon": "💻",
+        "image": "https://i.ibb.co/6DcW5bD/technology.jpg",
+        "description": "Advanced terms used in tech and innovation.",
+        "words": [
+          { "word": "Algorithm", "meaning": "A set of rules for solving problems.", "example": "The algorithm improves search results." },
+          { "word": "Cybersecurity", "meaning": "Protection against digital attacks.", "example": "Cybersecurity is vital for companies." },
+          { "word": "Artificial Intelligence", "meaning": "Machines that can think or learn.", "example": "AI is changing modern industries." },
+          { "word": "Blockchain", "meaning": "A digital ledger of transactions.", "example": "Blockchain is used in cryptocurrencies." },
+          { "word": "Database", "meaning": "A structured collection of data.", "example": "The database stores user information." },
+          { "word": "Cloud Computing", "meaning": "Storing and accessing data online.", "example": "Cloud computing powers modern apps." }
+        ]
+      },
+      {
+        "id": 14,
+        "name": "Science",
+        "icon": "🔬",
+        "image": "https://i.ibb.co/n78t7GH/science.jpg",
+        "description": "Vocabulary for scientific studies and research.",
+        "words": [
+          { "word": "Atom", "meaning": "The smallest unit of matter.", "example": "Atoms make up all things." },
+          { "word": "Gravity", "meaning": "The force that pulls objects down.", "example": "Gravity keeps us on Earth." },
+          { "word": "Photosynthesis", "meaning": "The process plants use to make food.", "example": "Plants produce oxygen through photosynthesis." },
+          { "word": "Evolution", "meaning": "The process of species changing over time.", "example": "Evolution explains natural diversity." },
+          { "word": "Molecule", "meaning": "Two or more atoms bonded together.", "example": "Water is a molecule of hydrogen and oxygen." },
+          { "word": "Experiment", "meaning": "A test to prove an idea.", "example": "The experiment confirmed the theory." }
+        ]
+      },
+      {
+        "id": 15,
+        "name": "Culture",
+        "icon": "🎭",
+        "image": "https://i.ibb.co/Z8DC5kP/culture.jpg",
+        "description": "Words related to human customs and traditions.",
+        "words": [
+          { "word": "Heritage", "meaning": "Cultural traditions passed down.", "example": "The museum protects our heritage." },
+          { "word": "Festival", "meaning": "A celebration or public event.", "example": "They enjoy the spring festival." },
+          { "word": "Ritual", "meaning": "A ceremonial act or procedure.", "example": "Every culture has unique rituals." },
+          { "word": "Tradition", "meaning": "Beliefs passed through generations.", "example": "We follow a family tradition." },
+          { "word": "Language", "meaning": "A system of communication.", "example": "Language connects people." },
+          { "word": "Art", "meaning": "Creative expression through skills.", "example": "The gallery displayed modern art." }
+        ]
+      },
+      {
+        "id": 16,
+        "name": "Business",
+        "icon": "💼",
+        "image": "https://i.ibb.co/YLvYk6L/business.jpg",
+        "description": "Advanced words used in business and economics.",
+        "words": [
+          { "word": "Revenue", "meaning": "Income from sales or services.", "example": "The company increased its revenue." },
+          { "word": "Strategy", "meaning": "A plan to achieve a goal.", "example": "They formed a new marketing strategy." },
+          { "word": "Investment", "meaning": "Putting money into something for profit.", "example": "He made a smart investment in real estate." },
+          { "word": "Profit", "meaning": "Money gained after expenses.", "example": "The shop made a big profit." },
+          { "word": "Market", "meaning": "A place or system for trade.", "example": "They studied the target market." },
+          { "word": "Economy", "meaning": "The wealth and resources of a country.", "example": "The economy is growing rapidly." }
+        ]
+      },
+      {
+        "id": 17,
+        "name": "Health",
+        "icon": "⚕️",
+        "image": "https://i.ibb.co/zr8hVgD/health.jpg",
+        "description": "Advanced health and wellness vocabulary.",
+        "words": [
+          { "word": "Nutrition", "meaning": "The process of getting food for health.", "example": "Good nutrition keeps us healthy." },
+          { "word": "Exercise", "meaning": "Physical activity for fitness.", "example": "Daily exercise boosts energy." },
+          { "word": "Immunity", "meaning": "The body's defense against illness.", "example": "A strong immunity prevents diseases." },
+          { "word": "Therapy", "meaning": "Treatment for illness or condition.", "example": "He goes to speech therapy." },
+          { "word": "Vaccine", "meaning": "A substance that protects from disease.", "example": "Vaccines prevent infections." },
+          { "word": "Diagnosis", "meaning": "Identifying a disease or problem.", "example": "The doctor gave a quick diagnosis." }
+        ]
+      },
+      {
+        "id": 18,
+        "name": "Philosophy",
+        "icon": "📚",
+        "image": "https://i.ibb.co/dg3mB2P/philosophy.jpg",
+        "description": "Complex words to express ideas and thoughts.",
+        "words": [
+          { "word": "Ethics", "meaning": "Moral principles of right and wrong.", "example": "Ethics guide our behavior." },
+          { "word": "Logic", "meaning": "Reasoning and rules of thought.", "example": "Logic helps solve problems." },
+          { "word": "Wisdom", "meaning": "Knowledge gained through experience.", "example": "He is respected for his wisdom." },
+          { "word": "Justice", 
+          "meaning": "Fair treatment of people.", "example": "Justice must be served equally." },
+          { "word": "Truth", "meaning": "What is real and accurate.", "example": "Truth builds trust." },
+          { "word": "Existence", "meaning": "The state of being alive.", "example": "Philosophers debate the meaning of existence." }
+        ]
+      }
+    ]
+  }
+]

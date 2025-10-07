@@ -204,6 +204,7 @@ export default function ProfilePage() {
                   to="/schedule"
                   className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center"
                 >
+                  Learning a session
                   Schedule
                 </Link>
                 <Link
