@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { FaBookOpen, FaComments, FaGlobe, FaFont } from "react-icons/fa";
 import DailyChallenge from "./DailyChallenge";
+import SpeakingModal from "./SpeakingModal";
+import LearningTips from "./LearningTips";
 const ScheduleSession = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [wordsData, setWordsData] = useState([]);
@@ -8,6 +10,9 @@ const ScheduleSession = () => {
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState(null);
+
+const [showModal, setShowModal] = useState(false);
+
 
   // ✅ Fetch JSON data
   useEffect(() => {
@@ -144,6 +149,15 @@ const ScheduleSession = () => {
                 </div>
               ))}
 
+               {selectedLevel && !selectedCategory && (
+              <button
+                onClick={() => setSelectedLevel(null)}
+                className="col-span-full mb-5 text-lg text-accent underline"
+              >
+                ← Back to Levels
+              </button>
+            )}
+
             {selectedLevel && !selectedCategory &&
               selectedLevel.categories.map((cat) => (
                 <div
@@ -162,7 +176,7 @@ const ScheduleSession = () => {
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg">
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className="mb-5 text-sm text-indigo-600 underline"
+                  className="mb-5 text-lg text-accent underline"
                 >
                   ← Back to Categories
                 </button>
@@ -176,8 +190,8 @@ const ScheduleSession = () => {
                       className="border rounded-lg p-4 shadow-sm hover:shadow-md transition bg-gray-50"
                     >
                       <p className="font-semibold text-gray-800">{w.word}</p>
-                      <p className="text-sm text-gray-600 italic">{w.meaning}</p>
-                      <p className="text-sm mt-2 text-gray-700">{w.example}</p>
+                      <p className="text-sm text-gray-600 italic">Meaning: {w.meaning}</p>
+                      <p className="text-sm mt-2 text-gray-700">Sentence: {w.example}</p>
                     </li>
                   ))}
                 </ul>
@@ -185,6 +199,8 @@ const ScheduleSession = () => {
             )}
           </>
         )}
+
+
 
         {/* READING */}
         {activeTab === "reading" && (
@@ -227,7 +243,7 @@ const ScheduleSession = () => {
             {selectedLevel && !selectedCategory && (
               <button
                 onClick={() => setSelectedLevel(null)}
-                className="col-span-full mb-5 text-sm text-indigo-600 underline"
+                className="col-span-full mb-5 text-sm text-indigo-600text-lg text-accent underline "
               >
                 ← Back to Levels
               </button>
@@ -259,7 +275,7 @@ const ScheduleSession = () => {
                 >
                   ← Back to Sets
                 </button>
-                <h3 className="text-2xl font-bold text-indigo-700 mb-4">
+                <h3 className="text-2xl font-bold text-accent underline mb-4">
                   {selectedCategory.set}
                 </h3>
                 <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -291,7 +307,7 @@ const ScheduleSession = () => {
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg text-left">
                 <button
                   onClick={() => setSelectedLesson(null)}
-                  className="mb-5 text-sm text-indigo-600 underline"
+                  className="mb-5 text-lg text-accent underline"
                 >
                   ← Back to Lessons
                 </button>
@@ -338,9 +354,15 @@ const ScheduleSession = () => {
               <p className="text-gray-600 mb-3">
                 Book your personal tutor for live speaking practice.
               </p>
-              <button className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600">
-                Book Tutor
-              </button>
+
+              <button
+  onClick={() => setShowModal(true)}
+  className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600"
+>
+  Book Tutor
+</button>
+
+
             </div>
 
             <div className="bg-white shadow-xl rounded-xl p-6 hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-purple-400">
@@ -350,12 +372,17 @@ const ScheduleSession = () => {
               <p className="text-gray-600 mb-3">
                 Practice with an English Pro Partner and enhance fluency.
               </p>
-              <button className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600">
-                Start Now
-              </button>
+              <button
+  onClick={() => setShowModal(true)}
+  className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600"
+>
+  Start Now
+</button>
+
             </div>
           </>
         )}
+{showModal && <SpeakingModal isOpen={showModal} onClose={() => setShowModal(false)} />}
 
         {/* DEFAULT */}
         {activeTab === "all" && (
@@ -364,10 +391,14 @@ const ScheduleSession = () => {
           </div>
         )}
       </section>
+
       <section className="mt-20">
 <DailyChallenge/>
 </section>
 
+<section className="mt-20">
+  <LearningTips />
+</section>
     </div>
 
 
