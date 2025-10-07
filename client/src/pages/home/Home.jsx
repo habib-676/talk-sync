@@ -1,13 +1,11 @@
-
 import SpeakingPracticeDemo from "../Demo/SpeakingDemo";
-import ChooseUs from "../WhyUs/Chooseus";
+import ChooseUs from "../WhyUs/ChooseUs";
 import BadgesPreview from "./sections/BadgesPreview";
 import Faq from "./sections/Faq";
 import Hero from "./sections/Hero";
 import HowItWorks from "./sections/HowItWorks";
 import Reviews from "./sections/Reviews";
 import StatsWithLanguages from "./sections/StatsWithLanguages";
-
 
 const Home = () => {
   return (
