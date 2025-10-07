@@ -10,9 +10,6 @@ const cookieParser = require("cookie-parser");
 const http = require("http");
 const { Server } = require("socket.io");
 
-const path = require("path"); // for production
-const __dirname = path.resolve(); // for production
-
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -958,16 +955,6 @@ async function run() {
 }
 
 run().catch(console.dir);
-
-// -- -- --           FOR PRODUCTION         -- -- --
-
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../client/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../client", "dist", "index.html"));
-  });
-}
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`TalkSync server is running on port ${port}`);
