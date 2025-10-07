@@ -1,26 +1,159 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import { IoIosSend, IoMdPhotos } from "react-icons/io";
 import { RiInformationLine } from "react-icons/ri";
+import { MdVideoCall, MdCallEnd } from "react-icons/md";
 
 import logo from "../../../assets/logo/logo.png";
 import { formatMessageTime } from "../../../lib/utils";
 import useAuth from "../../../hooks/useAuth";
-import { useState } from "react";
+import toast from "react-hot-toast";
+
+const STUN_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
+
+const CallModal = ({
+  visible,
+  status,
+  callerName,
+  calleeName,
+  isCaller,
+  onAccept,
+  onDecline,
+  onEnd,
+  onCancel,
+  localVideoRef,
+  remoteVideoRef,
+}) => {
+  if (!visible) return null;
+
+  // Button sets vary by status:
+  // - 'ringing' => incoming: accept / decline
+  // - 'calling' => caller waiting: cancel
+  // - 'in-call' => show end call
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-lg w-full max-w-3xl p-4 shadow-xl">
+        <div className="flex justify-between items-center mb-3">
+          <div>
+            <p className="text-sm text-gray-500">
+              {status === "ringing" && `Incoming call from ${callerName}`}
+              {status === "calling" && `Calling ${calleeName}...`}
+              {status === "in-call" &&
+                `In call with ${isCaller ? calleeName : callerName}`}
+            </p>
+          </div>
+          <div>
+            {status === "in-call" ? (
+              <button
+                onClick={onEnd}
+                className="px-3 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2"
+                title="End call"
+              >
+                <MdCallEnd />
+                End
+              </button>
+            ) : status === "calling" ? (
+              <button
+                onClick={onCancel}
+                className="px-3 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2"
+                title="Cancel call"
+              >
+                <MdCallEnd />
+                Cancel
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="bg-black rounded overflow-hidden">
+            <video
+              ref={localVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-48 object-cover"
+            />
+            <p className="text-xs text-center py-1">You</p>
+          </div>
+          <div className="bg-black rounded overflow-hidden">
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className="w-full h-48 object-cover"
+            />
+            <p className="text-xs text-center py-1">Remote</p>
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-4">
+          {status === "ringing" && (
+            <>
+              <button
+                onClick={onAccept}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg"
+              >
+                Accept
+              </button>
+              <button
+                onClick={onDecline}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+              >
+                Decline
+              </button>
+            </>
+          )}
+
+          {status === "calling" && (
+            <p className="text-sm text-gray-500">
+              Ringing... waiting for answer
+            </p>
+          )}
+
+          {status === "in-call" && (
+            <p className="text-sm text-gray-500">Call in progress</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ChatContainer = ({ selectedUser, setSelectedUser }) => {
   const scrollEnd = useRef();
-  const { user, socketRef } = useAuth();
+  const { user, socketRef, onlineUsers } = useAuth();
+
   const [messages, setMessages] = useState([]); // conversation messages
   const [text, setText] = useState(""); // message input text
   const [sending, setSending] = useState(false);
+
+  // --- Call related refs & state ---
+  const pcRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const otherUserIdRef = useRef(null);
+  const isCallerRef = useRef(false);
+  const callStatusRef = useRef("idle"); // mirror of state to read inside socket handlers
+
+  const [callVisible, setCallVisible] = useState(false);
+  const [callStatus, setCallStatus] = useState("idle"); // 'idle'|'calling'|'ringing'|'in-call'
+  const [incomingCaller, setIncomingCaller] = useState(null); // { from, name, signal }
+
+  // helper to set state + ref
+  const setCallStatusSafe = (s) => {
+    callStatusRef.current = s;
+    setCallStatus(s);
+  };
 
   useEffect(() => {
     if (scrollEnd.current) {
       scrollEnd.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+  }, [messages]);
 
+  // fetch messages when selectedUser changes
   useEffect(() => {
     if (!selectedUser || !user) {
       setMessages([]);
@@ -50,9 +183,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     const socket = socketRef?.current;
     if (!socket) return;
 
-    const handler = (newMessage) => {
-      // only append if message is part of the currently open conversation
-      // newMessage contains senderId/receiverId etc (server sends it)
+    const messageHandler = (newMessage) => {
       const otherId = selectedUser?.uid;
       if (!otherId) return;
 
@@ -66,14 +197,278 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       }
     };
 
-    socket.on("newMessage", handler);
+    socket.on("newMessage", messageHandler);
 
     return () => {
-      socket.off("newMessage", handler);
+      socket.off("newMessage", messageHandler);
     };
   }, [socketRef, selectedUser, user]);
 
-  // send message handler
+  // ------------------ SOCKET CALL HANDLERS ------------------
+  useEffect(() => {
+    const socket = socketRef?.current;
+    if (!socket) return;
+
+    // incoming call from another user
+    const incomingCallHandler = (data) => {
+      // data: { from, name, signal }
+      console.log("incomingCall", data);
+
+      // If busy, decline automatically
+      if (callStatusRef.current !== "idle") {
+        socket.emit("declineCall", { to: data.from });
+        return;
+      }
+
+      setIncomingCaller({
+        from: data.from,
+        name: data.name,
+        signal: data.signal,
+      });
+      otherUserIdRef.current = data.from;
+      isCallerRef.current = false;
+      setCallStatusSafe("ringing");
+      setCallVisible(true);
+    };
+
+    // the callee accepted and sent an answer (for caller)
+    const callAcceptedHandler = async (signal) => {
+      console.log("callAccepted", signal);
+      try {
+        if (pcRef.current) {
+          await pcRef.current.setRemoteDescription(
+            new RTCSessionDescription(signal)
+          );
+          setCallStatusSafe("in-call");
+          setCallVisible(true);
+        }
+      } catch (err) {
+        console.error("Error setting remote description (answer):", err);
+        cleanUpCall();
+      }
+    };
+
+    const callDeclinedHandler = () => {
+      console.log("callDeclined");
+      // notify user and cleanup
+      toast.error("Call was declined");
+      cleanUpCall();
+    };
+
+    const iceCandidateHandler = async (candidate) => {
+      if (!candidate || !pcRef.current) return;
+      try {
+        await pcRef.current.addIceCandidate(candidate);
+      } catch (err) {
+        console.error("Error adding received ICE candidate:", err);
+      }
+    };
+
+    const endCallHandler = () => {
+      console.log("endCall");
+      toast.error("Call ended");
+      cleanUpCall();
+    };
+
+    socket.on("incomingCall", incomingCallHandler);
+    socket.on("callAccepted", callAcceptedHandler);
+    socket.on("callDeclined", callDeclinedHandler);
+    socket.on("iceCandidate", iceCandidateHandler);
+    socket.on("endCall", endCallHandler);
+
+    return () => {
+      socket.off("incomingCall", incomingCallHandler);
+      socket.off("callAccepted", callAcceptedHandler);
+      socket.off("callDeclined", callDeclinedHandler);
+      socket.off("iceCandidate", iceCandidateHandler);
+      socket.off("endCall", endCallHandler);
+    };
+  }, [socketRef]);
+
+  // cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      cleanUpCall();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ------------------ CALL ACTIONS ------------------
+  const initiateCall = async () => {
+    if (!selectedUser) {
+      toast.error("Select a user to call");
+      return;
+    }
+    if (!onlineUsers.includes(selectedUser.uid)) {
+      toast.error("User is offline");
+      return;
+    }
+
+    isCallerRef.current = true;
+    otherUserIdRef.current = selectedUser.uid;
+    setCallStatusSafe("calling");
+    setCallVisible(true);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      localStreamRef.current = stream;
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+      const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
+      pcRef.current = pc;
+
+      // attach local tracks
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      // remote track handler
+      pc.ontrack = (event) => {
+        const [remoteStream] = event.streams;
+        if (remoteVideoRef.current)
+          remoteVideoRef.current.srcObject = remoteStream;
+      };
+
+      // ICE candidates -> send to callee
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          socketRef.current.emit("iceCandidate", {
+            to: otherUserIdRef.current,
+            candidate: event.candidate,
+          });
+        }
+      };
+
+      // create offer
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      // send offer to server to route to callee
+      socketRef.current.emit("callUser", {
+        userToCall: otherUserIdRef.current,
+        signalData: offer,
+        from: user.uid,
+        name: user.displayName || user.email || user.uid,
+      });
+    } catch (err) {
+      console.error("initiateCall error", err);
+      toast.error("Unable to start call. Check camera/mic permissions.");
+      cleanUpCall();
+    }
+  };
+
+  const acceptIncomingCall = async () => {
+    try {
+      const caller = incomingCaller;
+      if (!caller) return;
+
+      setCallStatusSafe("in-call");
+      setCallVisible(true);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      localStreamRef.current = stream;
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+      const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
+      pcRef.current = pc;
+
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      pc.ontrack = (event) => {
+        const [remoteStream] = event.streams;
+        if (remoteVideoRef.current)
+          remoteVideoRef.current.srcObject = remoteStream;
+      };
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          socketRef.current.emit("iceCandidate", {
+            to: caller.from,
+            candidate: event.candidate,
+          });
+        }
+      };
+
+      // set caller's offer as remote description
+      await pc.setRemoteDescription(new RTCSessionDescription(caller.signal));
+
+      // create answer and set local description
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      // send answer to caller
+      socketRef.current.emit("acceptCall", { to: caller.from, signal: answer });
+    } catch (err) {
+      console.error("acceptIncomingCall error", err);
+      toast.error("Unable to accept call. Check camera/mic permissions.");
+      cleanUpCall();
+    }
+  };
+
+  const declineIncomingCall = () => {
+    if (incomingCaller?.from) {
+      socketRef.current.emit("declineCall", { to: incomingCaller.from });
+    }
+    cleanUpCall();
+  };
+
+  const cancelOutgoingCall = () => {
+    // caller cancels before connected
+    if (otherUserIdRef.current) {
+      socketRef.current.emit("declineCall", { to: otherUserIdRef.current });
+    }
+    cleanUpCall();
+  };
+
+  const endCall = () => {
+    const otherId = isCallerRef.current
+      ? otherUserIdRef.current
+      : incomingCaller?.from;
+    if (otherId) socketRef.current.emit("endCall", { to: otherId });
+    cleanUpCall();
+  };
+
+  // Clean up function (close pc, stop tracks, reset refs & state)
+  const cleanUpCall = () => {
+    setCallStatusSafe("idle");
+    setCallVisible(false);
+    setIncomingCaller(null);
+
+    isCallerRef.current = false;
+    otherUserIdRef.current = null;
+
+    // close peer connection
+    try {
+      if (pcRef.current) {
+        pcRef.current.ontrack = null;
+        pcRef.current.onicecandidate = null;
+        pcRef.current.close();
+        pcRef.current = null;
+      }
+    } catch (err) {
+      console.warn("pc cleanup error", err);
+    }
+
+    // stop local tracks
+    try {
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+        localStreamRef.current = null;
+      }
+    } catch (err) {
+      console.warn("stream cleanup error", err);
+    }
+
+    // clear video elements
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+  };
+
+  // --- send message handler ---
   const sendMessage = async () => {
     if (!text.trim() || !user || !selectedUser) return;
     setSending(true);
@@ -88,7 +483,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     // optimistic UI update
     setMessages((prev) => [...prev, newMsg]);
     setText("");
-    // POST to backend - backend will save and emit to the receiver socket
+    // POST to backend - backend will save + emit to the receiver socket
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/messages`, {
         method: "POST",
@@ -99,8 +494,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
         throw new Error("Failed to send message");
       }
       const saved = await res.json();
-      // Optionally, replace optimistic message with saved (if saved contains _id or server timestamp)
-      // For simplicity, we won't replace here; you can match by createdAt and update if you like
+      // Optionally update optimistic message with server data
     } catch (err) {
       console.error("Send message error:", err);
       // rollback or mark as failed — left as improvement
@@ -109,13 +503,16 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     }
   };
 
-  // input key handler (Enter -> send)
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
+
+  // For UX: small helper to check if selected user is online
+  const isSelectedUserOnline =
+    selectedUser && onlineUsers?.includes(selectedUser.uid);
 
   if (!selectedUser) {
     return (
@@ -125,6 +522,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       </div>
     );
   }
+
   return (
     <div className="h-full overflow-scroll relative border-l border-r border-gray-300 bg-primary/5">
       {/* header */}
@@ -138,6 +536,26 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
           {selectedUser.name || selectedUser.fullName || "Unknown"}
           <span className="w-2 h-2 rounded-full bg-green-500"></span>
         </p>
+
+        {/* VIDEO CALL BUTTON */}
+        <div
+          title={isSelectedUserOnline ? "Start video call" : "User offline"}
+          onClick={() => {
+            if (!isSelectedUserOnline) {
+              toast.error("User is offline or not connected.");
+              return;
+            }
+            initiateCall();
+          }}
+          className={`cursor-pointer mr-2 ${
+            isSelectedUserOnline
+              ? "text-primary"
+              : "opacity-40 cursor-not-allowed"
+          }`}
+        >
+          <MdVideoCall size={22} />
+        </div>
+
         <div
           onClick={() => setSelectedUser(null)}
           alt=""
@@ -224,6 +642,21 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
           />
         </div>
       </div>
+
+      {/* Call modal */}
+      <CallModal
+        visible={callVisible}
+        status={callStatus}
+        callerName={incomingCaller?.name}
+        calleeName={selectedUser?.name || selectedUser?.fullName}
+        isCaller={isCallerRef.current}
+        onAccept={acceptIncomingCall}
+        onDecline={declineIncomingCall}
+        onEnd={endCall}
+        onCancel={cancelOutgoingCall}
+        localVideoRef={localVideoRef}
+        remoteVideoRef={remoteVideoRef}
+      />
     </div>
   );
 };

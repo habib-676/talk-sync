@@ -14,11 +14,15 @@ import Inbox from "../pages/inbox/Inbox";
 import PrivateRoute from "../routes/PrivateRoute";
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/userProfile";
-import Profile from "../pages/ProfilePage/Profile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
 import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
+import Overview from "../pages/dashboard/Overview";
+import FriendsPage from "../pages/dashboard/FriendsPage";
+import SessionsPage from "../pages/dashboard/SessionsPage";
+import BadgesPage from "../pages/dashboard/BadgesPage";
+import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -39,6 +43,19 @@ export const router = createBrowserRouter([
       {
         path: "/blogs/:id",
         Component: BlogDetails, //added by amena
+      },
+      {
+        path: "/dashboard",
+        element: <DashboardLayout/>, // sidebar layout
+        children: [
+          { index: true, element: <Overview /> },
+          { path: "overview", element: <Overview /> },
+          { path: "profile", element: <ProfilePage/> },
+          { path: "friends", element: <FriendsPage/> },
+          { path: "sessions", element: <SessionsPage/> },
+          { path: "badges", element: <BadgesPage/> },
+          { path: "inbox", element: <Inbox/> },
+        ],
       },
       {
         path: "/inbox",
@@ -68,10 +85,9 @@ export const router = createBrowserRouter([
         path: "/profile",
         element: (
           <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        ),
-      },
+            <ProfilePage />
+          </PrivateRoute>)
+      }
     ],
   },
   {
@@ -92,7 +108,7 @@ export const router = createBrowserRouter([
     path: "/profile",
     element: (
       <PrivateRoute>
-        <Profile />
+        <ProfilePage />
       </PrivateRoute>
     ),
   },
