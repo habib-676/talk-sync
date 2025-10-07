@@ -760,6 +760,149 @@ async function run() {
         res.status(500).json({ success: false, message: error.message });
       }
     });
+    // inside run() after you define usersCollections, messagesCollections
+const sessionsCollections = database.collection("sessions");
+
+/**
+ * GET /users/following/:email
+ * Returns full user docs for people that the given user follows
+ */
+app.get("/users/following/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+    if (!email) return res.status(400).json({ success: false, message: "Email required" });
+
+    const me = await usersCollections.findOne({ email });
+    if (!me) return res.status(404).json({ success: false, message: "User not found" });
+
+    const following = Array.isArray(me.following) ? me.following : [];
+    if (!following.length) return res.json({ success: true, users: [] });
+
+    // following array stores user IDs (strings) — fetch those users
+    const followDocs = await usersCollections.find({ _id: { $in: following.map(id => new ObjectId(id)) } })
+      .project({ password: 0 })
+      .toArray();
+
+    res.json({ success: true, users: followDocs });
+  } catch (err) {
+    console.error("GET /users/following error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * POST /sessions/request
+ * Create a session request (status: pending)
+ * Body: { fromEmail, toEmail, scheduledAt(optional ISO string), durationMinutes (optional) , message (optional) }
+ */
+app.post("/sessions/request", async (req, res) => {
+  try {
+    const { fromEmail, toEmail, scheduledAt, durationMinutes = 10, message = "" } = req.body;
+    if (!fromEmail || !toEmail) {
+      return res.status(400).json({ success: false, message: "fromEmail and toEmail required" });
+    }
+
+    // fetch users
+    const fromUser = await usersCollections.findOne({ email: fromEmail });
+    const toUser = await usersCollections.findOne({ email: toEmail });
+    if (!fromUser || !toUser) {
+      return res.status(404).json({ success: false, message: "User(s) not found" });
+    }
+
+    const session = {
+      fromUserId: fromUser._id.toString(),
+      fromEmail,
+      fromName: fromUser.name || fromUser.displayName || "",
+      toUserId: toUser._id.toString(),
+      toEmail,
+      toName: toUser.name || toUser.displayName || "",
+      status: "pending", // pending | accepted | rejected | canceled | finished
+      scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+      durationMinutes,
+      message,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const result = await sessionsCollections.insertOne(session);
+
+    // notify the receiver via socket if connected
+    const receiverSocketId = userSocketMap[session.toUserId];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("sessionRequested", { sessionId: result.insertedId.toString(), session });
+    }
+
+    res.status(201).json({ success: true, sessionId: result.insertedId, session });
+  } catch (err) {
+    console.error("POST /sessions/request error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * GET /sessions?email=...
+ * Returns sessions where the email is either requester or receiver.
+ * Optional query param status to filter.
+ */
+app.get("/sessions", async (req, res) => {
+  try {
+    const email = (req.query.email || "").toLowerCase();
+    if (!email) return res.status(400).json({ success: false, message: "email query required" });
+
+    const status = req.query.status; // optional
+    const q = {
+      $or: [{ fromEmail: email }, { toEmail: email }],
+    };
+    if (status) q.status = status;
+
+    const sessions = await sessionsCollections.find(q).sort({ createdAt: -1 }).toArray();
+    res.json({ success: true, sessions });
+  } catch (err) {
+    console.error("GET /sessions error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * POST /sessions/:id/accept
+ * Accept a session request. Body: { actionByEmail } // must be receiver
+ */
+app.post("/sessions/:id/accept", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { actionByEmail } = req.body;
+    if (!actionByEmail) return res.status(400).json({ success: false, message: "actionByEmail required" });
+
+    const session = await sessionsCollections.findOne({ _id: new ObjectId(id) });
+    if (!session) return res.status(404).json({ success: false, message: "Session not found" });
+
+    // only the receiver (toEmail) can accept
+    if (session.toEmail.toLowerCase() !== actionByEmail.toLowerCase()) {
+      return res.status(403).json({ success: false, message: "Only receiver can accept" });
+    }
+
+    const update = {
+      $set: {
+        status: "accepted",
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    await sessionsCollections.updateOne({ _id: new ObjectId(id) }, update);
+
+    // notify the requester
+    const requesterSocketId = userSocketMap[session.fromUserId];
+    if (requesterSocketId) {
+      io.to(requesterSocketId).emit("sessionAccepted", { sessionId: id, session: { ...session, status: "accepted" } });
+    }
+
+    res.json({ success: true, message: "Session accepted" });
+  } catch (err) {
+    console.error("POST /sessions/:id/accept error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");

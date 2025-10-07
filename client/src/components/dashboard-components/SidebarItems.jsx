@@ -2,7 +2,11 @@ import React from "react";
 import { Link, useLocation } from "react-router";
 import {
   LayoutDashboard,
+  User,
   Users,
+  MessageSquare,
+  Video,
+  Award,
   BarChart3,
   Megaphone,
   BookOpen,
@@ -61,23 +65,41 @@ export const LearnerSidebarLinks = () => {
   const location = useLocation();
   return (
     <>
+    <SidebarItem
+        to="/dashboard/overview"
+        icon={<LayoutDashboard size={20} />}
+        label="Overview"
+        isActive={location.pathname === "/dashboard/overview"}
+      />
       <SidebarItem
         to="/dashboard/profile"
-        icon={<LayoutDashboard size={20} />}
+        icon={<User size={20} />}
         label="Profile"
         isActive={location.pathname === "/dashboard/profile"}
       />
       <SidebarItem
         to="/dashboard/inbox"
-        icon={<BookOpen size={20} />}
+        icon={<MessageSquare size={20} />}
         label="Inbox"
         isActive={location.pathname.includes("/dashboard/inbox")}
       />
       <SidebarItem
-        to="/dashboard/follow"
-        icon={<Settings size={20} />}
-        label="Find A Partner"
-        isActive={location.pathname.includes("/dashboard/follow")}
+        to="/dashboard/friends"
+        icon={<Users size={20} />}
+        label="Find Friends"
+        isActive={location.pathname.includes("/dashboard/friends")}
+      />
+      <SidebarItem
+        to="/dashboard/sessions"
+        icon={<Video size={20} />}
+        label="Sessions"
+        isActive={location.pathname.includes("/dashboard/sessions")}
+      />
+      <SidebarItem
+        to="/dashboard/badges"
+        icon={<Award size={20} />}
+        label="Badges"
+        isActive={location.pathname.includes("/dashboard/badges")}
       />
     </>
   );
