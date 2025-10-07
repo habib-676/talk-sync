@@ -13,7 +13,7 @@ import Inbox from "../pages/inbox/Inbox";
 
 import PrivateRoute from "../routes/PrivateRoute";
 import FollowPage from "../pages/Follow.jsx/FollowPage";
-import UserProfile from "../pages/Profile/userProfile";
+import UserProfile from "../pages/Profile/UserProfile";
 import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
@@ -46,15 +46,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <DashboardLayout/>, // sidebar layout
+        element: <DashboardLayout />, // sidebar layout
         children: [
           { index: true, element: <Overview /> },
           { path: "overview", element: <Overview /> },
-          { path: "profile", element: <ProfilePage/> },
-          { path: "friends", element: <FriendsPage/> },
-          { path: "sessions", element: <SessionsPage/> },
-          { path: "badges", element: <BadgesPage/> },
-          { path: "inbox", element: <Inbox/> },
+          { path: "profile", element: <ProfilePage /> },
+          { path: "friends", element: <FriendsPage /> },
+          { path: "sessions", element: <SessionsPage /> },
+          { path: "badges", element: <BadgesPage /> },
+          { path: "inbox", element: <Inbox /> },
         ],
       },
       {
@@ -73,7 +73,7 @@ export const router = createBrowserRouter([
         path: "/follow", //added by jannatul
         Component: FollowPage,
       },
-       {
+      {
         path: "/schedule", //added by amena
         Component: ScheduleSession,
       },
@@ -86,8 +86,9 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ProfilePage />
-          </PrivateRoute>)
-      }
+          </PrivateRoute>
+        ),
+      },
     ],
   },
   {
@@ -112,7 +113,7 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
- 
+
   {
     path: "/profile/edit",
     element: (
