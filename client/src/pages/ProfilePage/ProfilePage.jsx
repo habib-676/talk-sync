@@ -202,9 +202,9 @@ export default function ProfilePage() {
                 </Link>
                 <Link
                   to="/schedule"
-                  className="px-3 py-2 rounded-lg border text-sm text-slate-700 text-center"
+                  className="px-3 bg-accent py-2 rounded-lg border text-sm text-white text-center"
                 >
-                  Schedule
+                  Learn Now →
                 </Link>
                 <Link
                   to="/badges"

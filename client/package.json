@@ -29,7 +29,8 @@
     "socket.io-client": "^4.8.1",
     "sweetalert2": "^11.23.0",
     "swiper": "^12.0.1",
-    "tailwindcss": "^4.1.13"
+    "tailwindcss": "^4.1.13",
+    "talk-sync-app": "file:.."
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
