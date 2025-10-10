@@ -45,19 +45,6 @@ export const router = createBrowserRouter([
         Component: BlogDetails, //added by amena
       },
       {
-        path: "/dashboard",
-        element: <DashboardLayout />, // sidebar layout
-        children: [
-          { index: true, element: <Overview /> },
-          { path: "overview", element: <Overview /> },
-          { path: "profile", element: <ProfilePage /> },
-          { path: "friends", element: <FriendsPage /> },
-          { path: "sessions", element: <SessionsPage /> },
-          { path: "badges", element: <BadgesPage /> },
-          { path: "inbox", element: <Inbox /> },
-        ],
-      },
-      {
         path: "/inbox",
         element: (
           <PrivateRoute>
@@ -89,6 +76,26 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+    ],
+  },
+  {
+    path: "/dashboard",
+    element: <DashboardLayout />, // sidebar layout
+    children: [
+      { index: true, element: <Overview /> },
+      { path: "overview", element: <Overview /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "profile/edit",
+        element: (
+          <PrivateRoute>
+            <EditProfile />
+          </PrivateRoute>
+        ),
+      },
+      { path: "friends", element: <FriendsPage /> },
+      { path: "sessions", element: <SessionsPage /> },
+      { path: "badges", element: <BadgesPage /> },
+      { path: "inbox", element: <Inbox /> }
     ],
   },
   {
