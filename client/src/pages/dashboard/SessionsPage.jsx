@@ -3,20 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import useAuth from "../../hooks/useAuth";
 import { Clock, Send, Check, X, UserPlus, Calendar } from "lucide-react";
 
-/**
- * Colorful interactive Sessions page
- * - Friends grid with gradient cards and request modal
- * - Tabs for Incoming / Outgoing / Upcoming / History
- * - Works with your backend endpoints:
- *    GET  /users/following/:email      -> { success: true, users: [...] }  (optional)
- *    GET  /users/id/:id                 -> { success: true, user }
- *    GET  /sessions?email=...           -> { success: true, sessions: [...] }
- *    POST /sessions/request             -> { success: true, session: {...} }
- *    POST /sessions/:id/accept          -> { success: true }
- *
- * If endpoints differ, change BACKEND or the fetch shapes.
- */
-
 const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const SkeletonCard = () => (
