@@ -92,7 +92,7 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      { path: "friends", element: <FriendsPage /> },
+      { path: "follow", element: <FollowPage/> },
       { path: "sessions", element: <SessionsPage /> },
       { path: "badges", element: <BadgesPage /> },
       { path: "inbox", element: <Inbox /> }
