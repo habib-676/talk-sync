@@ -4,7 +4,7 @@ import useAuth from "../../hooks/useAuth";
 import { Link } from "react-router";
 import { Clock, User, Sparkles, BadgeCheck, Search, X } from "lucide-react";
 
-const BACKEND = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 async function fetchJson(url, opts = {}) {
   const res = await fetch(url, opts);
@@ -179,7 +179,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-12 relative bg-gradient-to-br from-indigo-100 via-white to-pink-100">
-      {/* Decorative */}
       <div className="absolute -right-24 -top-16 w-80 h-80 rounded-full bg-gradient-to-tr from-indigo-300 to-pink-300 opacity-30 blur-3xl transform rotate-12" />
       <div className="absolute -left-28 -bottom-20 w-72 h-72 rounded-full bg-gradient-to-tr from-emerald-200 to-cyan-200 opacity-25 blur-2xl" />
 
@@ -199,9 +198,8 @@ export default function ProfilePage() {
 
               <div className="mt-4 flex items-center gap-3">
                 <Link to="/dashboard/profile/edit" className="px-4 py-2 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-semibold shadow hover:brightness-105 transition">Edit profile</Link>
-                {/* restored the previous Learn Now target */}
                 <Link to="/schedule" className="px-4 py-2 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 text-white font-semibold shadow hover:scale-105 transition">Learn now →</Link>
-                <button onClick={() => setShowFriendsModal(true)} className="px-4 py-2 rounded-full bg-white border text-indigo-700 shadow hover:shadow-md transition">View all friends</button>
+                {/* removed top View all friends button per your request */}
               </div>
             </div>
           </div>
@@ -221,7 +219,6 @@ export default function ProfilePage() {
           </div>
         </header>
 
-        {/* summary cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-pink-500 text-white shadow-lg transform hover:-translate-y-1 transition">
             <div className="flex items-center gap-3">
@@ -254,7 +251,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Friends preview: shows at most 3 and appears below header (not beside edit) */}
+        {/* Friends preview */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold">Friends</h3>
@@ -276,7 +273,6 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {/* details & badges */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow">
             <h4 className="text-lg font-semibold text-indigo-600 mb-3">About & Onboarding details</h4>
