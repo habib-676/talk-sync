@@ -3,6 +3,7 @@ import { FaBookOpen, FaComments, FaGlobe, FaFont } from "react-icons/fa";
 import DailyChallenge from "./DailyChallenge";
 import SpeakingModal from "./SpeakingModal";
 import LearningTips from "./LearningTips";
+
 const ScheduleSession = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [wordsData, setWordsData] = useState([]);
@@ -10,21 +11,22 @@ const ScheduleSession = () => {
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-const [showModal, setShowModal] = useState(false);
-
-
-  // ✅ Fetch JSON data
+  // ✅ Fetch static words JSON (from public folder)
   useEffect(() => {
     fetch("/wordsData.json")
       .then((res) => res.json())
       .then((data) => setWordsData(data))
       .catch((err) => console.error("Failed to load words JSON", err));
+  }, []);
 
-    fetch("/readingData.json")
+  // ✅ Fetch reading data from backend (MongoDB)
+  useEffect(() => {
+    fetch("http://localhost:5000/books") // backend API endpoint
       .then((res) => res.json())
       .then((data) => setReadingData(data))
-      .catch((err) => console.error("Failed to load reading JSON", err));
+      .catch((err) => console.error("Failed to load books from backend", err));
   }, []);
 
   // ✅ Reset selections when switching tab
@@ -43,7 +45,6 @@ const [showModal, setShowModal] = useState(false);
   };
 
   return (
-    <div>
     <div className="mt-20 min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-10 px-5 md:px-20">
       {/* Header Section */}
       <section className="text-center mb-12">
@@ -53,14 +54,11 @@ const [showModal, setShowModal] = useState(false);
         <p className="text-gray-600 mb-6">
           Take a quick test or book a live class to improve your communication skills.
         </p>
-        {/* <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full font-semibold hover:scale-105 transition-transform">
-          Take Free Test
-        </button> */}
       </section>
 
       {/* Tabs */}
       <section className="flex justify-center flex-wrap gap-4 mb-10">
-        {["all", "words", "reading","speaking"].map((tab) => (
+        {["all", "words", "reading", "speaking"].map((tab) => (
           <button
             key={tab}
             onClick={() => {
@@ -79,7 +77,7 @@ const [showModal, setShowModal] = useState(false);
         ))}
       </section>
 
-        {/* Dynamic Title & Description */}
+      {/* Dynamic Title & Description */}
       <div className="text-center mb-10">
         {activeTab === "words" && (
           <>
@@ -123,10 +121,8 @@ const [showModal, setShowModal] = useState(false);
         )}
       </div>
 
-      {/* Content */}
+      {/* Main Content Section */}
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-
         {/* WORDS */}
         {activeTab === "words" && (
           <>
@@ -149,7 +145,7 @@ const [showModal, setShowModal] = useState(false);
                 </div>
               ))}
 
-               {selectedLevel && !selectedCategory && (
+            {selectedLevel && !selectedCategory && (
               <button
                 onClick={() => setSelectedLevel(null)}
                 className="col-span-full mb-5 text-lg text-accent underline"
@@ -158,7 +154,8 @@ const [showModal, setShowModal] = useState(false);
               </button>
             )}
 
-            {selectedLevel && !selectedCategory &&
+            {selectedLevel &&
+              !selectedCategory &&
               selectedLevel.categories.map((cat) => (
                 <div
                   key={cat.id}
@@ -190,8 +187,12 @@ const [showModal, setShowModal] = useState(false);
                       className="border rounded-lg p-4 shadow-sm hover:shadow-md transition bg-gray-50"
                     >
                       <p className="font-semibold text-gray-800">{w.word}</p>
-                      <p className="text-sm text-gray-600 italic">Meaning: {w.meaning}</p>
-                      <p className="text-sm mt-2 text-gray-700">Sentence: {w.example}</p>
+                      <p className="text-sm text-gray-600 italic">
+                        Meaning: {w.meaning}
+                      </p>
+                      <p className="text-sm mt-2 text-gray-700">
+                        Sentence: {w.example}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -200,13 +201,9 @@ const [showModal, setShowModal] = useState(false);
           </>
         )}
 
-
-
         {/* READING */}
         {activeTab === "reading" && (
           <>
-          
-            {/* STEP 1: Level Selection */}
             {!selectedLevel &&
               readingData.map((level, idx) => (
                 <div
@@ -214,44 +211,32 @@ const [showModal, setShowModal] = useState(false);
                   onClick={() => setSelectedLevel(level)}
                   className="cursor-pointer bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-indigo-300"
                 >
-                  {(() => {
-  const levelImages = [
-    "https://i.ibb.co.com/jZQsT1WP/Reading-glasses-bro.png",
-    "https://i.ibb.co.com/DDrCdZWY/Webinar-pana.png",
-    "https://i.ibb.co.com/xqdY75G0/Instruction-manual-cuate.png",
-  ];
-  return (
-    <img
-      src={levelImages[idx % levelImages.length]}
-      alt={level.level}
-      className="w-full h-48 object-contain rounded-lg mb-4 bg-white"
-    />
-  );
-})
-()}
-
-   <h3 className="text-xl font-semibold text-indigo-700">
+                  <img
+                    src={`https://i.ibb.co.com/${["jZQsT1WP/Reading-glasses-bro.png", "DDrCdZWY/Webinar-pana.png", "xqdY75G0/Instruction-manual-cuate.png"][idx % 3]}`}
+                    alt={level.level}
+                    className="w-full h-48 object-contain rounded-lg mb-4 bg-white"
+                  />
+                  <h3 className="text-xl font-semibold text-indigo-700">
                     {level.level}
                   </h3>
                   <p className="text-gray-600 mt-2">
-                    Explore {level.sets.length} reading sets.
+                    Explore {level.sets?.length || 0} reading sets.
                   </p>
                 </div>
               ))}
 
-            {/* Back Button for Level */}
             {selectedLevel && !selectedCategory && (
               <button
                 onClick={() => setSelectedLevel(null)}
-                className="col-span-full mb-5 text-sm text-indigo-600text-lg text-accent underline "
+                className="col-span-full mb-5 text-sm text-indigo-600 underline"
               >
                 ← Back to Levels
               </button>
             )}
 
-            {/* STEP 2: Set Selection */}
-            {selectedLevel && !selectedCategory &&
-              selectedLevel.sets.map((set, idx) => (
+            {selectedLevel &&
+              !selectedCategory &&
+              selectedLevel.sets?.map((set, idx) => (
                 <div
                   key={idx}
                   onClick={() => setSelectedCategory(set)}
@@ -261,12 +246,11 @@ const [showModal, setShowModal] = useState(false);
                     {set.set}
                   </h4>
                   <p className="text-gray-600 mt-2">
-                    {set.lessons.length} lessons available
+                    {set.lessons?.length || 0} lessons available
                   </p>
                 </div>
               ))}
 
-            {/* STEP 3: Lesson Details */}
             {selectedCategory && !selectedLesson && (
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg">
                 <button
@@ -279,7 +263,7 @@ const [showModal, setShowModal] = useState(false);
                   {selectedCategory.set}
                 </h3>
                 <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {selectedCategory.lessons.map((lesson) => (
+                  {selectedCategory.lessons?.map((lesson) => (
                     <li
                       key={lesson.id}
                       onClick={() => setSelectedLesson(lesson)}
@@ -302,7 +286,6 @@ const [showModal, setShowModal] = useState(false);
               </div>
             )}
 
-            {/* STEP 4: Single Book View */}
             {selectedLesson && (
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg text-left">
                 <button
@@ -344,7 +327,8 @@ const [showModal, setShowModal] = useState(false);
             )}
           </>
         )}
-{/* SPEAKING */}
+
+        {/* SPEAKING */}
         {activeTab === "speaking" && (
           <>
             <div className="bg-white shadow-xl rounded-xl p-6 hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-indigo-400">
@@ -354,15 +338,12 @@ const [showModal, setShowModal] = useState(false);
               <p className="text-gray-600 mb-3">
                 Book your personal tutor for live speaking practice.
               </p>
-
               <button
-  onClick={() => setShowModal(true)}
-  className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600"
->
-  Book Tutor
-</button>
-
-
+                onClick={() => setShowModal(true)}
+                className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600"
+              >
+                Book Tutor
+              </button>
             </div>
 
             <div className="bg-white shadow-xl rounded-xl p-6 hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-purple-400">
@@ -373,38 +354,25 @@ const [showModal, setShowModal] = useState(false);
                 Practice with an English Pro Partner and enhance fluency.
               </p>
               <button
-  onClick={() => setShowModal(true)}
-  className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600"
->
-  Start Now
-</button>
-
+                onClick={() => setShowModal(true)}
+                className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600"
+              >
+                Start Now
+              </button>
             </div>
           </>
         )}
-{showModal && <SpeakingModal isOpen={showModal} onClose={() => setShowModal(false)} />}
-
-        {/* DEFAULT */}
-        {activeTab === "all" && (
-          <div className="col-span-full text-center text-gray-600">
-            Choose a category to explore learning options.
-          </div>
-        )}
       </section>
 
+      {showModal && <SpeakingModal isOpen={showModal} onClose={() => setShowModal(false)} />}
+
       <section className="mt-20">
-<DailyChallenge/>
-</section>
-
-<section className="mt-20">
-  <LearningTips />
-</section>
+        <DailyChallenge />
+      </section>
+      <section className="mt-20">
+        <LearningTips />
+      </section>
     </div>
-
-
-    </div>
-
-  
   );
 };
 
