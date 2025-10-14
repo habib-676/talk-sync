@@ -16,7 +16,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://talksync0001.netlify.app"],
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
   })
 );
