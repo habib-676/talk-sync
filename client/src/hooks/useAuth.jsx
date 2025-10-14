@@ -1,4 +1,3 @@
-
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 
@@ -17,7 +16,7 @@ const useAuth = () => {
     try {
       setLoadingMongo(true);
       const response = await fetch(
-        `http://localhost:5000/users/${authInfo.user.email}`
+        `${import.meta.env.VITE_API_URL}/users/${authInfo.user.email}`
       );
       const data = await response.json();
 
