@@ -10,7 +10,6 @@ import AuthLayouts from "../layouts/AuthLayouts";
 import blogs from "../pages/Blogs/blogs";
 import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
-
 import PrivateRoute from "../routes/PrivateRoute";
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/UserProfile";
@@ -85,17 +84,18 @@ export const router = createBrowserRouter([
       { index: true, element: <Overview /> },
       { path: "overview", element: <Overview /> },
       { path: "profile", element: <ProfilePage /> },
-      { path: "profile/edit",
+      {
+        path: "profile/edit",
         element: (
           <PrivateRoute>
             <EditProfile />
           </PrivateRoute>
         ),
       },
-      { path: "follow", element: <FollowPage/> },
+      { path: "follow", element: <FollowPage /> },
       { path: "sessions", element: <SessionsPage /> },
       { path: "badges", element: <BadgesPage /> },
-      { path: "inbox", element: <Inbox /> }
+      { path: "inbox", element: <Inbox /> },
     ],
   },
   {
@@ -121,7 +121,6 @@ export const router = createBrowserRouter([
     ),
   },
 
- 
   {
     path: "/onboarding",
     element: (
@@ -131,29 +130,8 @@ export const router = createBrowserRouter([
     ),
   },
 
-  {
-<<<<<<< HEAD
-    path: "/dashboard",
-    element: (
-      <PrivateRoute>
-        <DashboardLayout />
-      </PrivateRoute>
-    ),
-    children: [
-      { index: true, element: <Overview /> },
-      { path: "overview", element: <Overview /> },
-      { path: "profile", element: <ProfilePage /> },
-      { path: "friends", element: <FriendsPage /> },
-      { path: "sessions", element: <SessionsPage /> },
-      { path: "badges", element: <BadgesPage /> },
-      { path: "inbox", element: <Inbox /> },
-      { path: "profile/edit", element: <EditProfile></EditProfile> },
-    ],
-  },
 
   {
-=======
->>>>>>> 3fd91b86ad1273e40b3cc85c2c60053c747616f7
     path: "*",
     element: <NotFound />,
   },
