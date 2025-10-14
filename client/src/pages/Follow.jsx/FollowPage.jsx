@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { UserPlus, UserCheck, UserX, Users, Search, Filter, Users as UsersIcon, Sparkles } from "lucide-react";
+import {
+  UserPlus,
+  UserCheck,
+  UserX,
+  Users,
+  Search,
+  Filter,
+  Users as UsersIcon,
+  Sparkles,
+} from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router";
 
@@ -13,7 +22,8 @@ export default function FollowPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const navigate = useNavigate();
 
-  const defaultAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face";
+  const defaultAvatar =
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face";
 
   useEffect(() => {
     if (!mongoUser?._id) {
@@ -24,15 +34,19 @@ export default function FollowPage() {
     const fetchUsersWithRelationships = async () => {
       try {
         setLoadingUsers(true);
-        const usersResponse = await fetch("http://localhost:5000/users");
+        const usersResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/users`
+        );
         const allUsers = await usersResponse.json();
         const filteredUsers = allUsers.filter((u) => u._id !== mongoUser._id);
-        
+
         const usersWithRelationships = await Promise.all(
           filteredUsers.map(async (user) => {
             try {
               const relationshipResponse = await fetch(
-                `http://localhost:5000/relationship/${mongoUser._id}/${user._id}`
+                `${import.meta.env.VITE_API_URL}/relationship/${
+                  mongoUser._id
+                }/${user._id}`
               );
               if (relationshipResponse.ok) {
                 const relationshipData = await relationshipResponse.json();
@@ -41,22 +55,27 @@ export default function FollowPage() {
                   followers: user.followers || [],
                   following: user.following || [],
                   friends: user.friends || [],
-                  relationship: relationshipData.success ? relationshipData.relationship : {
-                    iFollow: false,
-                    followsMe: false,
-                    isFriend: false
-                  }
+                  relationship: relationshipData.success
+                    ? relationshipData.relationship
+                    : {
+                        iFollow: false,
+                        followsMe: false,
+                        isFriend: false,
+                      },
                 };
               }
             } catch (error) {
-              console.error(`Error fetching relationship for user ${user._id}:`, error);
+              console.error(
+                `Error fetching relationship for user ${user._id}:`,
+                error
+              );
             }
-            
+
             const userFollowers = user.followers || [];
             const userFriends = user.friends || [];
             const myFollowing = mongoUser.following || [];
             const myFriends = mongoUser.friends || [];
-            
+
             return {
               ...user,
               followers: user.followers || [],
@@ -65,12 +84,14 @@ export default function FollowPage() {
               relationship: {
                 iFollow: myFollowing.includes(user._id),
                 followsMe: userFollowers.includes(mongoUser._id),
-                isFriend: myFriends.includes(user._id) && userFriends.includes(mongoUser._id)
-              }
+                isFriend:
+                  myFriends.includes(user._id) &&
+                  userFriends.includes(mongoUser._id),
+              },
             };
           })
         );
-        
+
         setUsers(usersWithRelationships);
         setFilteredUsers(usersWithRelationships);
         setLoadingUsers(false);
@@ -86,23 +107,30 @@ export default function FollowPage() {
   useEffect(() => {
     let result = users;
     if (searchTerm) {
-      result = result.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      result = result.filter(
+        (user) =>
+          user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     switch (activeFilter) {
       case "friends":
-        result = result.filter(user => user.relationship.isFriend);
+        result = result.filter((user) => user.relationship.isFriend);
         break;
       case "following":
-        result = result.filter(user => user.relationship.iFollow && !user.relationship.isFriend);
+        result = result.filter(
+          (user) => user.relationship.iFollow && !user.relationship.isFriend
+        );
         break;
       case "followers":
-        result = result.filter(user => user.relationship.followsMe && !user.relationship.iFollow);
+        result = result.filter(
+          (user) => user.relationship.followsMe && !user.relationship.iFollow
+        );
         break;
       case "suggested":
-        result = result.filter(user => !user.relationship.iFollow && !user.relationship.followsMe);
+        result = result.filter(
+          (user) => !user.relationship.iFollow && !user.relationship.followsMe
+        );
         break;
       default:
         break;
@@ -114,28 +142,33 @@ export default function FollowPage() {
     if (!mongoUser?._id || updatingUser) return;
     try {
       setUpdatingUser(targetId);
-      const response = await fetch(`http://localhost:5000/users/${targetId}/follow`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentUserId: mongoUser._id }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/users/${targetId}/follow`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentUserId: mongoUser._id }),
+        }
+      );
       const result = await response.json();
       if (result.success) {
         await refreshMongoUser();
-        
-        setUsers(prev =>
-          prev.map(user => {
+
+        setUsers((prev) =>
+          prev.map((user) => {
             if (user._id === targetId) {
               const newRelationship = {
                 iFollow: true,
                 followsMe: user.relationship.followsMe,
-                isFriend: result.becameFriends || false
+                isFriend: result.becameFriends || false,
               };
               return {
                 ...user,
                 relationship: newRelationship,
                 followers: [...(user.followers || []), mongoUser._id],
-                friends: result.becameFriends ? [...(user.friends || []), mongoUser._id] : user.friends
+                friends: result.becameFriends
+                  ? [...(user.friends || []), mongoUser._id]
+                  : user.friends,
               };
             }
             return user;
@@ -153,26 +186,33 @@ export default function FollowPage() {
     if (!mongoUser?._id || updatingUser) return;
     try {
       setUpdatingUser(targetId);
-      await fetch(`http://localhost:5000/users/${targetId}/unfollow`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentUserId: mongoUser._id }),
-      });
-      
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/users/${targetId}/unfollow`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentUserId: mongoUser._id }),
+        }
+      );
+
       await refreshMongoUser();
-      
-      setUsers(prev =>
-        prev.map(user => {
+
+      setUsers((prev) =>
+        prev.map((user) => {
           if (user._id === targetId) {
             return {
               ...user,
               relationship: {
                 iFollow: false,
                 followsMe: user.relationship.followsMe,
-                isFriend: false
+                isFriend: false,
               },
-              followers: (user.followers || []).filter(id => id !== mongoUser._id),
-              friends: (user.friends || []).filter(id => id !== mongoUser._id)
+              followers: (user.followers || []).filter(
+                (id) => id !== mongoUser._id
+              ),
+              friends: (user.friends || []).filter(
+                (id) => id !== mongoUser._id
+              ),
             };
           }
           return user;
@@ -189,26 +229,33 @@ export default function FollowPage() {
     if (!mongoUser?._id || updatingUser) return;
     try {
       setUpdatingUser(targetId);
-      await fetch(`http://localhost:5000/users/${targetId}/remove-follower`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentUserId: mongoUser._id }),
-      });
-      
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/users/${targetId}/remove-follower`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentUserId: mongoUser._id }),
+        }
+      );
+
       await refreshMongoUser();
-      
-      setUsers(prev =>
-        prev.map(user => {
+
+      setUsers((prev) =>
+        prev.map((user) => {
           if (user._id === targetId) {
             return {
               ...user,
               relationship: {
                 iFollow: user.relationship.iFollow,
                 followsMe: false,
-                isFriend: false
+                isFriend: false,
               },
-              following: (user.following || []).filter(id => id !== mongoUser._id),
-              friends: (user.friends || []).filter(id => id !== mongoUser._id)
+              following: (user.following || []).filter(
+                (id) => id !== mongoUser._id
+              ),
+              friends: (user.friends || []).filter(
+                (id) => id !== mongoUser._id
+              ),
             };
           }
           return user;
@@ -227,13 +274,14 @@ export default function FollowPage() {
 
   const getButtonConfig = (user) => {
     const { iFollow, followsMe, isFriend } = user.relationship;
-    
+
     if (isFriend) {
       return {
         primary: {
           text: "Friends",
           icon: <Users size={16} />,
-          className: "bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200",
+          className:
+            "bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200",
         },
         // secondary: {
         //   text: "Unfriend",
@@ -247,39 +295,44 @@ export default function FollowPage() {
         primary: {
           text: "Following",
           icon: <UserCheck size={16} />,
-          className: "bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200",
+          className:
+            "bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200",
         },
         secondary: {
           text: "Unfollow",
           icon: <UserX size={16} />,
-          className: "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
+          className:
+            "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
           onClick: () => handleUnfollow(user._id),
-        }
+        },
       };
     } else if (followsMe) {
       return {
         primary: {
           text: "Follow Back",
           icon: <UserCheck size={16} />,
-          className: "bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 hover:border-blue-300",
+          className:
+            "bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 hover:border-blue-300",
           onClick: () => handleFollow(user._id),
         },
         secondary: {
           text: "Delete",
           icon: <UserX size={16} />,
-          className: "bg-white border border-red-200 text-red-600 hover:bg-red-50",
+          className:
+            "bg-white border border-red-200 text-red-600 hover:bg-red-50",
           onClick: () => handleRemoveFollower(user._id),
-        }
+        },
       };
     } else {
       return {
         primary: {
           text: "Follow",
           icon: <UserPlus size={16} />,
-          className: "bg-pink-100 hover:bg-pink-200 text-pink-700 border border-gray-300",
+          className:
+            "bg-pink-100 hover:bg-pink-200 text-pink-700 border border-gray-300",
           onClick: () => handleFollow(user._id),
         },
-        secondary: null
+        secondary: null,
       };
     }
   };
@@ -289,7 +342,7 @@ export default function FollowPage() {
     { key: "friends", label: "Friends", icon: <Users size={16} /> },
     { key: "following", label: "Following", icon: <UserCheck size={16} /> },
     { key: "followers", label: "Followers", icon: <UserPlus size={16} /> },
-    { key: "suggested", label: "Suggested", icon: <Sparkles size={16} /> }
+    { key: "suggested", label: "Suggested", icon: <Sparkles size={16} /> },
   ];
 
   if (loadingMongo) {
@@ -308,8 +361,12 @@ export default function FollowPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
           <UsersIcon className="mx-auto h-16 w-16 text-purple-400 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to TalkSync</h2>
-          <p className="text-gray-600">Please login to connect with other language learners</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Welcome to TalkSync
+          </h2>
+          <p className="text-gray-600">
+            Please login to connect with other language learners
+          </p>
         </div>
       </div>
     );
@@ -322,7 +379,9 @@ export default function FollowPage() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-white rounded-lg px-4 py-2 shadow-sm border border-purple-100 mb-6">
             <Sparkles className="h-5 w-5 text-purple-400" />
-            <span className="text-purple-600 font-medium">Connect & Learn Together</span>
+            <span className="text-purple-600 font-medium">
+              Connect & Learn Together
+            </span>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Language Community
@@ -338,23 +397,29 @@ export default function FollowPage() {
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
               <UsersIcon className="h-5 w-5 text-blue-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{mongoUser.following?.length || 0}</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {mongoUser.following?.length || 0}
+            </div>
             <div className="text-blue-600 text-sm font-medium">Following</div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-sm border border-purple-100 p-6 text-center">
             <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
               <UserPlus className="h-5 w-5 text-purple-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{mongoUser.followers?.length || 0}</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {mongoUser.followers?.length || 0}
+            </div>
             <div className="text-purple-600 text-sm font-medium">Followers</div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-sm border border-pink-100 p-6 text-center">
             <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mx-auto mb-3">
               <Users className="h-5 w-5 text-pink-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{mongoUser.friends?.length || 0}</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {mongoUser.friends?.length || 0}
+            </div>
             <div className="text-pink-600 text-sm font-medium">Friends</div>
           </div>
         </div>
@@ -403,10 +468,12 @@ export default function FollowPage() {
             {filteredUsers.length === 0 ? (
               <div className="col-span-full bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                 <UsersIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No learners found</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No learners found
+                </h3>
                 <p className="text-gray-600">
-                  {searchTerm || activeFilter !== "all" 
-                    ? "Try adjusting your search or filter criteria" 
+                  {searchTerm || activeFilter !== "all"
+                    ? "Try adjusting your search or filter criteria"
                     : "No other users available at the moment"}
                 </p>
               </div>
@@ -416,9 +483,12 @@ export default function FollowPage() {
                 const { iFollow, followsMe, isFriend } = user.relationship;
 
                 return (
-                  <div key={user._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300">
+                  <div
+                    key={user._id}
+                    className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300"
+                  >
                     {/* User Header - Clickable Area */}
-                    <div 
+                    <div
                       className="flex items-start justify-between mb-4 cursor-pointer"
                       onClick={() => handleUserClick(user._id)}
                     >
@@ -440,24 +510,37 @@ export default function FollowPage() {
                           <h3 className="font-semibold text-gray-900 hover:text-purple-600 transition-colors">
                             {user.name}
                           </h3>
-                          <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                          <p className="text-sm text-gray-500 truncate">
+                            {user.email}
+                          </p>
                         </div>
                       </div>
-                      
+
                       {/* Status Badge */}
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        isFriend ? 'bg-purple-100 text-purple-700' :
-                        iFollow ? 'bg-blue-100 text-blue-700' :
-                        followsMe ? 'bg-pink-100 text-pink-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {isFriend ? 'Friend' : iFollow ? 'Following' : followsMe ? 'Follows You' : 'New'}
+                      <div
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          isFriend
+                            ? "bg-purple-100 text-purple-700"
+                            : iFollow
+                            ? "bg-blue-100 text-blue-700"
+                            : followsMe
+                            ? "bg-pink-100 text-pink-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {isFriend
+                          ? "Friend"
+                          : iFollow
+                          ? "Following"
+                          : followsMe
+                          ? "Follows You"
+                          : "New"}
                       </div>
                     </div>
 
                     {/* User Bio - Also Clickable */}
                     {user.bio && (
-                      <div 
+                      <div
                         className="text-sm text-gray-600 mb-4 line-clamp-2 cursor-pointer hover:text-gray-700 transition-colors"
                         onClick={() => handleUserClick(user._id)}
                       >
@@ -468,17 +551,22 @@ export default function FollowPage() {
                     {/* User Stats */}
                     <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
                       <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <div className="font-semibold text-gray-900">{user.followers?.length || 0}</div>
+                        <div className="font-semibold text-gray-900">
+                          {user.followers?.length || 0}
+                        </div>
                         <div className="text-gray-500">Followers</div>
                       </div>
                       <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <div className="font-semibold text-gray-900">{user.following?.length || 0}</div>
+                        <div className="font-semibold text-gray-900">
+                          {user.following?.length || 0}
+                        </div>
                         <div className="text-gray-500">Following</div>
                       </div>
                     </div>
 
                     {/* Languages */}
-                    {(user.native_language || user.learning_language?.length > 0) && (
+                    {(user.native_language ||
+                      user.learning_language?.length > 0) && (
                       <div className="mb-4">
                         <div className="flex flex-wrap gap-1">
                           {user.native_language && (
@@ -487,7 +575,10 @@ export default function FollowPage() {
                             </span>
                           )}
                           {user.learning_language?.map((lang, index) => (
-                            <span key={index} className="px-2 py-1 bg-pink-100 text-pink-700 text-xs rounded">
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-pink-100 text-pink-700 text-xs rounded"
+                            >
                               Learning: {lang}
                             </span>
                           ))}
@@ -500,15 +591,20 @@ export default function FollowPage() {
                       {/* Primary Action Button */}
                       <button
                         onClick={buttonConfig.primary.onClick || (() => {})}
-                        disabled={updatingUser === user._id || !buttonConfig.primary.onClick}
+                        disabled={
+                          updatingUser === user._id ||
+                          !buttonConfig.primary.onClick
+                        }
                         className={`flex-1 py-2.5 px-4 rounded-lg border font-medium transition-all flex items-center justify-center gap-2 ${
-                          updatingUser === user._id 
-                            ? 'opacity-50 cursor-not-allowed' 
-                            : 'hover:shadow-sm'
+                          updatingUser === user._id
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:shadow-sm"
                         } ${buttonConfig.primary.className}`}
                       >
                         {buttonConfig.primary.icon}
-                        {updatingUser === user._id ? "..." : buttonConfig.primary.text}
+                        {updatingUser === user._id
+                          ? "..."
+                          : buttonConfig.primary.text}
                       </button>
 
                       {/* Secondary Action Button (if exists) */}
@@ -517,13 +613,15 @@ export default function FollowPage() {
                           onClick={buttonConfig.secondary.onClick}
                           disabled={updatingUser === user._id}
                           className={`py-2 px-4 rounded-lg border font-medium transition-all flex items-center justify-center gap-2 ${
-                            updatingUser === user._id 
-                              ? 'opacity-50 cursor-not-allowed' 
-                              : 'hover:shadow-sm'
+                            updatingUser === user._id
+                              ? "opacity-50 cursor-not-allowed"
+                              : "hover:shadow-sm"
                           } ${buttonConfig.secondary.className}`}
                         >
                           {buttonConfig.secondary.icon}
-                          {updatingUser === user._id ? "..." : buttonConfig.secondary.text}
+                          {updatingUser === user._id
+                            ? "..."
+                            : buttonConfig.secondary.text}
                         </button>
                       )}
                     </div>
