@@ -24,3 +24,10 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+
+# -- added by habib
+
+.firebase
+.firebaserc
+firebase.json

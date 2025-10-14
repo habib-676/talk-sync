@@ -16,7 +16,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: ["https://talksync-a9da2.web.app", "http://localhost:5173"],
     credentials: true,
   })
 );
@@ -33,6 +33,7 @@ const io = new Server(server, {
       "http://localhost:5173",
       "http://localhost:5174",
       "https://talksync0001.netlify.app",
+      "https://talksync-a9da2.web.app",
     ], // frontend URL
     credentials: true,
     methods: ["GET", "POST"],
