@@ -84,10 +84,10 @@ export const LearnerSidebarLinks = () => {
         isActive={location.pathname.includes("/dashboard/inbox")}
       />
       <SidebarItem
-        to="/dashboard/friends"
+        to="/dashboard/follow"
         icon={<Users size={20} />}
-        label="Find Friends"
-        isActive={location.pathname.includes("/dashboard/friends")}
+        label="Find a partner"
+        isActive={location.pathname.includes("/dashboard/follow")}
       />
       <SidebarItem
         to="/dashboard/sessions"

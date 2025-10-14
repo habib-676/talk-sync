@@ -19,7 +19,6 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
 import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
 import Overview from "../pages/dashboard/Overview";
-import FriendsPage from "../pages/dashboard/FriendsPage";
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
@@ -80,6 +79,26 @@ export const router = createBrowserRouter([
     ],
   },
   {
+    path: "/dashboard",
+    element: <DashboardLayout />, // sidebar layout
+    children: [
+      { index: true, element: <Overview /> },
+      { path: "overview", element: <Overview /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "profile/edit",
+        element: (
+          <PrivateRoute>
+            <EditProfile />
+          </PrivateRoute>
+        ),
+      },
+      { path: "follow", element: <FollowPage/> },
+      { path: "sessions", element: <SessionsPage /> },
+      { path: "badges", element: <BadgesPage /> },
+      { path: "inbox", element: <Inbox /> }
+    ],
+  },
+  {
     path: "/auth",
     element: <AuthLayouts></AuthLayouts>, //added by Jannatul
     children: [
@@ -113,6 +132,7 @@ export const router = createBrowserRouter([
   },
 
   {
+<<<<<<< HEAD
     path: "/dashboard",
     element: (
       <PrivateRoute>
@@ -132,6 +152,8 @@ export const router = createBrowserRouter([
   },
 
   {
+=======
+>>>>>>> 3fd91b86ad1273e40b3cc85c2c60053c747616f7
     path: "*",
     element: <NotFound />,
   },
