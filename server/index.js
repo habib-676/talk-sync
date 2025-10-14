@@ -16,7 +16,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*", // set to frontend origin in production
+    origin: ["http://localhost:5173", "https://talksync0001.netlify.app"],
     credentials: true,
   })
 );
@@ -29,7 +29,11 @@ const server = http.createServer(app);
 // Setup socket.io
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend URL
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://talksync0001.netlify.app",
+    ], // frontend URL
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -206,22 +210,21 @@ async function run() {
     };
 
     // User related APIs
- 
-app.get("/user-role", verifyToken, async (req, res) => {
-  try {
-    const email = req.decoded?.email;
-    if (!email) return res.status(401).send({ message: "Unauthorized" });
 
-    const user = await usersCollections.findOne({ email });
-    if (!user) return res.status(404).send({ message: "User not found" });
+    app.get("/user-role", verifyToken, async (req, res) => {
+      try {
+        const email = req.decoded?.email;
+        if (!email) return res.status(401).send({ message: "Unauthorized" });
 
-    res.send({ role: user.role || "learner" });
-  } catch (e) {
-    console.error("Error getting user role:", e);
-    res.status(500).send({ message: "Server error during role retrieval" });
-  }
-});
+        const user = await usersCollections.findOne({ email });
+        if (!user) return res.status(404).send({ message: "User not found" });
 
+        res.send({ role: user.role || "learner" });
+      } catch (e) {
+        console.error("Error getting user role:", e);
+        res.status(500).send({ message: "Server error during role retrieval" });
+      }
+    });
 
     // ✅ FIXED: Removed nested duplicate route
     app.get("/users/:email", async (req, res) => {
