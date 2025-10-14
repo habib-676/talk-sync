@@ -44,19 +44,7 @@ export const router = createBrowserRouter([
         path: "/blogs/:id",
         Component: BlogDetails, //added by amena
       },
-      {
-        path: "/dashboard",
-        element: <DashboardLayout />, // sidebar layout
-        children: [
-          { index: true, element: <Overview /> },
-          { path: "overview", element: <Overview /> },
-          { path: "profile", element: <ProfilePage /> },
-          { path: "friends", element: <FriendsPage /> },
-          { path: "sessions", element: <SessionsPage /> },
-          { path: "badges", element: <BadgesPage /> },
-          { path: "inbox", element: <Inbox /> },
-        ],
-      },
+
       {
         path: "/inbox",
         element: (
@@ -115,7 +103,7 @@ export const router = createBrowserRouter([
   },
 
   {
-    path: "/profile/edit",
+    path: "/dashboard/profile/edit",
     element: (
       <PrivateRoute>
         <EditProfile />
@@ -129,6 +117,20 @@ export const router = createBrowserRouter([
         <OnBoarding />
       </PrivateRoute>
     ),
+  },
+
+  {
+    path: "/dashboard",
+    element: <DashboardLayout />, // sidebar layout
+    children: [
+      { index: true, element: <Overview /> },
+      { path: "overview", element: <Overview /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "friends", element: <FriendsPage /> },
+      { path: "sessions", element: <SessionsPage /> },
+      { path: "badges", element: <BadgesPage /> },
+      { path: "inbox", element: <Inbox /> },
+    ],
   },
 
   {
