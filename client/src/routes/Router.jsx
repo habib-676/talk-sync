@@ -102,14 +102,7 @@ export const router = createBrowserRouter([
     ),
   },
 
-  {
-    path: "/dashboard/profile/edit",
-    element: (
-      <PrivateRoute>
-        <EditProfile />
-      </PrivateRoute>
-    ),
-  },
+ 
   {
     path: "/onboarding",
     element: (
@@ -121,7 +114,11 @@ export const router = createBrowserRouter([
 
   {
     path: "/dashboard",
-    element: <DashboardLayout />, // sidebar layout
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       { index: true, element: <Overview /> },
       { path: "overview", element: <Overview /> },
@@ -130,6 +127,7 @@ export const router = createBrowserRouter([
       { path: "sessions", element: <SessionsPage /> },
       { path: "badges", element: <BadgesPage /> },
       { path: "inbox", element: <Inbox /> },
+      { path: "profile/edit", element: <EditProfile></EditProfile> },
     ],
   },
 
