@@ -12,7 +12,7 @@ const useRole = () => {
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const res = await axiosSecure.get("/user-role");
-      return res.data.role;
+      return res.data?.role;
     },
   });
 

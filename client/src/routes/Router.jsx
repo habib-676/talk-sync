@@ -10,7 +10,6 @@ import AuthLayouts from "../layouts/AuthLayouts";
 import blogs from "../pages/Blogs/blogs";
 import BlogDetails from "../pages/Blogs/BlogDetails";
 import Inbox from "../pages/inbox/Inbox";
-
 import PrivateRoute from "../routes/PrivateRoute";
 import FollowPage from "../pages/Follow.jsx/FollowPage";
 import UserProfile from "../pages/Profile/UserProfile";
@@ -85,17 +84,18 @@ export const router = createBrowserRouter([
       { index: true, element: <Overview /> },
       { path: "overview", element: <Overview /> },
       { path: "profile", element: <ProfilePage /> },
-      { path: "profile/edit",
+      {
+        path: "profile/edit",
         element: (
           <PrivateRoute>
             <EditProfile />
           </PrivateRoute>
         ),
       },
-      { path: "follow", element: <FollowPage/> },
+      { path: "follow", element: <FollowPage /> },
       { path: "sessions", element: <SessionsPage /> },
       { path: "badges", element: <BadgesPage /> },
-      { path: "inbox", element: <Inbox /> }
+      { path: "inbox", element: <Inbox /> },
     ],
   },
   {
@@ -122,14 +122,6 @@ export const router = createBrowserRouter([
   },
 
   {
-    path: "/dashboard/profile/edit",
-    element: (
-      <PrivateRoute>
-        <EditProfile />
-      </PrivateRoute>
-    ),
-  },
-  {
     path: "/onboarding",
     element: (
       <PrivateRoute>
@@ -137,6 +129,7 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
+
 
   {
     path: "*",
