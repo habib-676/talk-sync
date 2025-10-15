@@ -11,10 +11,10 @@ const Reviews = () => {
   }, []);
 
   return (
-    <section className="maximum-w mx-auto px-4 py-16 bg-base-100">
+    <section className="maximum-w mx-auto px-4 py-16">
       <h2 className="text-4xl font-bold text-center mb-12">What People Say</h2>
       <Marquee gradient={false} speed={60} pauseOnHover={true}>
-        <div className="flex space-x-6 p-10"> 
+        <div className="flex space-x-6 p-10">
           {reviews.map((review, index) => (
             <div
               key={index}

@@ -14,10 +14,7 @@ const DesktopNav = ({ user }) => {
 
   // Conditionally add Dashboard link if user is logged in
   if (user) {
-    menuItems.push(
-      { to: "/dashboard", label: "Dashboard" },
-      { to: "/inbox", label: "Inbox" }
-    );
+    menuItems.push({ to: "/dashboard", label: "Dashboard" });
   }
   return (
     <ul className="hidden lg:flex items-center">
