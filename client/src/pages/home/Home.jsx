@@ -24,7 +24,7 @@ const Home = () => {
       <section>
         <Ads />
       </section>
-      <section>
+      <section className="bg-primary/5">
         <Reviews />
       </section>
       <section>
