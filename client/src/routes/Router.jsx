@@ -18,10 +18,7 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
 import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
 import Overview from "../pages/dashboard/Overview";
-<<<<<<< Updated upstream
 import FriendsPage from "../pages/dashboard/FriendsPage";
-=======
->>>>>>> Stashed changes
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
@@ -134,7 +131,6 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <ProfilePage />
-<<<<<<< Updated upstream
       </PrivateRoute>
     ),
   },
@@ -144,8 +140,6 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <EditProfile />
-=======
->>>>>>> Stashed changes
       </PrivateRoute>
     ),
   },
