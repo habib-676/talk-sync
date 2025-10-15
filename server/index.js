@@ -16,7 +16,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // set to frontend origin in production
+    origin: ["https://talksync-a9da2.web.app", "http://localhost:5173"],
     credentials: true,
   })
 );
@@ -29,7 +29,12 @@ const server = http.createServer(app);
 // Setup socket.io
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend URL
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://talksync0001.netlify.app",
+      "https://talksync-a9da2.web.app",
+    ], // frontend URL
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -70,8 +75,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
-          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
         .send({ success: true });
     });
@@ -160,7 +165,6 @@ async function run() {
           });
         }
       });
-
       // When user accepts a call
       socket.on("acceptCall", ({ to, signal }) => {
         const callerSocketId = userSocketMap[to];
@@ -226,6 +230,21 @@ async function run() {
         res.send({ role: user.role });
       } catch (error) {
         console.error("Error getting user role:", error);
+        res.status(500).send({ message: "Server error during role retrieval" });
+      }
+    });
+
+    app.get("/user-role", verifyToken, async (req, res) => {
+      try {
+        const email = req.decoded?.email;
+        if (!email) return res.status(401).send({ message: "Unauthorized" });
+
+        const user = await usersCollections.findOne({ email });
+        if (!user) return res.status(404).send({ message: "User not found" });
+
+        res.send({ role: user.role || "learner" });
+      } catch (e) {
+        console.error("Error getting user role:", e);
         res.status(500).send({ message: "Server error during role retrieval" });
       }
     });
@@ -702,8 +721,8 @@ async function run() {
         const learning = Array.isArray(user.learning_language)
           ? user.learning_language
           : user.learning_language
-          ? [user.learning_language]
-          : [];
+            ? [user.learning_language]
+            : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 

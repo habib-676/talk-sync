@@ -13,23 +13,20 @@ const ScheduleSession = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // ✅ Fetch static words JSON (from public folder)
+  // ✅ Fetch JSON data from public folder
   useEffect(() => {
     fetch("/wordsData.json")
       .then((res) => res.json())
       .then((data) => setWordsData(data))
       .catch((err) => console.error("Failed to load words JSON", err));
-  }, []);
 
-  // ✅ Fetch reading data from backend (MongoDB)
-  useEffect(() => {
-    fetch("http://localhost:5000/books") // backend API endpoint
+    fetch("/readingData.json")
       .then((res) => res.json())
       .then((data) => setReadingData(data))
-      .catch((err) => console.error("Failed to load books from backend", err));
+      .catch((err) => console.error("Failed to load reading JSON", err));
   }, []);
 
-  // ✅ Reset selections when switching tab
+  // ✅ Reset selections when switching tabs
   const resetSelections = () => {
     setSelectedLevel(null);
     setSelectedCategory(null);
@@ -121,11 +118,12 @@ const ScheduleSession = () => {
         )}
       </div>
 
-      {/* Main Content Section */}
+      {/* Main Content */}
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* WORDS */}
+        {/* WORDS TAB */}
         {activeTab === "words" && (
           <>
+            {/* Step 1: Level selection */}
             {!selectedLevel &&
               wordsData.map((level) => (
                 <div
@@ -138,42 +136,39 @@ const ScheduleSession = () => {
                     alt={level.level}
                     className="w-24 h-24 mx-auto mb-4 rounded-full shadow"
                   />
-                  <h3 className="text-xl font-semibold text-indigo-700">
-                    {level.level}
-                  </h3>
+                  <h3 className="text-xl font-semibold text-indigo-700">{level.level}</h3>
                   <p className="text-gray-600 mt-2">{level.description}</p>
                 </div>
               ))}
 
+            {/* Step 2: Category selection */}
             {selectedLevel && !selectedCategory && (
-              <button
-                onClick={() => setSelectedLevel(null)}
-                className="col-span-full mb-5 text-lg text-accent underline"
-              >
-                ← Back to Levels
-              </button>
+              <>
+                <button
+                  onClick={() => setSelectedLevel(null)}
+                  className="col-span-full mb-5 text-lg text-indigo-600 underline"
+                >
+                  ← Back to Levels
+                </button>
+                {selectedLevel.categories.map((cat) => (
+                  <div
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat)}
+                    className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform text-center border-t-4 border-purple-300"
+                  >
+                    <div className="text-4xl mb-3">{cat.icon}</div>
+                    <h4 className="text-lg font-semibold text-indigo-700">{cat.name}</h4>
+                  </div>
+                ))}
+              </>
             )}
 
-            {selectedLevel &&
-              !selectedCategory &&
-              selectedLevel.categories.map((cat) => (
-                <div
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat)}
-                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform text-center border-t-4 border-purple-300"
-                >
-                  <div className="text-4xl mb-3">{cat.icon}</div>
-                  <h4 className="text-lg font-semibold text-indigo-700">
-                    {cat.name}
-                  </h4>
-                </div>
-              ))}
-
+            {/* Step 3: Word list */}
             {selectedCategory && (
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg">
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className="mb-5 text-lg text-accent underline"
+                  className="mb-5 text-lg text-indigo-600 underline"
                 >
                   ← Back to Categories
                 </button>
@@ -201,69 +196,76 @@ const ScheduleSession = () => {
           </>
         )}
 
-        {/* READING */}
+        {/* READING TAB */}
         {activeTab === "reading" && (
           <>
+            {/* Step 1: Level selection */}
             {!selectedLevel &&
-              readingData.map((level, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedLevel(level)}
-                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-indigo-300"
-                >
-                  <img
-                    src={`https://i.ibb.co.com/${["jZQsT1WP/Reading-glasses-bro.png", "DDrCdZWY/Webinar-pana.png", "xqdY75G0/Instruction-manual-cuate.png"][idx % 3]}`}
-                    alt={level.level}
-                    className="w-full h-48 object-contain rounded-lg mb-4 bg-white"
-                  />
-                  <h3 className="text-xl font-semibold text-indigo-700">
-                    {level.level}
-                  </h3>
-                  <p className="text-gray-600 mt-2">
-                    Explore {level.sets?.length || 0} reading sets.
-                  </p>
-                </div>
-              ))}
+              readingData.map((level, idx) => {
+                const levelImages = [
+                  "https://i.ibb.co.com/jZQsT1WP/Reading-glasses-bro.png",
+                  "https://i.ibb.co.com/DDrCdZWY/Webinar-pana.png",
+                  "https://i.ibb.co.com/xqdY75G0/Instruction-manual-cuate.png",
+                ];
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedLevel(level)}
+                    className="cursor-pointer bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-indigo-300"
+                  >
+                    <img
+                      src={levelImages[idx % levelImages.length]}
+                      alt={level.level}
+                      className="w-full h-48 object-contain rounded-lg mb-4 bg-white"
+                    />
+                    <h3 className="text-xl font-semibold text-indigo-700">
+                      {level.level}
+                    </h3>
+                    <p className="text-gray-600 mt-2">
+                      Explore {level.sets?.length || 0} reading sets.
+                    </p>
+                  </div>
+                );
+              })}
 
+            {/* Step 2: Set selection */}
             {selectedLevel && !selectedCategory && (
-              <button
-                onClick={() => setSelectedLevel(null)}
-                className="col-span-full mb-5 text-sm text-indigo-600 underline"
-              >
-                ← Back to Levels
-              </button>
+              <>
+                <button
+                  onClick={() => setSelectedLevel(null)}
+                  className="col-span-full mb-5 text-lg text-indigo-600 underline"
+                >
+                  ← Back to Levels
+                </button>
+                {selectedLevel.sets.map((set, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedCategory(set)}
+                    className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-purple-300"
+                  >
+                    <h4 className="text-lg font-semibold text-indigo-700">{set.set}</h4>
+                    <p className="text-gray-600 mt-2">
+                      {set.lessons?.length || 0} lessons available
+                    </p>
+                  </div>
+                ))}
+              </>
             )}
 
-            {selectedLevel &&
-              !selectedCategory &&
-              selectedLevel.sets?.map((set, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedCategory(set)}
-                  className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-purple-300"
-                >
-                  <h4 className="text-lg font-semibold text-indigo-700">
-                    {set.set}
-                  </h4>
-                  <p className="text-gray-600 mt-2">
-                    {set.lessons?.length || 0} lessons available
-                  </p>
-                </div>
-              ))}
-
+            {/* Step 3: Lesson list */}
             {selectedCategory && !selectedLesson && (
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg">
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className="mb-5 text-sm text-indigo-600 underline"
+                  className="mb-5 text-lg text-indigo-600 underline"
                 >
                   ← Back to Sets
                 </button>
-                <h3 className="text-2xl font-bold text-accent underline mb-4">
+                <h3 className="text-2xl font-bold text-indigo-700 mb-4">
                   {selectedCategory.set}
                 </h3>
                 <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {selectedCategory.lessons?.map((lesson) => (
+                  {selectedCategory.lessons.map((lesson) => (
                     <li
                       key={lesson.id}
                       onClick={() => setSelectedLesson(lesson)}
@@ -274,32 +276,27 @@ const ScheduleSession = () => {
                         alt={lesson.title}
                         className="w-full h-40 object-cover rounded-lg mb-3"
                       />
-                      <p className="font-semibold text-gray-800">
-                        {lesson.title}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {lesson.description}
-                      </p>
+                      <p className="font-semibold text-gray-800">{lesson.title}</p>
+                      <p className="text-sm text-gray-600">{lesson.description}</p>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
+            {/* Step 4: Single Lesson View */}
             {selectedLesson && (
               <div className="col-span-full bg-white rounded-xl p-8 shadow-lg text-left">
                 <button
                   onClick={() => setSelectedLesson(null)}
-                  className="mb-5 text-lg text-accent underline"
+                  className="mb-5 text-lg text-indigo-600 underline"
                 >
                   ← Back to Lessons
                 </button>
                 <h3 className="text-3xl font-bold text-indigo-700 mb-3">
                   {selectedLesson.title}
                 </h3>
-                <p className="text-gray-700 mb-5">
-                  {selectedLesson.description}
-                </p>
+                <p className="text-gray-700 mb-5">{selectedLesson.description}</p>
                 <img
                   src={selectedLesson.image}
                   alt={selectedLesson.title}
@@ -328,7 +325,7 @@ const ScheduleSession = () => {
           </>
         )}
 
-        {/* SPEAKING */}
+        {/* SPEAKING TAB */}
         {activeTab === "speaking" && (
           <>
             <div className="bg-white shadow-xl rounded-xl p-6 hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-indigo-400">
@@ -362,13 +359,23 @@ const ScheduleSession = () => {
             </div>
           </>
         )}
+
+        {/* ALL TAB */}
+        {activeTab === "all" && (
+          <div className="col-span-full text-center text-gray-600">
+            Choose a category to explore learning options.
+          </div>
+        )}
       </section>
 
+      {/* Speaking Modal */}
       {showModal && <SpeakingModal isOpen={showModal} onClose={() => setShowModal(false)} />}
 
+      {/* Daily Challenge + Tips */}
       <section className="mt-20">
         <DailyChallenge />
       </section>
+
       <section className="mt-20">
         <LearningTips />
       </section>

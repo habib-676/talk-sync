@@ -1,4 +1,3 @@
-// hooks/useAuth.js
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 
@@ -17,7 +16,11 @@ const useAuth = () => {
     try {
       setLoadingMongo(true);
       const response = await fetch(
+<<<<<<< Updated upstream
         `http://localhost:5000/users/${authInfo.user.email}`
+=======
+        `${import.meta.env.VITE_API_URL}/users/${authInfo.user.email}`
+>>>>>>> Stashed changes
       );
       const data = await response.json();
 

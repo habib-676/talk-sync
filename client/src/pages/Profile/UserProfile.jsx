@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { 
-  UserPlus, 
-  UserCheck, 
-  UserX, 
-  Users, 
-  MapPin, 
-  Calendar, 
-  Globe, 
-  BookOpen, 
+import {
+  UserPlus,
+  UserCheck,
+  UserX,
+  Users,
+  MapPin,
+  Calendar,
+  Globe,
+  BookOpen,
   MessageCircle,
   ArrowLeft,
-
   Mail,
   Heart,
   Star,
@@ -18,7 +17,7 @@ import {
   Languages,
   Target,
   Sparkles,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
@@ -38,9 +37,11 @@ export default function UserProfile() {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/users/id/${userId}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/users/id/${userId}`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           setProfileUser(data.user);
         }
@@ -59,16 +60,21 @@ export default function UserProfile() {
 
     try {
       setUpdating(true);
-      const response = await fetch(`http://localhost:5000/users/${profileUser._id}/follow`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentUserId: mongoUser._id }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/users/${profileUser._id}/follow`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentUserId: mongoUser._id }),
+        }
+      );
 
       const result = await response.json();
       if (result.success) {
         await refreshMongoUser();
-        const updatedResponse = await fetch(`http://localhost:5000/users/id/${userId}`);
+        const updatedResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/users/id/${userId}`
+        );
         const updatedData = await updatedResponse.json();
         if (updatedData.success) {
           setProfileUser(updatedData.user);
@@ -86,16 +92,21 @@ export default function UserProfile() {
 
     try {
       setUpdating(true);
-      const response = await fetch(`http://localhost:5000/users/${profileUser._id}/unfollow`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentUserId: mongoUser._id }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/users/${profileUser._id}/unfollow`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentUserId: mongoUser._id }),
+        }
+      );
 
       const result = await response.json();
       if (result.success) {
         await refreshMongoUser();
-        const updatedResponse = await fetch(`http://localhost:5000/users/id/${userId}`);
+        const updatedResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/users/id/${userId}`
+        );
         const updatedData = await updatedResponse.json();
         if (updatedData.success) {
           setProfileUser(updatedData.user);
@@ -113,16 +124,23 @@ export default function UserProfile() {
 
     try {
       setUpdating(true);
-      const response = await fetch(`http://localhost:5000/users/${profileUser._id}/remove-follower`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentUserId: mongoUser._id }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/users/${
+          profileUser._id
+        }/remove-follower`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentUserId: mongoUser._id }),
+        }
+      );
 
       const result = await response.json();
       if (result.success) {
         await refreshMongoUser();
-        const updatedResponse = await fetch(`http://localhost:5000/users/id/${userId}`);
+        const updatedResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/users/id/${userId}`
+        );
         const updatedData = await updatedResponse.json();
         if (updatedData.success) {
           setProfileUser(updatedData.user);
@@ -137,7 +155,7 @@ export default function UserProfile() {
 
   const handleSendMessage = () => {
     if (!profileUser?._id) return;
-    navigate('/inbox');
+    navigate("/inbox");
   };
 
   const getRelationshipStatus = () => {
@@ -151,13 +169,16 @@ export default function UserProfile() {
 
     const iFollow = myFollowing.includes(profileUser._id);
     const followsMe = myFollowers.includes(profileUser._id);
-    const isFriend = myFriends.includes(profileUser._id) && theirFriends.includes(mongoUser._id);
+    const isFriend =
+      myFriends.includes(profileUser._id) &&
+      theirFriends.includes(mongoUser._id);
 
     return { iFollow, followsMe, isFriend };
   };
 
   const getActionButtons = () => {
-    if (!mongoUser || !mongoUser._id || !profileUser) return { primary: null, secondary: null };
+    if (!mongoUser || !mongoUser._id || !profileUser)
+      return { primary: null, secondary: null };
 
     const relationship = getRelationshipStatus();
     if (!relationship) return { primary: null, secondary: null };
@@ -173,55 +194,62 @@ export default function UserProfile() {
           primary: {
             text: "Friends",
             icon: <Users size={18} />,
-            className: "bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200",
+            className:
+              "bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200",
             onClick: handleUnfollow,
           },
           secondary: {
             text: "Unfriend",
             icon: <UserX size={18} />,
-            className: "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
+            className:
+              "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
             onClick: handleUnfollow,
-          }
+          },
         };
       } else if (iFollow) {
         return {
           primary: {
             text: "Following",
             icon: <UserCheck size={18} />,
-            className: "bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200",
+            className:
+              "bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200",
             onClick: () => {},
           },
           secondary: {
             text: "Unfollow",
             icon: <UserX size={18} />,
-            className: "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
+            className:
+              "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50",
             onClick: handleUnfollow,
-          }
+          },
         };
       } else if (followsMe) {
         return {
           primary: {
             text: "Follow Back",
             icon: <UserPlus size={18} />,
-            className: "bg-green-100 hover:bg-green-200 text-green-700 border border-green-200",
+            className:
+              "bg-green-100 hover:bg-green-200 text-green-700 border border-green-200",
             onClick: handleFollow,
           },
           secondary: {
             text: "Delete",
             icon: <Trash2 size={18} />,
-            className: "bg-white border border-red-200 text-red-600 hover:bg-red-50",
+            className:
+              "bg-white border border-red-200 text-red-600 hover:bg-red-50",
             onClick: handleRemoveFollower,
-          }
+          },
         };
       } else {
         return {
           primary: {
             text: "Follow",
             icon: <UserPlus size={18} />,
-            className: "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300",
+            className:
+              "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300",
             onClick: handleFollow,
           },
-          secondary: null
+          secondary: null,
         };
       }
     } else {
@@ -229,10 +257,11 @@ export default function UserProfile() {
         primary: {
           text: "Edit Profile",
           icon: <UserCheck size={18} />,
-          className: "bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200",
+          className:
+            "bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200",
           onClick: () => navigate("/edit-profile"),
         },
-        secondary: null
+        secondary: null,
       };
     }
   };
@@ -241,11 +270,16 @@ export default function UserProfile() {
 
   const getProficiencyColor = (level) => {
     switch (level?.toLowerCase()) {
-      case 'beginner': return 'bg-green-100 text-green-700 border-green-200';
-      case 'intermediate': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'advanced': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'expert': return 'bg-orange-100 text-orange-700 border-orange-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case "beginner":
+        return "bg-green-100 text-green-700 border-green-200";
+      case "intermediate":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "advanced":
+        return "bg-purple-100 text-purple-700 border-purple-200";
+      case "expert":
+        return "bg-orange-100 text-orange-700 border-orange-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
     }
   };
 
@@ -265,9 +299,13 @@ export default function UserProfile() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
           <Users className="mx-auto h-16 w-16 text-purple-400 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">User Not Found</h2>
-          <p className="text-gray-600 mb-6">The user you're looking for doesn't exist.</p>
-          <button 
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            User Not Found
+          </h2>
+          <p className="text-gray-600 mb-6">
+            The user you're looking for doesn't exist.
+          </p>
+          <button
             onClick={() => navigate(-1)}
             className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
           >
@@ -284,7 +322,7 @@ export default function UserProfile() {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => navigate(-1)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
@@ -295,7 +333,9 @@ export default function UserProfile() {
                 <Users className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Find More Partners</h1>
+                <h1 className="text-lg font-semibold text-gray-900">
+                  Find More Partners
+                </h1>
                 <p className="text-sm text-gray-500">Discover and connect</p>
               </div>
             </div>
@@ -309,7 +349,7 @@ export default function UserProfile() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
           {/* Cover Photo */}
           <div className="h-32 bg-gradient-to-r from-purple-100 via-pink-100 to-blue-100"></div>
-          
+
           {/* Profile Content */}
           <div className="px-6 pb-6">
             {/* Avatar and Info */}
@@ -317,7 +357,10 @@ export default function UserProfile() {
               <div className="flex items-end gap-4">
                 <div className="relative">
                   <img
-                    src={profileUser.image || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"}
+                    src={
+                      profileUser.image ||
+                      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+                    }
                     alt={profileUser.name}
                     className="w-24 h-24 rounded-xl border-4 border-white object-cover shadow-md"
                   />
@@ -327,9 +370,15 @@ export default function UserProfile() {
                 </div>
                 <div className="pb-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-2xl font-bold text-gray-900">{profileUser.name}</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {profileUser.name}
+                    </h1>
                     {profileUser.proficiency_level && (
-                      <div className={`px-2 py-1 ${getProficiencyColor(profileUser.proficiency_level)} text-xs font-medium rounded-full border`}>
+                      <div
+                        className={`px-2 py-1 ${getProficiencyColor(
+                          profileUser.proficiency_level
+                        )} text-xs font-medium rounded-full border`}
+                      >
                         {profileUser.proficiency_level}
                       </div>
                     )}
@@ -339,29 +388,34 @@ export default function UserProfile() {
                     {profileUser.email}
                   </p>
                   {profileUser.bio && (
-                    <p className="text-gray-700 mt-2 max-w-md text-sm leading-relaxed">{profileUser.bio}</p>
+                    <p className="text-gray-700 mt-2 max-w-md text-sm leading-relaxed">
+                      {profileUser.bio}
+                    </p>
                   )}
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-2 mt-4 sm:mt-0">
-                {mongoUser && mongoUser._id && profileUser && mongoUser._id !== profileUser._id && (
-                  <button
-                    onClick={handleSendMessage}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <MessageCircle size={16} />
-                    <span className="font-medium">Message</span>
-                  </button>
-                )}
-                
+                {mongoUser &&
+                  mongoUser._id &&
+                  profileUser &&
+                  mongoUser._id !== profileUser._id && (
+                    <button
+                      onClick={handleSendMessage}
+                      className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <MessageCircle size={16} />
+                      <span className="font-medium">Message</span>
+                    </button>
+                  )}
+
                 {actionButtons.primary && (
                   <button
                     onClick={actionButtons.primary.onClick}
                     disabled={updating}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                      updating ? 'opacity-50 cursor-not-allowed' : ''
+                      updating ? "opacity-50 cursor-not-allowed" : ""
                     } ${actionButtons.primary.className}`}
                   >
                     {actionButtons.primary.icon}
@@ -374,36 +428,40 @@ export default function UserProfile() {
                     onClick={actionButtons.secondary.onClick}
                     disabled={updating}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                      updating ? 'opacity-50 cursor-not-allowed' : ''
+                      updating ? "opacity-50 cursor-not-allowed" : ""
                     } ${actionButtons.secondary.className}`}
                   >
                     {actionButtons.secondary.icon}
                     {updating ? "..." : actionButtons.secondary.text}
                   </button>
                 )}
-
-                
               </div>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-xl font-bold text-gray-900 mb-1">{profileUser.followers?.length || 0}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">
+                  {profileUser.followers?.length || 0}
+                </div>
                 <div className="text-blue-600 text-sm font-medium flex items-center justify-center gap-1">
                   <Heart size={14} />
                   Followers
                 </div>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-xl font-bold text-gray-900 mb-1">{profileUser.following?.length || 0}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">
+                  {profileUser.following?.length || 0}
+                </div>
                 <div className="text-purple-600 text-sm font-medium flex items-center justify-center gap-1">
                   <UserCheck size={14} />
                   Following
                 </div>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-xl font-bold text-gray-900 mb-1">{profileUser.friends?.length || 0}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">
+                  {profileUser.friends?.length || 0}
+                </div>
                 <div className="text-pink-600 text-sm font-medium flex items-center justify-center gap-1">
                   <Users size={14} />
                   Friends
@@ -415,9 +473,21 @@ export default function UserProfile() {
             <div className="border-b border-gray-200">
               <nav className="flex space-x-8">
                 {[
-                  { id: "about", label: "About", icon: <UserCheck size={16} /> },
-                  { id: "languages", label: "Languages", icon: <Languages size={16} /> },
-                  { id: "interests", label: "Interests", icon: <Star size={16} /> }
+                  {
+                    id: "about",
+                    label: "About",
+                    icon: <UserCheck size={16} />,
+                  },
+                  {
+                    id: "languages",
+                    label: "Languages",
+                    icon: <Languages size={16} />,
+                  },
+                  {
+                    id: "interests",
+                    label: "Interests",
+                    icon: <Star size={16} />,
+                  },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -453,40 +523,58 @@ export default function UserProfile() {
                     <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
                       <MapPin size={18} className="text-blue-500" />
                       <div>
-                        <p className="text-sm text-blue-600 font-medium">Location</p>
-                        <p className="text-gray-900">{profileUser.user_country}</p>
+                        <p className="text-sm text-blue-600 font-medium">
+                          Location
+                        </p>
+                        <p className="text-gray-900">
+                          {profileUser.user_country}
+                        </p>
                       </div>
                     </div>
                   )}
-                  
+
                   {profileUser.date_of_birth && (
                     <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-lg border border-pink-100">
                       <Calendar size={18} className="text-pink-500" />
                       <div>
-                        <p className="text-sm text-pink-600 font-medium">Date of Birth</p>
-                        <p className="text-gray-900">{new Date(profileUser.date_of_birth).toLocaleDateString()}</p>
+                        <p className="text-sm text-pink-600 font-medium">
+                          Date of Birth
+                        </p>
+                        <p className="text-gray-900">
+                          {new Date(
+                            profileUser.date_of_birth
+                          ).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                   )}
                 </div>
-                
+
                 <div className="space-y-4">
                   {profileUser.gender && (
                     <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
                       <Users size={18} className="text-green-500" />
                       <div>
-                        <p className="text-sm text-green-600 font-medium">Gender</p>
-                        <p className="text-gray-900 capitalize">{profileUser.gender}</p>
+                        <p className="text-sm text-green-600 font-medium">
+                          Gender
+                        </p>
+                        <p className="text-gray-900 capitalize">
+                          {profileUser.gender}
+                        </p>
                       </div>
                     </div>
                   )}
-                  
+
                   {profileUser.proficiency_level && (
                     <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
                       <Award size={18} className="text-orange-500" />
                       <div>
-                        <p className="text-sm text-orange-600 font-medium">Proficiency Level</p>
-                        <p className="text-gray-900 capitalize">{profileUser.proficiency_level}</p>
+                        <p className="text-sm text-orange-600 font-medium">
+                          Proficiency Level
+                        </p>
+                        <p className="text-gray-900 capitalize">
+                          {profileUser.proficiency_level}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -501,7 +589,9 @@ export default function UserProfile() {
                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                   <Languages className="h-4 w-4 text-green-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Language Skills</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Language Skills
+                </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {profileUser.native_language && (
@@ -511,8 +601,12 @@ export default function UserProfile() {
                         <Globe size={20} className="text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-blue-600 font-medium">Native Language</p>
-                        <p className="text-blue-800 font-semibold">{profileUser.native_language}</p>
+                        <p className="text-sm text-blue-600 font-medium">
+                          Native Language
+                        </p>
+                        <p className="text-blue-800 font-semibold">
+                          {profileUser.native_language}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 text-sm text-blue-700">
@@ -521,30 +615,38 @@ export default function UserProfile() {
                     </div>
                   </div>
                 )}
-                
-                {profileUser.learning_language && profileUser.learning_language.length > 0 && (
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Target size={20} className="text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-purple-600 font-medium">Learning Languages</p>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {profileUser.learning_language.map((lang, index) => (
-                            <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded border border-purple-200">
-                              {lang}
-                            </span>
-                          ))}
+
+                {profileUser.learning_language &&
+                  profileUser.learning_language.length > 0 && (
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Target size={20} className="text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-purple-600 font-medium">
+                            Learning Languages
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {profileUser.learning_language.map(
+                              (lang, index) => (
+                                <span
+                                  key={index}
+                                  className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded border border-purple-200"
+                                >
+                                  {lang}
+                                </span>
+                              )
+                            )}
+                          </div>
                         </div>
                       </div>
+                      <div className="flex items-center gap-1 text-sm text-purple-700">
+                        <BookOpen size={14} />
+                        <span>Currently Learning</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-purple-700">
-                      <BookOpen size={14} />
-                      <span>Currently Learning</span>
-                    </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           )}
@@ -555,19 +657,23 @@ export default function UserProfile() {
                 <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
                   <Star className="h-4 w-4 text-pink-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Interests & Hobbies</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Interests & Hobbies
+                </h3>
               </div>
               {profileUser.interests && profileUser.interests.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {profileUser.interests.map((interest, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="p-3 bg-purple-50 border border-purple-100 rounded-lg text-center hover:bg-purple-100 transition-colors"
                     >
                       <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                         <Heart size={16} className="text-purple-600" />
                       </div>
-                      <span className="text-purple-700 font-medium text-sm">{interest}</span>
+                      <span className="text-purple-700 font-medium text-sm">
+                        {interest}
+                      </span>
                     </div>
                   ))}
                 </div>
