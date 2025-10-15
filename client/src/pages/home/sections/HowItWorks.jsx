@@ -34,7 +34,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section className="maximum-w mx-auto px-4 py-14">
+    <section id="howItsWork" className="maximum-w mx-auto px-4 py-14">
       <div className="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-white via-slate-50 to-white shadow-2xl ring-1 ring-gray-100">
         <div className="md:flex md:items-start md:justify-between gap-8">
           {/* Left: heading */}

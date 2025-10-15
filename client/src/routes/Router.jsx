@@ -67,19 +67,15 @@ export const router = createBrowserRouter([
         path: "/profile/:userId",
         element: <UserProfile></UserProfile>,
       },
-      {
-        path: "/profile",
-        element: (
-          <PrivateRoute>
-            <ProfilePage />
-          </PrivateRoute>
-        ),
-      },
     ],
   },
   {
     path: "/dashboard",
-    element: <DashboardLayout />, // sidebar layout
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       { index: true, element: <Overview /> },
       { path: "overview", element: <Overview /> },
@@ -129,7 +125,6 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
-
 
   {
     path: "*",
