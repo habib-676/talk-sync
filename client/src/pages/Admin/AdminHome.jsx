@@ -10,66 +10,83 @@ import {
   BarChart, Bar,
 } from "recharts";
 
-// If you already have axiosSecure, swap it in here.
+// ---------------- Config ----------------
 const API_BASE = import.meta?.env?.VITE_API_URL || "http://localhost:5000";
 const api = axios.create({ baseURL: API_BASE, withCredentials: true });
+const fmt = (n) => Number(n ?? 0).toLocaleString();
+const shortDay = (d) => (d?.slice?.(5) ?? d);
 
 // ---------------- Helpers ----------------
-const fmt = (n) => Number(n ?? 0).toLocaleString();
-const shortDay = (d) => (d?.slice?.(5) ?? d); // "YYYY-MM-DD" -> "MM-DD"
-
-// simple skeleton block
-const Skel = ({ h = 64 }) => (
-  <div className="w-full rounded-xl bg-gray-200/70 dark:bg-gray-700/50 animate-pulse" style={{ height: h }} />
-);
-
-// compose timeseries merge helper for multi-series charts
 const mergeSeries = (users = [], messages = [], sessions = []) => {
-  // all days from any series
-  const days = Array.from(
-    new Set([
-      ...users.map((d) => d.day),
-      ...messages.map((d) => d.day),
-      ...sessions.map((d) => d.day),
-    ])
-  ).sort();
+  const days = Array.from(new Set([
+    ...users.map((d) => d.day),
+    ...messages.map((d) => d.day),
+    ...sessions.map((d) => d.day),
+  ])).sort();
   const map = (arr) => Object.fromEntries(arr.map((x) => [x.day, x.count]));
   const u = map(users); const m = map(messages); const s = map(sessions);
   return days.map((day) => ({ day, users: u[day] ?? 0, messages: m[day] ?? 0, sessions: s[day] ?? 0 }));
 };
 
+const Skel = ({ h = 64, rounded = "rounded-2xl" }) => (
+  <div className={`w-full ${rounded} bg-gradient-to-br from-gray-200/70 to-gray-300/60 dark:from-gray-700/40 dark:to-gray-800/40 animate-pulse`} style={{ height: h }} />
+);
+
 // ---------------- Data hooks ----------------
 const useAdminOverview = () =>
-  useQuery({
-    queryKey: ["admin-overview"],
-    queryFn: async () => (await api.get("/admin/overview")).data.data,
-  });
+  useQuery({ queryKey: ["admin-overview"], queryFn: async () => (await api.get("/admin/overview")).data.data });
 
 const useAnalyticsOverview = () =>
-  useQuery({
-    queryKey: ["analytics-overview"],
-    queryFn: async () => (await api.get("/admin/analytics/overview")).data.data,
-  });
+  useQuery({ queryKey: ["analytics-overview"], queryFn: async () => (await api.get("/admin/analytics/overview")).data.data });
 
 const useTimeseries = (metric, days = 30) =>
-  useQuery({
-    queryKey: ["timeseries", metric, days],
-    queryFn: async () => (await api.get("/admin/analytics/timeseries", { params: { metric, days } })).data.data,
-  });
+  useQuery({ queryKey: ["timeseries", metric, days], queryFn: async () => (await api.get("/admin/analytics/timeseries", { params: { metric, days } })).data.data });
 
 const useTop = () =>
-  useQuery({
-    queryKey: ["analytics-top"],
-    queryFn: async () => (await api.get("/admin/analytics/top")).data.data,
-  });
+  useQuery({ queryKey: ["analytics-top"], queryFn: async () => (await api.get("/admin/analytics/top")).data.data });
 
 const useDistribution = (field = "native_language") =>
-  useQuery({
-    queryKey: ["analytics-dist", field],
-    queryFn: async () => (await api.get("/admin/analytics/distribution", { params: { field } })).data.data,
-  });
+  useQuery({ queryKey: ["analytics-dist", field], queryFn: async () => (await api.get("/admin/analytics/distribution", { params: { field } })).data.data });
 
-// ---------------- Component ----------------
+// ---------------- Tiny presentational bits ----------------
+const GlassCard = ({ children, className = "" }) => (
+  <div className={[
+    "relative overflow-hidden",
+    "rounded-3xl border border-white/60 dark:border-white/10",
+    "bg-white/70 dark:bg-white/[0.06] backdrop-blur-xl",
+    "shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]",
+    className,
+  ].join(" ")}>
+    {/* subtle gradient sheen */}
+    <div className="pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(70%_60%_at_20%_0%,black,transparent)] bg-gradient-to-br from-white/60 via-transparent to-transparent" />
+    <div className="relative">{children}</div>
+  </div>
+);
+
+const KpiCard = ({ icon: Icon, title, value, sub, color }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="group"
+  >
+    <GlassCard className="p-5 transition hover:-translate-y-0.5 hover:shadow-xl">
+      <div className="flex items-center gap-4">
+        <div className={`relative grid size-14 place-items-center rounded-2xl text-white shadow-lg shadow-black/10
+          bg-gradient-to-br ${color}`}>
+          <Icon size={22} />
+          <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 group-hover:opacity-100 transition" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs tracking-wide text-gray-600 dark:text-gray-400">{title}</p>
+          <p className="text-[28px] leading-tight font-semibold text-gray-900 dark:text-white truncate">{fmt(value)}</p>
+          {!!sub && <p className="text-xs text-gray-500 dark:text-gray-400">{sub}</p>}
+        </div>
+      </div>
+    </GlassCard>
+  </motion.div>
+);
+
+// ---------------- Main ----------------
 export default function AdminHome() {
   const { data: overview, isLoading: loadingOverview, error: errOverview } = useAdminOverview();
   const { data: aov, isLoading: loadingAov, error: errAov } = useAnalyticsOverview();
@@ -83,240 +100,199 @@ export default function AdminHome() {
 
   const timeseries = useMemo(() => mergeSeries(users30, msgs30, sess30), [users30, msgs30, sess30]);
 
-  // error UI (auth / permission will show here)
   const errorMsg =
     errOverview?.response?.data?.message ||
     errAov?.response?.data?.message ||
     errOverview?.message ||
     errAov?.message;
 
-  // KPI cards
   const cards = [
     {
       title: "Total Users",
       value: overview?.usersCount ?? 0,
       sub: aov?.newUsers30 ? `+${fmt(aov.newUsers30)} last 30d` : "",
       icon: Users,
-      color: "from-blue-500 to-blue-600",
+      color: "from-sky-500 to-indigo-600",
     },
     {
       title: "Messages Sent",
       value: overview?.messagesCount ?? 0,
-      sub: msgs30?.reduce?.((t, x) => t + x.count, 0) ? `${fmt(msgs30.reduce((t, x) => t + x.count, 0))} in 30d` : "",
+      sub: msgs30?.length ? `${fmt(msgs30.reduce((t, x) => t + x.count, 0))} in 30d` : "",
       icon: MessageSquare,
-      color: "from-green-500 to-green-600",
+      color: "from-emerald-500 to-teal-600",
     },
     {
       title: "Active Users (7d)",
       value: overview?.activeUsers ?? 0,
       sub: aov?.activeUsers7 ? `Active: ${fmt(aov.activeUsers7)}` : "",
       icon: Activity,
-      color: "from-purple-500 to-indigo-600",
+      color: "from-violet-500 to-fuchsia-600",
     },
     {
       title: "Reported Issues",
       value: overview?.reportedIssues ?? 0,
-      sub: "Placeholder",
+      sub: "Internal triage",
       icon: AlertTriangle,
-      color: "from-red-500 to-rose-600",
+      color: "from-rose-500 to-orange-500",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 p-6">
+    <div className="relative min-h-screen p-6 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] dark:from-[#0b1020] dark:via-[#0d1224] dark:to-[#0a101e]">
+      {/* Decorative blobs */}
+      <div className="pointer-events-none absolute -top-24 -left-24 size-[340px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-sky-400/40 to-indigo-500/40" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 size-[380px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-teal-400/40 to-emerald-500/40" />
+
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          TalkSync Admin Dashboard
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Live overview of users, messages, sessions & engagement trends.
-        </p>
+      <motion.div initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+            TalkSync Admin
+          </h1>
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+            Elegant insights across your users, messages & sessions.
+          </p>
+        </div>
       </motion.div>
 
       {/* Error */}
       {errorMsg && (
-        <div className="mb-6 px-4 py-3 rounded-xl bg-red-50 text-red-700 border border-red-200">
-          {errorMsg}
-        </div>
+        <GlassCard className="mb-6 p-4 border-red-200/60 dark:border-red-400/20">
+          <div className="text-red-700 dark:text-red-300 text-sm">{errorMsg}</div>
+        </GlassCard>
       )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {(loadingOverview || loadingAov)
-          ? Array.from({ length: 4 }).map((_, i) => <Skel key={i} h={110} />)
-          : cards.map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                className="p-5 rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} grid place-items-center text-white shadow-md`}>
-                    <item.icon size={22} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-gray-500 dark:text-gray-400 text-xs">{item.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight truncate">
-                      {fmt(item.value)}
-                    </p>
-                    {!!item.sub && <p className="text-xs text-gray-500 dark:text-gray-400">{item.sub}</p>}
-                  </div>
-                </div>
-              </motion.div>
+          ? Array.from({ length: 4 }).map((_, i) => <Skel key={i} h={120} />)
+          : cards.map((c) => (
+              <KpiCard key={c.title} icon={c.icon} title={c.title} value={c.value} sub={c.sub} color={c.color} />
             ))
         }
       </div>
 
       {/* Charts */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 30-day trend (Users/Messages/Sessions) */}
-        <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-md">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              30-Day Activity Trend
-            </h2>
-            <span className="text-xs text-gray-500">Users / Messages / Sessions</span>
+      <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Trend */}
+        <GlassCard className="xl:col-span-2 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">30-Day Activity Trend</h2>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Users · Messages · Sessions</span>
           </div>
           {(lu || lm || ls) ? (
-            <Skel h={280} />
+            <Skel h={320} />
           ) : (
-            <div className="h-72">
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={timeseries}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" tickFormatter={shortDay} />
+                  <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.25} />
+                  <XAxis dataKey="day" tickFormatter={shortDay} tickMargin={10} />
                   <YAxis allowDecimals={false} />
                   <Tooltip formatter={(v) => fmt(v)} labelFormatter={(l) => `Day: ${l}`} />
                   <Legend />
-                  <Line type="monotone" dataKey="users" stroke="#3b82f6" name="Users" dot={false} />
-                  <Line type="monotone" dataKey="messages" stroke="#10b981" name="Messages" dot={false} />
-                  <Line type="monotone" dataKey="sessions" stroke="#8b5cf6" name="Sessions" dot={false} />
+                  <Line type="monotone" dataKey="users" stroke="#2563eb" strokeWidth={2} name="Users" dot={false} />
+                  <Line type="monotone" dataKey="messages" stroke="#059669" strokeWidth={2} name="Messages" dot={false} />
+                  <Line type="monotone" dataKey="sessions" stroke="#7c3aed" strokeWidth={2} name="Sessions" dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           )}
-        </div>
+        </GlassCard>
 
-        {/* Distribution (Top Languages) */}
-        <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
-            Top Native Languages
-          </h2>
+        {/* Distribution */}
+        <GlassCard className="p-5">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Top Native Languages</h2>
           {ld ? (
-            <Skel h={280} />
+            <Skel h={320} />
           ) : (
-            <div className="h-72">
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={distLang?.slice?.(0, 10) || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.25} />
                   <XAxis dataKey="label" interval={0} angle={-30} textAnchor="end" height={60} />
                   <YAxis allowDecimals={false} />
                   <Tooltip formatter={(v) => fmt(v)} />
-                  <Bar dataKey="count" fill="#64748b" name="Learners" />
+                  <Bar dataKey="count" fill="#334155" name="Learners" radius={[10, 10, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
-        </div>
+        </GlassCard>
       </div>
 
       {/* Leaderboards */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Top Senders */}
-        <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Top Message Senders</h2>
-          {lt ? (
-            <Skel h={210} />
-          ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-              {(top?.topSenders || []).slice(0, 6).map((row, i) => (
-                <li key={i} className="py-3 flex items-center justify-between">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
-                      {row?.user?.name || "Unknown User"}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {row?.user?.email || "—"}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {fmt(row.messages)}
-                  </span>
-                </li>
-              ))}
-              {!top?.topSenders?.length && <p className="text-sm text-gray-500">No data</p>}
-            </ul>
-          )}
-        </div>
-
-        {/* Most Followed */}
-        <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Most Followed Users</h2>
-          {lt ? (
-            <Skel h={210} />
-          ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-              {(top?.mostFollowed || []).slice(0, 6).map((u, i) => (
-                <li key={i} className="py-3 flex items-center justify-between">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{u.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.email}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {fmt(u.followersCount)}
-                  </span>
-                </li>
-              ))}
-              {!top?.mostFollowed?.length && <p className="text-sm text-gray-500">No data</p>}
-            </ul>
-          )}
-        </div>
-
-        {/* Most Friends */}
-        <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Most Friends</h2>
-          {lt ? (
-            <Skel h={210} />
-          ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-              {(top?.mostFriends || []).slice(0, 6).map((u, i) => (
-                <li key={i} className="py-3 flex items-center justify-between">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{u.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.email}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {fmt(u.friendsCount)}
-                  </span>
-                </li>
-              ))}
-              {!top?.mostFriends?.length && <p className="text-sm text-gray-500">No data</p>}
-            </ul>
-          )}
-        </div>
+      <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <Leaderboard
+          title="Top Message Senders"
+          loading={lt}
+          rows={(top?.topSenders || []).slice(0, 6).map((r) => ({
+            name: r?.user?.name || "Unknown User",
+            email: r?.user?.email || "—",
+            metric: r.messages,
+          }))}
+        />
+        <Leaderboard
+          title="Most Followed Users"
+          loading={lt}
+          rows={(top?.mostFollowed || []).slice(0, 6).map((u) => ({
+            name: u.name, email: u.email, metric: u.followersCount,
+          }))}
+        />
+        <Leaderboard
+          title="Most Friends"
+          loading={lt}
+          rows={(top?.mostFriends || []).slice(0, 6).map((u) => ({
+            name: u.name, email: u.email, metric: u.friendsCount,
+          }))}
+        />
       </div>
 
       {/* System Health */}
-      <div className="mt-10 bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-md">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">System Health</h2>
+      <GlassCard className="mt-10 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">System Health</h2>
         {(loadingOverview && loadingAov) ? (
           <Skel h={80} />
         ) : (
-          <ul className="text-gray-700 dark:text-gray-300 space-y-2 text-sm">
+          <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
             <li>✅ MongoDB Connected</li>
             <li>✅ Socket.IO Active</li>
             <li>✅ JWT Auth Enabled</li>
-            <li>🕒 Last Generated: <span className="font-medium">{aov?.generatedAt ? new Date(aov.generatedAt).toLocaleString() : "—"}</span></li>
+            <li>
+              🕒 Last Generated:{" "}
+              <span className="font-medium">
+                {aov?.generatedAt ? new Date(aov.generatedAt).toLocaleString() : "—"}
+              </span>
+            </li>
           </ul>
         )}
-      </div>
+      </GlassCard>
     </div>
+  );
+}
+
+// ---------------- Subcomponents ----------------
+function Leaderboard({ title, loading, rows }) {
+  return (
+    <GlassCard className="p-5">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">{title}</h2>
+      {loading ? (
+        <Skel h={220} />
+      ) : rows?.length ? (
+        <ul className="divide-y divide-gray-200/60 dark:divide-white/10">
+          {rows.map((r, i) => (
+            <li key={i} className="py-3 flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{r.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{r.email}</p>
+              </div>
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{fmt(r.metric)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-gray-500">No data</p>
+      )}
+    </GlassCard>
   );
 }
