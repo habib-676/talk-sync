@@ -88,7 +88,7 @@ export default function BadgesPreview({
                   {/* Responsive flex */}
                   <div
                     style={{ width: ringSize }}
-                    className="relative flex-shrink-0 mb-4 sm:mb-0" // Add margin for small screens
+                    className="relative flex-shrink-0 mb-4 sm:mb-0"
                   >
                     <svg
                       width={ringSize}
@@ -100,7 +100,7 @@ export default function BadgesPreview({
                         cx={ringSize / 2}
                         cy={ringSize / 2}
                         r={radius}
-                        stroke="#E5E7EB" // Lighter gray for background circle
+                        stroke="#E5E7EB"
                         strokeWidth="14"
                         fill="transparent"
                       />
@@ -140,7 +140,7 @@ export default function BadgesPreview({
 
                     <div className="absolute inset-0 grid place-items-center">
                       <div
-                        className={`w-20 h-20 rounded-full grid place-items-center text-4xl shadow-md`} // Added shadow for icon background
+                        className={`w-20 h-20 rounded-full grid place-items-center text-4xl shadow-md`}
                         style={{ background: "white" }}
                       >
                         <span>{b.icon}</span>
@@ -195,7 +195,7 @@ export default function BadgesPreview({
                                 } more points for ${b.title}`
                               )
                             }
-                            className="px-3 py-1 text-sm rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-sm hover:shadow-md transition-all" // Primary gradient applied
+                            className="px-3 py-1 text-sm rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-sm hover:shadow-md transition-all"
                           >
                             How to get it
                           </button>
@@ -244,7 +244,6 @@ export default function BadgesPreview({
         {/* CTA + tips */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           {" "}
-          {/* Primary gradient applied + responsive text alignment */}
           <div>
             <h3 className="text-xl sm:text-2xl font-bold">
               Ready to unlock your next badge?
