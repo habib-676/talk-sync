@@ -63,6 +63,7 @@ async function run() {
     const database = client.db(DB_NAME);
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
+    
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -888,6 +889,169 @@ async function run() {
         res.status(500).json({ success: false, message: err.message });
       }
     });
+
+
+    // admin 
+
+    // Admin overview (requires admin)
+app.get("/admin/overview", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const usersCount = await usersCollections.countDocuments();
+    const messagesCount = await messagesCollections.countDocuments();
+    const sessionsCount = await database.collection("sessions").countDocuments();
+
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const activeUsers = await usersCollections.countDocuments({
+      last_loggedIn: { $gte: weekAgo.toISOString() },
+    });
+
+    const reportedIssues = 5; // placeholder
+
+    res.json({
+      success: true,
+      data: { usersCount, messagesCount, sessionsCount, activeUsers, reportedIssues },
+    });
+  } catch (err) {
+    console.error("GET /admin/overview error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+// ===== Admin: Manage Users =====
+await usersCollections.updateMany(
+  { account_status: { $exists: false } },
+  { $set: { account_status: "active" } }
+);
+
+// GET /admin/users?search=&page=1&limit=10&role=admin|learner|all&status=active|suspended|all
+app.get("/admin/users", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const {
+      search = "",
+      page = "1",
+      limit = "10",
+      role = "all",
+      status = "all",
+    } = req.query;
+
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const pageSize = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50);
+
+    const q = {};
+
+    // text-like search on name or email
+    if (search) {
+      const s = String(search).trim();
+      q.$or = [
+        { name: { $regex: s, $options: "i" } },
+        { email: { $regex: s, $options: "i" } },
+      ];
+    }
+
+    if (role !== "all") q.role = role;
+    if (status !== "all") q.account_status = status; // we will set this field below
+
+    const total = await usersCollections.countDocuments(q);
+    const users = await usersCollections
+      .find(q, { projection: { password: 0 } })
+      .sort({ createdAt: -1 })
+      .skip((pageNum - 1) * pageSize)
+      .limit(pageSize)
+      .toArray();
+
+    res.json({
+      success: true,
+      data: users,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: pageSize,
+        pages: Math.ceil(total / pageSize),
+      },
+    });
+  } catch (err) {
+    console.error("GET /admin/users error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// PATCH /admin/users/:id/role  { role: "admin" | "learner" }
+app.patch("/admin/users/:id/role", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!["admin", "learner"].includes(role)) {
+      return res.status(400).json({ success: false, message: "Invalid role" });
+    }
+
+    const result = await usersCollections.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { role, updatedAt: new Date().toISOString() } }
+    );
+
+    if (!result.matchedCount)
+      return res.status(404).json({ success: false, message: "User not found" });
+
+    res.json({ success: true, message: "Role updated" });
+  } catch (err) {
+    console.error("PATCH /admin/users/:id/role error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// PATCH /admin/users/:id/status  { action: "suspend" | "activate" }
+app.patch("/admin/users/:id/status", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    if (!["suspend", "activate"].includes(action)) {
+      return res.status(400).json({ success: false, message: "Invalid action" });
+    }
+
+    const account_status = action === "suspend" ? "suspended" : "active";
+
+    const result = await usersCollections.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          account_status,
+          suspendedAt: account_status === "suspended" ? new Date().toISOString() : null,
+          updatedAt: new Date().toISOString(),
+        },
+      }
+    );
+
+    if (!result.matchedCount)
+      return res.status(404).json({ success: false, message: "User not found" });
+
+    res.json({ success: true, message: `User ${account_status}` });
+  } catch (err) {
+    console.error("PATCH /admin/users/:id/status error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// DELETE /admin/users/:id
+app.delete("/admin/users/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await usersCollections.deleteOne({ _id: new ObjectId(id) });
+    if (!result.deletedCount)
+      return res.status(404).json({ success: false, message: "User not found" });
+
+    // Optionally: also cleanup sessions/messages from/to this user
+    // await messagesCollections.deleteMany({ $or: [{ senderId: id }, { receiverId: id }] });
+    // await sessionsCollections.deleteMany({ $or: [{ fromUserId: id }, { toUserId: id }] });
+
+    res.json({ success: true, message: "User deleted" });
+  } catch (err) {
+    console.error("DELETE /admin/users/:id error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 
     /**
      * POST /sessions/:id/accept
