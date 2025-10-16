@@ -96,15 +96,6 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/profile",
-    element: (
-      <PrivateRoute>
-        <ProfilePage />
-      </PrivateRoute>
-    ),
-  },
-
-  {
     path: "/onboarding",
     element: (
       <PrivateRoute>
