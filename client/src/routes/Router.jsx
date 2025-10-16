@@ -21,6 +21,10 @@ import Overview from "../pages/dashboard/Overview";
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
+import AdminHome from "../pages/Admin/AdminHome";
+import AdminManageUsers from "../pages/Admin/AdminManageUsers";
+
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -92,8 +96,16 @@ export const router = createBrowserRouter([
       { path: "sessions", element: <SessionsPage /> },
       { path: "badges", element: <BadgesPage /> },
       { path: "inbox", element: <Inbox /> },
+      {
+        path:"admin", element:<AdminHome></AdminHome>
+      },
+      {
+        path: "admin/users",
+        element: <AdminManageUsers></AdminManageUsers>
+      }
     ],
   },
+  
   {
     path: "/auth",
     element: <AuthLayouts></AuthLayouts>, //added by Jannatul
