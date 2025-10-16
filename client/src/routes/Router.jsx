@@ -23,6 +23,8 @@ import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
 import AdminHome from "../pages/Admin/AdminHome";
 import AdminManageUsers from "../pages/Admin/AdminManageUsers";
+import AdminAnalytics from "../pages/Admin/AdminAnalytics";
+import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
 
 
 export const router = createBrowserRouter([
@@ -102,6 +104,14 @@ export const router = createBrowserRouter([
       {
         path: "admin/users",
         element: <AdminManageUsers></AdminManageUsers>
+      },
+      {
+        path:'admin/reports',
+        element: <AdminAnalytics></AdminAnalytics>
+      },
+      {
+        path: 'admin/announcements',
+        element: <AdminAnnouncements></AdminAnnouncements>
       }
     ],
   },
