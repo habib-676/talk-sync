@@ -57,7 +57,7 @@ export function LanguageFlags() {
       {flags.map((flag, i) => (
         <motion.div
           key={flag.name}
-          className="absolute z-30" // Added z-index
+          className="absolute z-30"
           style={flag.position}
           initial={{ opacity: 0, scale: 0, rotate: -180 }}
           animate={{ opacity: 1, scale: 1, rotate: 0 }}

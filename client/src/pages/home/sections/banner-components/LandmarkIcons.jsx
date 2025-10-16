@@ -70,7 +70,7 @@ export function LandmarkIcons() {
       {landmarks.map((landmark, i) => (
         <motion.div
           key={landmark.name}
-          className="absolute z-20" // Added z-index
+          className="absolute z-20"
           style={landmark.position}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}

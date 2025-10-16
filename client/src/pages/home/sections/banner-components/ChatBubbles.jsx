@@ -33,7 +33,7 @@ export function ChatBubbles() {
       {bubbles.map((bubble, i) => (
         <motion.div
           key={i}
-          className="absolute z-30" // Added z-index to ensure bubbles are on top
+          className="absolute z-30"
           style={bubble.position}
           initial={{ opacity: 0, scale: 0, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

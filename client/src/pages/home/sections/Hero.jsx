@@ -8,6 +8,8 @@ import { FloatingElements } from "./banner-components/FloatingElements";
 import { GlobeWithConnections } from "./banner-components/GlobeWithConnections";
 import { LandmarkIcons } from "./banner-components/LandmarkIcons";
 import { LanguageFlags } from "./banner-components/LanguageFlags";
+import { Link } from "react-router";
+import { toast } from "react-hot-toast";
 
 export function HeroBanner() {
   return (
@@ -92,13 +94,19 @@ export function HeroBanner() {
               transition={{ delay: 0.6 }}
               className="flex flex-wrap gap-4 pt-6"
             >
+              <Link to={"/auth/register"}>
+                <Button
+                  size="lg"
+                  className="bg-white text-indigo-600 hover:bg-gray-100 shadow-lg"
+                >
+                  Get Started Free
+                </Button>
+              </Link>
               <Button
-                size="lg"
-                className="bg-white text-indigo-600 hover:bg-gray-100 shadow-lg"
-              >
-                Get Started Free
-              </Button>
-              <Button
+                onClick={() => {
+                  // alert("Demo is not available yet.");
+                  toast.error("Demo is not available yet.");
+                }}
                 size="lg"
                 variant="outline"
                 className="bg-transparent text-white border-white/30 hover:bg-white/10 backdrop-blur-md"

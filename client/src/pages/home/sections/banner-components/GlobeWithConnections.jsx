@@ -16,7 +16,6 @@ export function GlobeWithConnections() {
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
       {" "}
-      {/* Added z-20 */}
       {/* Central globe container */}
       <motion.div
         className="relative w-64 h-64"

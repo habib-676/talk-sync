@@ -81,7 +81,7 @@ const HowItWorks = () => {
             partner connections. Four simple steps to transform your language
             learning experience.
           </p>
-          <div className="flex space-x-4 mb-12">
+          <div className="flex flex-col md:flex-row gap-5 mb-12">
             <Link to={"/auth/register"}>
               <button className="flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition duration-300 shadow-md hover:shadow-lg">
                 Get started free <ArrowUpRight size={18} className="ml-2" />
