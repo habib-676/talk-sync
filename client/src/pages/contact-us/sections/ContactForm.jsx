@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Send, Info } from "lucide-react";
 
-export function ContactForm() {
+export default function ContactForm() {
   const [category, setCategory] = useState("");
   const [formData, setFormData] = useState({
     name: "",

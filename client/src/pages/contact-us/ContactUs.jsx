@@ -1,7 +1,8 @@
-import { MessageCircle } from "lucide-react";
-import ContactForm from "./sections/ContactForm";
+import { Contact, MessageCircle } from "lucide-react";
 import { FAQSection } from "./sections/FAQSection";
-import { ContactMethods } from "./sections/ContactMethods";
+import ContactForm from "./sections/ContactForm";
+import ContactMethods from "./sections/ContactMethods";
+
 
 const ContactUs = () => {
   return (

@@ -21,7 +21,7 @@ const socialLinks = [
   },
 ];
 
-export function ContactMethods() {
+export default function ContactMethods() {
   return (
     <div className="bg-white border-t border-gray-200">
       <div className="max-w-6xl mx-auto px-4 py-16">
