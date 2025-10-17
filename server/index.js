@@ -64,8 +64,6 @@ async function run() {
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
     const announcementsCollection = database.collection("announcements");
-    
-
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -617,6 +615,7 @@ async function run() {
           receiverId: messageData?.receiverId,
           text: messageData?.text,
           image: imgUrl,
+          seen: false,
           createdAt: new Date().toISOString(),
         };
 
@@ -661,6 +660,52 @@ async function run() {
         res
           .status(500)
           .json({ success: false, message: "Internal server error" });
+      }
+    });
+
+    // Unread counts grouped by sender for a given user
+    app.get("/messages/unread-counts", async (req, res) => {
+      try {
+        const userId = req.query.userId;
+        if (!userId)
+          return res
+            .status(400)
+            .json({ success: false, message: "userId is required" });
+
+        const agg = await messagesCollections
+          .aggregate([
+            { $match: { receiverId: userId, seen: false } },
+            { $group: { _id: "$senderId", count: { $sum: 1 } } },
+          ])
+          .toArray();
+        const map = {};
+        for (const row of agg) map[row._id] = row.count;
+        res.json({ success: true, counts: map });
+      } catch (err) {
+        console.error("GET /messages/unread-counts error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // Mark messages from otherUserId -> userId as seen
+    app.post("/messages/mark-seen", async (req, res) => {
+      try {
+        const { userId, otherUserId } = req.body || {};
+        if (!userId || !otherUserId) {
+          return res.status(400).json({
+            success: false,
+            message: "userId and otherUserId required",
+          });
+        }
+
+        const result = await messagesCollections.updateMany(
+          { receiverId: userId, senderId: otherUserId, seen: false },
+          { $set: { seen: true } }
+        );
+        res.json({ success: true, modified: result.modifiedCount });
+      } catch (err) {
+        console.error("POST /messages/mark-seen error:", err);
+        res.status(500).json({ success: false, message: err.message });
       }
     });
     app.get("/dashboard/overview", async (req, res) => {
@@ -798,6 +843,39 @@ async function run() {
     });
 
     /**
+     * GET /users/followers/:email
+     * Returns full user docs for people that follow the given user
+     */
+    app.get("/users/followers/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        if (!email)
+          return res
+            .status(400)
+            .json({ success: false, message: "Email required" });
+
+        const me = await usersCollections.findOne({ email });
+        if (!me)
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
+
+        const followers = Array.isArray(me.followers) ? me.followers : [];
+        if (!followers.length) return res.json({ success: true, users: [] });
+
+        const followerDocs = await usersCollections
+          .find({ _id: { $in: followers.map((id) => new ObjectId(id)) } })
+          .project({ password: 0 })
+          .toArray();
+
+        res.json({ success: true, users: followerDocs });
+      } catch (err) {
+        console.error("GET /users/followers error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    /**
      * POST /sessions/request
      * Create a session request (status: pending)
      * Body: { fromEmail, toEmail, scheduledAt(optional ISO string), durationMinutes (optional) , message (optional) }
@@ -892,518 +970,702 @@ async function run() {
       }
     });
 
-
-    // admin 
+    // admin
 
     // Admin overview (requires admin)
-app.get("/admin/overview", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const usersCount = await usersCollections.countDocuments();
-    const messagesCount = await messagesCollections.countDocuments();
-    const sessionsCount = await database.collection("sessions").countDocuments();
+    app.get("/admin/overview", verifyToken, verifyAdmin, async (req, res) => {
+      try {
+        const usersCount = await usersCollections.countDocuments();
+        const messagesCount = await messagesCollections.countDocuments();
+        const sessionsCount = await database
+          .collection("sessions")
+          .countDocuments();
 
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const activeUsers = await usersCollections.countDocuments({
-      last_loggedIn: { $gte: weekAgo.toISOString() },
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const activeUsers = await usersCollections.countDocuments({
+          last_loggedIn: { $gte: weekAgo.toISOString() },
+        });
+
+        const reportedIssues = 5; // placeholder
+
+        res.json({
+          success: true,
+          data: {
+            usersCount,
+            messagesCount,
+            sessionsCount,
+            activeUsers,
+            reportedIssues,
+          },
+        });
+      } catch (err) {
+        console.error("GET /admin/overview error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
     });
-
-    const reportedIssues = 5; // placeholder
-
-    res.json({
-      success: true,
-      data: { usersCount, messagesCount, sessionsCount, activeUsers, reportedIssues },
-    });
-  } catch (err) {
-    console.error("GET /admin/overview error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-// ===== Admin: Manage Users =====
-await usersCollections.updateMany(
-  { account_status: { $exists: false } },
-  { $set: { account_status: "active" } }
-);
-
-// GET /admin/users?search=&page=1&limit=10&role=admin|learner|all&status=active|suspended|all
-app.get("/admin/users", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const {
-      search = "",
-      page = "1",
-      limit = "10",
-      role = "all",
-      status = "all",
-    } = req.query;
-
-    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
-    const pageSize = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50);
-
-    const q = {};
-
-    // text-like search on name or email
-    if (search) {
-      const s = String(search).trim();
-      q.$or = [
-        { name: { $regex: s, $options: "i" } },
-        { email: { $regex: s, $options: "i" } },
-      ];
-    }
-
-    if (role !== "all") q.role = role;
-    if (status !== "all") q.account_status = status; // we will set this field below
-
-    const total = await usersCollections.countDocuments(q);
-    const users = await usersCollections
-      .find(q, { projection: { password: 0 } })
-      .sort({ createdAt: -1 })
-      .skip((pageNum - 1) * pageSize)
-      .limit(pageSize)
-      .toArray();
-
-    res.json({
-      success: true,
-      data: users,
-      pagination: {
-        total,
-        page: pageNum,
-        limit: pageSize,
-        pages: Math.ceil(total / pageSize),
-      },
-    });
-  } catch (err) {
-    console.error("GET /admin/users error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// PATCH /admin/users/:id/role  { role: "admin" | "learner" }
-app.patch("/admin/users/:id/role", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { role } = req.body;
-
-    if (!["admin", "learner"].includes(role)) {
-      return res.status(400).json({ success: false, message: "Invalid role" });
-    }
-
-    const result = await usersCollections.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { role, updatedAt: new Date().toISOString() } }
+    // ===== Admin: Manage Users =====
+    await usersCollections.updateMany(
+      { account_status: { $exists: false } },
+      { $set: { account_status: "active" } }
     );
 
-    if (!result.matchedCount)
-      return res.status(404).json({ success: false, message: "User not found" });
+    // GET /admin/users?search=&page=1&limit=10&role=admin|learner|all&status=active|suspended|all
+    app.get("/admin/users", verifyToken, verifyAdmin, async (req, res) => {
+      try {
+        const {
+          search = "",
+          page = "1",
+          limit = "10",
+          role = "all",
+          status = "all",
+        } = req.query;
 
-    res.json({ success: true, message: "Role updated" });
-  } catch (err) {
-    console.error("PATCH /admin/users/:id/role error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+        const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+        const pageSize = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50);
 
-// PATCH /admin/users/:id/status  { action: "suspend" | "activate" }
-app.patch("/admin/users/:id/status", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { action } = req.body;
+        const q = {};
 
-    if (!["suspend", "activate"].includes(action)) {
-      return res.status(400).json({ success: false, message: "Invalid action" });
-    }
+        // text-like search on name or email
+        if (search) {
+          const s = String(search).trim();
+          q.$or = [
+            { name: { $regex: s, $options: "i" } },
+            { email: { $regex: s, $options: "i" } },
+          ];
+        }
 
-    const account_status = action === "suspend" ? "suspended" : "active";
+        if (role !== "all") q.role = role;
+        if (status !== "all") q.account_status = status; // we will set this field below
 
-    const result = await usersCollections.updateOne(
-      { _id: new ObjectId(id) },
-      {
-        $set: {
-          account_status,
-          suspendedAt: account_status === "suspended" ? new Date().toISOString() : null,
-          updatedAt: new Date().toISOString(),
-        },
+        const total = await usersCollections.countDocuments(q);
+        const users = await usersCollections
+          .find(q, { projection: { password: 0 } })
+          .sort({ createdAt: -1 })
+          .skip((pageNum - 1) * pageSize)
+          .limit(pageSize)
+          .toArray();
+
+        res.json({
+          success: true,
+          data: users,
+          pagination: {
+            total,
+            page: pageNum,
+            limit: pageSize,
+            pages: Math.ceil(total / pageSize),
+          },
+        });
+      } catch (err) {
+        console.error("GET /admin/users error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // PATCH /admin/users/:id/role  { role: "admin" | "learner" }
+    app.patch(
+      "/admin/users/:id/role",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
+          const { role } = req.body;
+
+          if (!["admin", "learner"].includes(role)) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Invalid role" });
+          }
+
+          const result = await usersCollections.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { role, updatedAt: new Date().toISOString() } }
+          );
+
+          if (!result.matchedCount)
+            return res
+              .status(404)
+              .json({ success: false, message: "User not found" });
+
+          res.json({ success: true, message: "Role updated" });
+        } catch (err) {
+          console.error("PATCH /admin/users/:id/role error:", err);
+          res.status(500).json({ success: false, message: err.message });
+        }
       }
     );
 
-    if (!result.matchedCount)
-      return res.status(404).json({ success: false, message: "User not found" });
+    // PATCH /admin/users/:id/status  { action: "suspend" | "activate" }
+    app.patch(
+      "/admin/users/:id/status",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
+          const { action } = req.body;
 
-    res.json({ success: true, message: `User ${account_status}` });
-  } catch (err) {
-    console.error("PATCH /admin/users/:id/status error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+          if (!["suspend", "activate"].includes(action)) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Invalid action" });
+          }
 
-// DELETE /admin/users/:id
-app.delete("/admin/users/:id", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
+          const account_status = action === "suspend" ? "suspended" : "active";
 
-    const result = await usersCollections.deleteOne({ _id: new ObjectId(id) });
-    if (!result.deletedCount)
-      return res.status(404).json({ success: false, message: "User not found" });
+          const result = await usersCollections.updateOne(
+            { _id: new ObjectId(id) },
+            {
+              $set: {
+                account_status,
+                suspendedAt:
+                  account_status === "suspended"
+                    ? new Date().toISOString()
+                    : null,
+                updatedAt: new Date().toISOString(),
+              },
+            }
+          );
 
-    // Optionally: also cleanup sessions/messages from/to this user
-    // await messagesCollections.deleteMany({ $or: [{ senderId: id }, { receiverId: id }] });
-    // await sessionsCollections.deleteMany({ $or: [{ fromUserId: id }, { toUserId: id }] });
+          if (!result.matchedCount)
+            return res
+              .status(404)
+              .json({ success: false, message: "User not found" });
 
-    res.json({ success: true, message: "User deleted" });
-  } catch (err) {
-    console.error("DELETE /admin/users/:id error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+          res.json({ success: true, message: `User ${account_status}` });
+        } catch (err) {
+          console.error("PATCH /admin/users/:id/status error:", err);
+          res.status(500).json({ success: false, message: err.message });
+        }
+      }
+    );
 
-// report & analytics
+    // DELETE /admin/users/:id
+    app.delete(
+      "/admin/users/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
 
-// ----- helpers (top of run or near routes)
-const toISODate = (d) => new Date(new Date(d).toISOString().slice(0,10)); // strip time (UTC day)
-const daysAgo = (n) => {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - n);
-  return toISODate(d);
-};
+          const result = await usersCollections.deleteOne({
+            _id: new ObjectId(id),
+          });
+          if (!result.deletedCount)
+            return res
+              .status(404)
+              .json({ success: false, message: "User not found" });
 
-// generic day bucket pipeline
-const dayBucketPipeline = (dateField, startDate, endDate) => ([
-  { $match: { [dateField]: { $gte: startDate.toISOString(), $lte: endDate.toISOString() } } },
-  { $addFields: { day: { $substr: [ `$${dateField}`, 0, 10 ] } } }, // YYYY-MM-DD from ISO string
-  { $group: { _id: "$day", count: { $sum: 1 } } },
-  { $sort: { _id: 1 } }
-]);
+          // Optionally: also cleanup sessions/messages from/to this user
+          // await messagesCollections.deleteMany({ $or: [{ senderId: id }, { receiverId: id }] });
+          // await sessionsCollections.deleteMany({ $or: [{ fromUserId: id }, { toUserId: id }] });
 
-// GET /admin/analytics/overview
-app.get("/admin/analytics/overview", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const now = new Date();
-    const last7 = daysAgo(7);
-    const last30 = daysAgo(30);
+          res.json({ success: true, message: "User deleted" });
+        } catch (err) {
+          console.error("DELETE /admin/users/:id error:", err);
+          res.status(500).json({ success: false, message: err.message });
+        }
+      }
+    );
 
-    const [usersCount, messagesCount, sessionsCount, newUsers7, newUsers30, activeUsers7, activeUsers30] =
-      await Promise.all([
-        usersCollections.countDocuments(),
-        messagesCollections.countDocuments(),
-        sessionsCollections.countDocuments(),
-        usersCollections.countDocuments({ createdAt: { $gte: last7.toISOString() } }),
-        usersCollections.countDocuments({ createdAt: { $gte: last30.toISOString() } }),
-        usersCollections.countDocuments({ last_loggedIn: { $gte: last7.toISOString() } }),
-        usersCollections.countDocuments({ last_loggedIn: { $gte: last30.toISOString() } }),
-      ]);
+    // report & analytics
 
-    res.json({
-      success: true,
-      data: {
-        usersCount,
-        messagesCount,
-        sessionsCount,
-        newUsers7,
-        newUsers30,
-        activeUsers7,
-        activeUsers30,
-        generatedAt: now.toISOString(),
-      },
-    });
-  } catch (err) {
-    console.error("GET /admin/analytics/overview error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-// GET /admin/analytics/timeseries?metric=users|messages|sessions&days=7|30|90
-app.get("/admin/analytics/timeseries", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const metric = (req.query.metric || "users").toString();
-    const days = Math.min(Math.max(parseInt(req.query.days || "30", 10), 1), 365);
-
-    const end = toISODate(new Date());
-    const start = daysAgo(days - 1); // inclusive
-    let pipeline;
-    if (metric === "users") {
-      pipeline = dayBucketPipeline("createdAt", start, end);
-    } else if (metric === "messages") {
-      pipeline = dayBucketPipeline("createdAt", start, end);
-    } else if (metric === "sessions") {
-      pipeline = dayBucketPipeline("createdAt", start, end);
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid metric" });
-    }
-
-    const coll =
-      metric === "users" ? usersCollections :
-      metric === "messages" ? messagesCollections :
-      sessionsCollections;
-
-    const raw = await coll.aggregate(pipeline).toArray();
-
-    // fill gaps with zeroes
-    const map = new Map(raw.map(r => [r._id, r.count]));
-    const out = [];
-    const cursor = new Date(start);
-    while (cursor <= end) {
-      const key = cursor.toISOString().slice(0,10);
-      out.push({ day: key, count: map.get(key) || 0 });
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
-    }
-
-    res.json({ success: true, data: out, start: start.toISOString(), end: end.toISOString() });
-  } catch (err) {
-    console.error("GET /admin/analytics/timeseries error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-// GET /admin/analytics/top
-// top senders, most-followed, most-friends
-app.get("/admin/analytics/top", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    // Top message senders (by senderId)
-    const topSenders = await messagesCollections.aggregate([
-      { $group: { _id: "$senderId", messages: { $sum: 1 } } },
-      { $sort: { messages: -1 } },
-      { $limit: 10 },
-      { $lookup: {
-          from: "users",
-          localField: "_id",
-          foreignField: "_id",
-          as: "userByObject"
-      }},
-      // if senderId stored as string ObjectId, convert:
-      // You can also try lookup by string compare:
-      { $lookup: {
-          from: "users",
-          let: { sid: "$_id" },
-          pipeline: [
-            { $match: { $expr: { $eq: [{ $toString: "$_id" }, "$$sid"] } } },
-            { $project: { name: 1, email: 1, image: 1 } }
-          ],
-          as: "user"
-      }},
-      { $addFields: { user: { $ifNull: [ { $arrayElemAt: ["$user", 0] }, null ] } } },
-      { $project: { _id: 0, senderId: "$_id", messages: 1, user: 1 } }
-    ]).toArray();
-
-    // Most-followed users
-    const mostFollowed = await usersCollections.aggregate([
-      { $addFields: { followersCount: { $size: { $ifNull: ["$followers", []] } } } },
-      { $sort: { followersCount: -1 } },
-      { $limit: 10 },
-      { $project: { name: 1, email: 1, image: 1, followersCount: 1 } }
-    ]).toArray();
-
-    // Most friends
-    const mostFriends = await usersCollections.aggregate([
-      { $addFields: { friendsCount: { $size: { $ifNull: ["$friends", []] } } } },
-      { $sort: { friendsCount: -1 } },
-      { $limit: 10 },
-      { $project: { name: 1, email: 1, image: 1, friendsCount: 1 } }
-    ]).toArray();
-
-    res.json({ success: true, data: { topSenders, mostFollowed, mostFriends } });
-  } catch (err) {
-    console.error("GET /admin/analytics/top error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-// GET /admin/analytics/distribution?field=native_language|user_country|proficiency_level
-app.get("/admin/analytics/distribution", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const allowed = ["native_language", "user_country", "proficiency_level"];
-    const field = (req.query.field || "").toString();
-    if (!allowed.includes(field)) {
-      return res.status(400).json({ success: false, message: "Invalid field" });
-    }
-
-    const data = await usersCollections.aggregate([
-      { $match: { [field]: { $exists: true, $ne: "" } } },
-      { $group: { _id: `$${field}`, count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 20 }
-    ]).toArray();
-
-    res.json({ success: true, data: data.map(d => ({ label: d._id, count: d.count })) });
-  } catch (err) {
-    console.error("GET /admin/analytics/distribution error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// announcements
-
-try {
-  await announcementsCollection.createIndex({ title: "text", description: "text" });
-  await announcementsCollection.createIndex({ status: 1, pinned: 1, createdAt: -1 });
-  console.log("✅ Announcements indexes ensured");
-} catch (e) {
-  console.warn("⚠️ Failed to create announcements indexes. Continuing anyway.", e?.message);
-}
-
-
-
-// tiny helper
-const toBool = (v) => (v === true || v === "true" ? true : v === false || v === "false" ? false : v);
-
-app.get("/admin/announcements", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const {
-      search = "",
-      status = "all",
-      pinned = "all",
-      page = 1,
-      limit = 10,
-    } = req.query;
-
-    const q = {};
-    if (search) {
-      q.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
-    if (status !== "all") q.status = status; // draft | scheduled | published | archived
-    if (pinned !== "all") q.pinned = toBool(pinned);
-
-    const pg = Math.max(parseInt(page), 1);
-    const lim = Math.max(parseInt(limit), 1);
-
-    const total = await announcementsCollection.countDocuments(q);
-    const data = await announcementsCollection
-      .find(q)
-      .sort({ pinned: -1, createdAt: -1 })
-      .skip((pg - 1) * lim)
-      .limit(lim)
-      .toArray();
-
-    res.json({
-      success: true,
-      data,
-      pagination: {
-        total,
-        page: pg,
-        limit: lim,
-        pages: Math.max(1, Math.ceil(total / lim)),
-      },
-    });
-  } catch (err) {
-    console.error("GET /admin/announcements error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-// POST /admin/announcements
-app.post("/admin/announcements", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { title, image = "", description, tags } = req.body || {};
-    if (!title || !description) {
-      return res.status(400).json({ success: false, message: "title and description are required" });
-    }
-
-    const doc = {
-      title,
-      image,
-      description,
-      tags: Array.isArray(tags) ? tags : [], // 👈 allow tags optionally
-      audience: { type: "all" },
-      status: "draft",
-      pinned: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    // ----- helpers (top of run or near routes)
+    const toISODate = (d) => new Date(new Date(d).toISOString().slice(0, 10)); // strip time (UTC day)
+    const daysAgo = (n) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - n);
+      return toISODate(d);
     };
 
-    const result = await announcementsCollection.insertOne(doc);
-    res.status(201).json({ success: true, id: result.insertedId, data: { ...doc, _id: result.insertedId } });
-  } catch (err) {
-    console.error("POST /admin/announcements error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
+    // generic day bucket pipeline
+    const dayBucketPipeline = (dateField, startDate, endDate) => [
+      {
+        $match: {
+          [dateField]: {
+            $gte: startDate.toISOString(),
+            $lte: endDate.toISOString(),
+          },
+        },
+      },
+      { $addFields: { day: { $substr: [`$${dateField}`, 0, 10] } } }, // YYYY-MM-DD from ISO string
+      { $group: { _id: "$day", count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ];
 
-app.patch("/admin/announcements/:id", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    let { title, image, description } = req.body || {};
+    // GET /admin/analytics/overview
+    app.get(
+      "/admin/analytics/overview",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const now = new Date();
+          const last7 = daysAgo(7);
+          const last30 = daysAgo(30);
 
-    const set = { updatedAt: new Date().toISOString() };
-    if (typeof title === "string") set.title = title;
-    if (typeof image === "string") set.image = image;
-    if (typeof description === "string") set.description = description;
+          const [
+            usersCount,
+            messagesCount,
+            sessionsCount,
+            newUsers7,
+            newUsers30,
+            activeUsers7,
+            activeUsers30,
+          ] = await Promise.all([
+            usersCollections.countDocuments(),
+            messagesCollections.countDocuments(),
+            sessionsCollections.countDocuments(),
+            usersCollections.countDocuments({
+              createdAt: { $gte: last7.toISOString() },
+            }),
+            usersCollections.countDocuments({
+              createdAt: { $gte: last30.toISOString() },
+            }),
+            usersCollections.countDocuments({
+              last_loggedIn: { $gte: last7.toISOString() },
+            }),
+            usersCollections.countDocuments({
+              last_loggedIn: { $gte: last30.toISOString() },
+            }),
+          ]);
 
-    const result = await announcementsCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: set }
+          res.json({
+            success: true,
+            data: {
+              usersCount,
+              messagesCount,
+              sessionsCount,
+              newUsers7,
+              newUsers30,
+              activeUsers7,
+              activeUsers30,
+              generatedAt: now.toISOString(),
+            },
+          });
+        } catch (err) {
+          console.error("GET /admin/analytics/overview error:", err);
+          res.status(500).json({ success: false, message: err.message });
+        }
+      }
     );
-    if (!result.matchedCount) {
-      return res.status(404).json({ success: false, message: "Announcement not found" });
-    }
-    res.json({ success: true, message: "Updated" });
-  } catch (err) {
-    console.error("PATCH /admin/announcements/:id error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-app.post("/admin/announcements/:id/action", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { action } = req.body || {};
-    const nowIso = new Date().toISOString();
+    // GET /admin/analytics/timeseries?metric=users|messages|sessions&days=7|30|90
+    app.get(
+      "/admin/analytics/timeseries",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const metric = (req.query.metric || "users").toString();
+          const days = Math.min(
+            Math.max(parseInt(req.query.days || "30", 10), 1),
+            365
+          );
 
-    let update = { updatedAt: nowIso };
+          const end = toISODate(new Date());
+          const start = daysAgo(days - 1); // inclusive
+          let pipeline;
+          if (metric === "users") {
+            pipeline = dayBucketPipeline("createdAt", start, end);
+          } else if (metric === "messages") {
+            pipeline = dayBucketPipeline("createdAt", start, end);
+          } else if (metric === "sessions") {
+            pipeline = dayBucketPipeline("createdAt", start, end);
+          } else {
+            return res
+              .status(400)
+              .json({ success: false, message: "Invalid metric" });
+          }
 
-    switch (action) {
-      case "publish":
-        update.status = "published";
-        update.publishedAt = nowIso;
-        break;
-      case "unpublish":
-        update.status = "draft";
-        update.$unset = { publishedAt: "" };
-        break;
-      case "pin":
-        update.pinned = true;
-        break;
-      case "unpin":
-        update.pinned = false;
-        break;
-      case "archive":
-        update.status = "archived";
-        break;
-      default:
-        return res.status(400).json({ success: false, message: "Invalid action" });
-    }
+          const coll =
+            metric === "users"
+              ? usersCollections
+              : metric === "messages"
+              ? messagesCollections
+              : sessionsCollections;
 
-    const $update = {};
-    if (update.$unset) {
-      $update.$unset = update.$unset;
-      delete update.$unset;
-    }
-    $update.$set = update;
+          const raw = await coll.aggregate(pipeline).toArray();
 
-    const result = await announcementsCollection.updateOne(
-      { _id: new ObjectId(id) },
-      $update
+          // fill gaps with zeroes
+          const map = new Map(raw.map((r) => [r._id, r.count]));
+          const out = [];
+          const cursor = new Date(start);
+          while (cursor <= end) {
+            const key = cursor.toISOString().slice(0, 10);
+            out.push({ day: key, count: map.get(key) || 0 });
+            cursor.setUTCDate(cursor.getUTCDate() + 1);
+          }
+
+          res.json({
+            success: true,
+            data: out,
+            start: start.toISOString(),
+            end: end.toISOString(),
+          });
+        } catch (err) {
+          console.error("GET /admin/analytics/timeseries error:", err);
+          res.status(500).json({ success: false, message: err.message });
+        }
+      }
+    );
+    // GET /admin/analytics/top
+    // top senders, most-followed, most-friends
+    app.get(
+      "/admin/analytics/top",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          // Top message senders (by senderId)
+          const topSenders = await messagesCollections
+            .aggregate([
+              { $group: { _id: "$senderId", messages: { $sum: 1 } } },
+              { $sort: { messages: -1 } },
+              { $limit: 10 },
+              {
+                $lookup: {
+                  from: "users",
+                  localField: "_id",
+                  foreignField: "_id",
+                  as: "userByObject",
+                },
+              },
+              // if senderId stored as string ObjectId, convert:
+              // You can also try lookup by string compare:
+              {
+                $lookup: {
+                  from: "users",
+                  let: { sid: "$_id" },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: { $eq: [{ $toString: "$_id" }, "$$sid"] },
+                      },
+                    },
+                    { $project: { name: 1, email: 1, image: 1 } },
+                  ],
+                  as: "user",
+                },
+              },
+              {
+                $addFields: {
+                  user: { $ifNull: [{ $arrayElemAt: ["$user", 0] }, null] },
+                },
+              },
+              { $project: { _id: 0, senderId: "$_id", messages: 1, user: 1 } },
+            ])
+            .toArray();
+
+          // Most-followed users
+          const mostFollowed = await usersCollections
+            .aggregate([
+              {
+                $addFields: {
+                  followersCount: { $size: { $ifNull: ["$followers", []] } },
+                },
+              },
+              { $sort: { followersCount: -1 } },
+              { $limit: 10 },
+              { $project: { name: 1, email: 1, image: 1, followersCount: 1 } },
+            ])
+            .toArray();
+
+          // Most friends
+          const mostFriends = await usersCollections
+            .aggregate([
+              {
+                $addFields: {
+                  friendsCount: { $size: { $ifNull: ["$friends", []] } },
+                },
+              },
+              { $sort: { friendsCount: -1 } },
+              { $limit: 10 },
+              { $project: { name: 1, email: 1, image: 1, friendsCount: 1 } },
+            ])
+            .toArray();
+
+          res.json({
+            success: true,
+            data: { topSenders, mostFollowed, mostFriends },
+          });
+        } catch (err) {
+          console.error("GET /admin/analytics/top error:", err);
+          res.status(500).json({ success: false, message: err.message });
+        }
+      }
+    );
+    // GET /admin/analytics/distribution?field=native_language|user_country|proficiency_level
+    app.get(
+      "/admin/analytics/distribution",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const allowed = [
+            "native_language",
+            "user_country",
+            "proficiency_level",
+          ];
+          const field = (req.query.field || "").toString();
+          if (!allowed.includes(field)) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Invalid field" });
+          }
+
+          const data = await usersCollections
+            .aggregate([
+              { $match: { [field]: { $exists: true, $ne: "" } } },
+              { $group: { _id: `$${field}`, count: { $sum: 1 } } },
+              { $sort: { count: -1 } },
+              { $limit: 20 },
+            ])
+            .toArray();
+
+          res.json({
+            success: true,
+            data: data.map((d) => ({ label: d._id, count: d.count })),
+          });
+        } catch (err) {
+          console.error("GET /admin/analytics/distribution error:", err);
+          res.status(500).json({ success: false, message: err.message });
+        }
+      }
     );
 
-    if (!result.matchedCount) {
-      return res.status(404).json({ success: false, message: "Announcement not found" });
+    // announcements
+
+    try {
+      await announcementsCollection.createIndex({
+        title: "text",
+        description: "text",
+      });
+      await announcementsCollection.createIndex({
+        status: 1,
+        pinned: 1,
+        createdAt: -1,
+      });
+      console.log("✅ Announcements indexes ensured");
+    } catch (e) {
+      console.warn(
+        "⚠️ Failed to create announcements indexes. Continuing anyway.",
+        e?.message
+      );
     }
 
-    res.json({ success: true, message: "Action applied" });
-  } catch (err) {
-    console.error("POST /admin/announcements/:id/action error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-app.delete("/admin/announcements/:id", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await announcementsCollection.deleteOne({ _id: new ObjectId(id) });
-    if (!result.deletedCount) {
-      return res.status(404).json({ success: false, message: "Announcement not found" });
-    }
-    res.json({ success: true, message: "Deleted" });
-  } catch (err) {
-    console.error("DELETE /admin/announcements/:id error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
+    // tiny helper
+    const toBool = (v) =>
+      v === true || v === "true"
+        ? true
+        : v === false || v === "false"
+        ? false
+        : v;
 
+    app.get(
+      "/admin/announcements",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const {
+            search = "",
+            status = "all",
+            pinned = "all",
+            page = 1,
+            limit = 10,
+          } = req.query;
 
+          const q = {};
+          if (search) {
+            q.$or = [
+              { title: { $regex: search, $options: "i" } },
+              { description: { $regex: search, $options: "i" } },
+            ];
+          }
+          if (status !== "all") q.status = status; // draft | scheduled | published | archived
+          if (pinned !== "all") q.pinned = toBool(pinned);
+
+          const pg = Math.max(parseInt(page), 1);
+          const lim = Math.max(parseInt(limit), 1);
+
+          const total = await announcementsCollection.countDocuments(q);
+          const data = await announcementsCollection
+            .find(q)
+            .sort({ pinned: -1, createdAt: -1 })
+            .skip((pg - 1) * lim)
+            .limit(lim)
+            .toArray();
+
+          res.json({
+            success: true,
+            data,
+            pagination: {
+              total,
+              page: pg,
+              limit: lim,
+              pages: Math.max(1, Math.ceil(total / lim)),
+            },
+          });
+        } catch (err) {
+          console.error("GET /admin/announcements error:", err);
+          res.status(500).json({ success: false, message: "Server error" });
+        }
+      }
+    );
+    // POST /admin/announcements
+    app.post(
+      "/admin/announcements",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const { title, image = "", description, tags } = req.body || {};
+          if (!title || !description) {
+            return res.status(400).json({
+              success: false,
+              message: "title and description are required",
+            });
+          }
+
+          const doc = {
+            title,
+            image,
+            description,
+            tags: Array.isArray(tags) ? tags : [], // 👈 allow tags optionally
+            audience: { type: "all" },
+            status: "draft",
+            pinned: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          const result = await announcementsCollection.insertOne(doc);
+          res.status(201).json({
+            success: true,
+            id: result.insertedId,
+            data: { ...doc, _id: result.insertedId },
+          });
+        } catch (err) {
+          console.error("POST /admin/announcements error:", err);
+          res.status(500).json({ success: false, message: "Server error" });
+        }
+      }
+    );
+
+    app.patch(
+      "/admin/announcements/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
+          let { title, image, description } = req.body || {};
+
+          const set = { updatedAt: new Date().toISOString() };
+          if (typeof title === "string") set.title = title;
+          if (typeof image === "string") set.image = image;
+          if (typeof description === "string") set.description = description;
+
+          const result = await announcementsCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: set }
+          );
+          if (!result.matchedCount) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Announcement not found" });
+          }
+          res.json({ success: true, message: "Updated" });
+        } catch (err) {
+          console.error("PATCH /admin/announcements/:id error:", err);
+          res.status(500).json({ success: false, message: "Server error" });
+        }
+      }
+    );
+    app.post(
+      "/admin/announcements/:id/action",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
+          const { action } = req.body || {};
+          const nowIso = new Date().toISOString();
+
+          let update = { updatedAt: nowIso };
+
+          switch (action) {
+            case "publish":
+              update.status = "published";
+              update.publishedAt = nowIso;
+              break;
+            case "unpublish":
+              update.status = "draft";
+              update.$unset = { publishedAt: "" };
+              break;
+            case "pin":
+              update.pinned = true;
+              break;
+            case "unpin":
+              update.pinned = false;
+              break;
+            case "archive":
+              update.status = "archived";
+              break;
+            default:
+              return res
+                .status(400)
+                .json({ success: false, message: "Invalid action" });
+          }
+
+          const $update = {};
+          if (update.$unset) {
+            $update.$unset = update.$unset;
+            delete update.$unset;
+          }
+          $update.$set = update;
+
+          const result = await announcementsCollection.updateOne(
+            { _id: new ObjectId(id) },
+            $update
+          );
+
+          if (!result.matchedCount) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Announcement not found" });
+          }
+
+          res.json({ success: true, message: "Action applied" });
+        } catch (err) {
+          console.error("POST /admin/announcements/:id/action error:", err);
+          res.status(500).json({ success: false, message: "Server error" });
+        }
+      }
+    );
+    app.delete(
+      "/admin/announcements/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
+          const result = await announcementsCollection.deleteOne({
+            _id: new ObjectId(id),
+          });
+          if (!result.deletedCount) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Announcement not found" });
+          }
+          res.json({ success: true, message: "Deleted" });
+        } catch (err) {
+          console.error("DELETE /admin/announcements/:id error:", err);
+          res.status(500).json({ success: false, message: "Server error" });
+        }
+      }
+    );
 
     /**
      * POST /sessions/:id/accept

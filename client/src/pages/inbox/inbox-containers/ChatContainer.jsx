@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import { IoIosSend, IoMdPhotos } from "react-icons/io";
 import { RiInformationLine } from "react-icons/ri";
-import { MdVideoCall, MdCallEnd } from "react-icons/md";
+import { MdVideoCall, MdCallEnd, MdArrowBackIosNew } from "react-icons/md";
 
 import logo from "../../../assets/logo/logo.png";
-import { formatMessageTime } from "../../../lib/utils";
+import { formatMessageTime, markConversationSeen } from "../../../lib/utils";
 import useAuth from "../../../hooks/useAuth";
 import toast from "react-hot-toast";
 
@@ -183,6 +183,15 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     };
 
     fetchMessages();
+
+    // mark this conversation as seen for the current user
+    (async () => {
+      try {
+        await markConversationSeen(user.uid, selectedUser.uid);
+      } catch {
+        // no-op: best-effort
+      }
+    })();
   }, [selectedUser, user]);
 
   // socket listener for real-time incoming messages
@@ -309,7 +318,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       socket.off("iceCandidate", iceCandidateHandler);
       socket.off("endCall", endCallHandler);
     };
-  }, [socketRef]);
+  }, [socketRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // cleanup when component unmounts
   useEffect(() => {
@@ -690,7 +699,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       if (!res.ok) {
         throw new Error("Failed to send message");
       }
-      const saved = await res.json();
+      await res.json();
       // Optionally update optimistic message with server data
     } catch (err) {
       console.error("Send message error:", err);
@@ -721,21 +730,34 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
   }
 
   return (
-    <div className="h-full overflow-scroll relative border-l border-r border-gray-300 bg-primary/5">
+    <div className="h-full overflow-y-auto relative border-l border-r border-base-300 bg-base-200/30">
       {/* header */}
-      <div className="flex items-center gap-3 py-3 mx-4 border-b border-accent">
+      <div className="flex items-center gap-3 py-3 px-4 border-b border-base-300 sticky top-0 bg-base-100/80 backdrop-blur z-10">
+        {/* Mobile back button to open sidebar */}
+        <button
+          className="md:hidden p-2 rounded-full hover:bg-base-200 text-secondary"
+          onClick={() => setSelectedUser(null)}
+          title="Back"
+        >
+          <MdArrowBackIosNew size={18} />
+        </button>
         <img
           src={selectedUser.image || selectedUser.profilePic || ""}
           alt=""
-          className="w-8 aspect-[1/1] object-cover rounded-full"
+          className="w-8 h-8 object-cover rounded-full"
         />
-        <p className="flex-1 text-lg  flex items-center gap-2">
-          {selectedUser.name || selectedUser.fullName || "Unknown"}
-          <span className="w-2 h-2 rounded-full bg-green-500"></span>
-        </p>
+        <div className="flex-1 flex items-center gap-2">
+          <p className="text-base font-medium">
+            {selectedUser.name || selectedUser.fullName || "Unknown"}
+          </p>
+          {isSelectedUserOnline && (
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+          )}
+        </div>
 
         {/* VIDEO CALL BUTTON */}
-        <div
+        <button
+          type="button"
           title={isSelectedUserOnline ? "Start video call" : "User offline"}
           onClick={() => {
             if (!isSelectedUserOnline) {
@@ -744,48 +766,45 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
             }
             initiateCall();
           }}
-          className={`cursor-pointer mr-2 ${
+          className={`p-2 rounded-lg ${
             isSelectedUserOnline
-              ? "text-primary"
+              ? "text-primary hover:bg-primary/10"
               : "opacity-40 cursor-not-allowed"
           }`}
         >
-          <MdVideoCall size={22} />
-        </div>
+          <MdVideoCall size={20} />
+        </button>
 
-        <div
-          onClick={() => setSelectedUser(null)}
-          alt=""
-          className="md:hidden max-w-7"
-        >
-          <RxAvatar />
-        </div>
-        <div className="max-md:hidden max-w-5 ">
-          <RiInformationLine size={20} />
+        <div className="hidden md:block text-secondary/70">
+          <RiInformationLine size={18} />
         </div>
       </div>
 
       {/* chat messages */}
-      <div className="flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6">
+      <div className="flex flex-col h-[calc(100%-120px)] overflow-y-auto p-4 pb-16">
         {messages.map((msg, index) => {
           const isMe = msg.senderId === user.uid;
           return (
             <div
               key={index}
-              className={`flex items-end gap-2 justify-end ${
-                !isMe && "flex-row-reverse"
+              className={`flex items-end gap-2 ${
+                isMe ? "justify-end" : "justify-start"
               }`}
             >
               {msg.image ? (
                 <img
                   src={msg.image}
                   alt=""
-                  className="max-w-[230px]  border border-primary/70 rounded-lg overflow-hidden mb-8"
+                  className={`max-w-[230px] border ${
+                    isMe ? "border-primary/70" : "border-base-300"
+                  } rounded-xl overflow-hidden mb-6`}
                 />
               ) : (
                 <p
-                  className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-8 break-all bg-primary/70 text-white ${
-                    isMe ? "rounded-br-none" : "rounded-bl-none"
+                  className={`px-3 py-2 max-w-[240px] text-sm rounded-2xl mb-3 break-words shadow-sm ${
+                    isMe
+                      ? "bg-primary/80 text-white rounded-br-sm"
+                      : "bg-base-100 text-secondary rounded-bl-sm border border-base-200"
                   }`}
                 >
                   {msg.text}
@@ -799,7 +818,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
                       ? user.photoURL || ""
                       : selectedUser.image || selectedUser.profilePic || ""
                   }
-                  className="w-7 aspect-[1/1] object-cover rounded-full"
+                  className="w-7 h-7 object-cover rounded-full"
                 />
                 <p className="text-gray-500">
                   {formatMessageTime(msg.createdAt)}
@@ -813,13 +832,13 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
 
       {/* bottom input */}
       <div className="absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3">
-        <div className="flex-1 flex items-center bg-primary/10 px-3 rounded-full">
+        <div className="flex-1 flex items-center bg-base-100/80 backdrop-blur px-3 rounded-full border border-base-300">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Send a message"
-            className="flex-1 text-sm p-3 border-none rounded-lg outline-none placeholder-gray-400 resize-none"
+            className="flex-1 text-sm p-3 border-none rounded-lg outline-none placeholder-gray-400 resize-none bg-transparent"
             rows={1}
           />
           <input type="file" id="image" accept="image/png, image/jpeg" hidden />
