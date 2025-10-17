@@ -64,6 +64,7 @@ async function run() {
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
     const announcementsCollection = database.collection("announcements");
+    
 
 
     // jwt related APIs ----->
