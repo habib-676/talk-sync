@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState, useCallback } from "react";
 import NextSessionCard from "../../components/dashboard/widgets/NextSessionCard";
 import ProgressDonut from "../../components/dashboard/widgets/ProgressDonut";
@@ -30,7 +32,7 @@ function StatCard({ label, value, icon, colorFrom, colorTo }) {
   );
 }
 
-export default function Overview() {
+export default function LearnerOverview() {
   const { user: authUser } = useAuth();
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);

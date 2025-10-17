@@ -17,7 +17,7 @@ import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
 import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
-import Overview from "../pages/dashboard/Overview";
+
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
@@ -25,8 +25,7 @@ import AdminHome from "../pages/Admin/AdminHome";
 import AdminManageUsers from "../pages/Admin/AdminManageUsers";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
-
-
+import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 
 export const router = createBrowserRouter([
   {
@@ -71,8 +70,8 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
     children: [
-      { index: true, element: <Overview /> },
-      { path: "/dashboard/overview", element: <Overview /> },
+      { index: true, element: <OverviewSwitcher /> },
+      { path: "/dashboard/overview", element: <OverviewSwitcher /> },
       { path: "/dashboard/profile", element: <ProfilePage /> },
       {
         path: "/dashboard/profile/edit",
@@ -82,33 +81,30 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      { path: "follow", element: <FollowPage /> },
-      { path: "sessions", element: <SessionsPage /> },
-      { path: "badges", element: <BadgesPage /> },
-      { path: "inbox", element: <Inbox /> },
       {
-        path:"admin", element:<AdminHome></AdminHome>
+        path: "admin",
+        element: <AdminHome></AdminHome>,
       },
       {
         path: "admin/users",
-        element: <AdminManageUsers></AdminManageUsers>
+        element: <AdminManageUsers></AdminManageUsers>,
       },
       {
-        path:'admin/reports',
-        element: <AdminAnalytics></AdminAnalytics>
+        path: "admin/reports",
+        element: <AdminAnalytics></AdminAnalytics>,
       },
       {
-        path: 'admin/announcements',
-        element: <AdminAnnouncements></AdminAnnouncements>
+        path: "admin/announcements",
+        element: <AdminAnnouncements></AdminAnnouncements>,
       },
-  
+
       { path: "/dashboard/follow", element: <FollowPage /> },
       { path: "/dashboard/sessions", element: <SessionsPage /> },
       { path: "/dashboard/badges", element: <BadgesPage /> },
       { path: "/dashboard/inbox", element: <Inbox /> },
     ],
   },
-  
+
   {
     path: "/auth",
     element: <AuthLayouts></AuthLayouts>,
