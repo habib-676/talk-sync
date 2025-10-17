@@ -2,41 +2,41 @@
   {
     "id": 1,
     "question": "What is Talksync?",
-    "answer": "Talksync is a language exchange platform where learners can connect with partners around the world to practice speaking in real-time through video, audio, and chat."
+    "answer": "TalkSync is a language exchange and learning platform that connects you with native speakers worldwide. Practice real conversations, improve your skills through interactive lessons, and join a vibrant community of language learners—all in one place."
   },
   {
     "id": 2,
     "question": "Is Talksync free to use?",
-    "answer": "Yes, Talksync offers free features for language practice. However, premium plans are available for advanced features such as professional tutoring and session history."
+    "answer": "Yes! TalkSync offers a free tier with access to core features including language partner matching, basic lessons, and community features. We also offer premium plans with additional features like unlimited video calls, advanced analytics, and personalized tutoring."
   },
   {
     "id": 3,
     "question": "How do I find a language partner?",
-    "answer": "You can use the 'Find a Partner' feature to search based on language preferences, proficiency levels, and availability."
+    "answer": "Finding a partner is easy! Simply set your learning preferences and the languages you speak. Our smart matching algorithm will suggest compatible partners based on your goals, interests, and availability. You can browse profiles and send connection requests to start practicing."
   },
   {
     "id": 4,
     "question": "Do I need to install anything?",
-    "answer": "No installation is required. Talksync works directly from your web browser. For the best experience, use a modern browser like Chrome or Edge."
+    "answer": "No installation required! TalkSync works directly in your web browser on any device. For the best mobile experience, you can also add TalkSync to your home screen as a progressive web app (PWA) for quick access."
   },
   {
     "id": 5,
     "question": "Is my data secure?",
-    "answer": "Yes, Talksync uses encrypted connections and secure authentication (JWT) to protect your data and ensure safe communication."
+    "answer": "Absolutely. We take your privacy seriously. All data is encrypted end-to-end, and we follow industry-standard security practices. We never share your personal information with third parties, and you have full control over your data at all times."
   },
   {
     "id": 6,
-    "question": "Can I use Talksync on mobile?",
-    "answer": "Yes, Talksync is fully responsive and works on smartphones, tablets, and desktops."
+    "question": "Can I use TalkSync on mobile?",
+    "answer": "Yes! TalkSync is fully responsive and optimized for mobile devices. Access all features including video calls, lessons, and chat seamlessly on your smartphone or tablet through any modern web browser."
   },
   {
     "id": 7,
     "question": "What languages can I practice?",
-    "answer": "You can practice any language available in our community. Popular choices include English, Spanish, French, Bangla, Japanese, and more."
+    "answer": "TalkSync supports over 50 languages including English, Spanish, French, German, Mandarin, Japanese, Korean, Arabic, and many more. You can practice multiple languages simultaneously and connect with native speakers from around the globe."
   },
   {
     "id": 8,
     "question": "How does the badge system work?",
-    "answer": "Badges (Bronze, Silver, Gold) are awarded based on your activity, engagement, and progress on the platform."
+    "answer": "Earn badges and achievements as you progress! Complete lessons, maintain learning streaks, help other learners, and reach milestones to unlock exclusive badges. These showcase your dedication and skill level to the community and potential language partners."
   }
 ]
