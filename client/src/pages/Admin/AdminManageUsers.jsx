@@ -14,7 +14,7 @@ const GlassCard = ({ className = "", children }) => (
       "relative overflow-hidden rounded-3xl",
       "border border-white/60 bg-white/70 backdrop-blur-xl",
       "shadow-[0_8px_30px_rgba(0,0,0,0.06)]",
-      "dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]",
+      ":border-white/10 :bg-white/[0.06] :shadow-[0_8px_30px_rgba(0,0,0,0.35)]",
       className,
     ].join(" ")}
   >
@@ -52,17 +52,17 @@ const StatusDot = ({ status = "active" }) => (
 const SkelRow = () => (
   <tr>
     <td colSpan={8} className="px-4 py-3">
-      <div className="h-10 w-full animate-pulse rounded-lg bg-slate-100/70 dark:bg-white/10" />
+      <div className="h-10 w-full animate-pulse rounded-lg bg-slate-100/70 :bg-white/10" />
     </td>
   </tr>
 );
 
 const EmptyState = ({ onRefresh }) => (
   <div className="p-12 text-center">
-    <div className="mx-auto mb-3 grid size-12 place-items-center rounded-2xl bg-slate-100 text-slate-500 dark:bg-white/10">
+    <div className="mx-auto mb-3 grid size-12 place-items-center rounded-2xl bg-slate-100 text-slate-500 :bg-white/10">
       <Search className="size-5" />
     </div>
-    <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
+    <h3 className="text-base font-semibold text-slate-800 :text-slate-100">
       No users found
     </h3>
     <p className="mt-1 text-sm text-slate-500">
@@ -70,7 +70,7 @@ const EmptyState = ({ onRefresh }) => (
     </p>
     <button
       onClick={onRefresh}
-      className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+      className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 :border-white/10 :bg-white/5 :text-slate-200"
     >
       <RefreshCw className="size-4" /> Refresh
     </button>
@@ -160,18 +160,18 @@ export default function AdminManageUsers() {
   const canClick = !mRole.isPending && !mStatus.isPending && !mDelete.isPending;
 
   return (
-    <div className="relative min-h-screen p-6 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] dark:from-[#0b1020] dark:via-[#0d1224] dark:to-[#0a101e]">
+    <div className="relative min-h-screen p-6 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] :from-[#0b1020] :via-[#0d1224] :to-[#0a101e]">
       {/* soft blobs */}
-      <div className="pointer-events-none absolute -top-24 -left-24 size-[320px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-sky-400/40 to-indigo-500/40" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 size-[360px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-pink-400/40 to-pink-500/40" />
+      <div className="pointer-events-none absolute -top-24 -left-24 size-[320px] rounded-full blur-3xl opacity-30 :opacity-20 bg-gradient-to-br from-sky-400/40 to-indigo-500/40" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 size-[360px] rounded-full blur-3xl opacity-30 :opacity-20 bg-gradient-to-br from-pink-400/40 to-pink-500/40" />
 
       {/* header + toolbar */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 :text-white">
             Manage Users
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-slate-600 :text-slate-400">
             Search, filter, change roles, suspend/activate, or delete users.
           </p>
         </div>
@@ -183,7 +183,7 @@ export default function AdminManageUsers() {
                 const p = toast.loading("Refreshing…");
                 refetch().finally(() => toast.dismiss(p));
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 :border-white/10 :bg-white/5 :text-slate-200"
             >
               {isFetching ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
               Refresh
@@ -204,7 +204,7 @@ export default function AdminManageUsers() {
                 setPage(1);
               }}
               placeholder="Search by name or email…"
-              className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none ring-0 placeholder:text-slate-400 focus:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+              className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none ring-0 placeholder:text-slate-400 focus:border-slate-300 :border-white/10 :bg-white/5 :text-slate-100"
             />
           </div>
 
@@ -214,7 +214,7 @@ export default function AdminManageUsers() {
               setRole(e.target.value);
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm :border-white/10 :bg-white/5 :text-slate-100"
           >
             <option value="all">All roles</option>
             <option value="admin">Admin</option>
@@ -227,7 +227,7 @@ export default function AdminManageUsers() {
               setStatus(e.target.value);
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm :border-white/10 :bg-white/5 :text-slate-100"
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
@@ -240,7 +240,7 @@ export default function AdminManageUsers() {
       <GlassCard>
         <div className="min-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-slate-50/70 backdrop-blur supports-[backdrop-filter]:bg-slate-50/60 text-left text-slate-600 dark:bg-white/[0.04] dark:text-slate-300">
+            <thead className="sticky top-0 z-10 bg-slate-50/70 backdrop-blur supports-[backdrop-filter]:bg-slate-50/60 text-left text-slate-600 :bg-white/[0.04] :text-slate-300">
               <tr>
                 <th className="px-4 py-3 font-semibold">User</th>
                 <th className="px-4 py-3 font-semibold">Role</th>
@@ -252,7 +252,7 @@ export default function AdminManageUsers() {
                 <th className="px-4 py-3 text-right font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/10">
+            <tbody className="divide-y divide-slate-100 :divide-white/10">
               {isLoading
                 ? Array.from({ length: 6 }).map((_, i) => <SkelRow key={i} />)
                 : users.length === 0
@@ -271,17 +271,17 @@ export default function AdminManageUsers() {
                     const nextRole = u.role === "admin" ? "learner" : "admin";
 
                     return (
-                      <tr key={u._id} className="align-middle hover:bg-slate-50/60 dark:hover:bg-white/[0.03]">
+                      <tr key={u._id} className="align-middle hover:bg-slate-50/60 :hover:bg-white/[0.03]">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <img
                               src={u.image || "https://i.pravatar.cc/100?img=1"}
-                              className="size-10 rounded-full object-cover ring-1 ring-slate-200 dark:ring-white/10"
+                              className="size-10 rounded-full object-cover ring-1 ring-slate-200 :ring-white/10"
                               alt={u.name || u.email}
                               loading="lazy"
                             />
                             <div className="min-w-0">
-                              <div className="truncate font-medium text-slate-800 dark:text-slate-100">
+                              <div className="truncate font-medium text-slate-800 :text-slate-100">
                                 {u.name || "Unnamed"}
                               </div>
                               <div className="truncate text-xs text-slate-500">{u.email}</div>
@@ -316,7 +316,7 @@ export default function AdminManageUsers() {
                                   { loading: "Updating role…", success: "Role updated", error: "Failed to update role" }
                                 );
                               }}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 :border-white/10 :bg-white/5 :text-slate-200"
                               title={`Make ${nextRole}`}
                             >
                               <ShieldCheck className="size-4" />
@@ -340,7 +340,7 @@ export default function AdminManageUsers() {
                                     { loading: "Suspending…", success: "User suspended", error: "Failed to suspend" }
                                   );
                                 }}
-                                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/30 dark:bg-rose-400/10 dark:text-rose-300"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-100 disabled:opacity-50 :border-rose-400/30 :bg-rose-400/10 :text-rose-300"
                                 title="Suspend user"
                               >
                                 <UserX className="size-4" />
@@ -362,7 +362,7 @@ export default function AdminManageUsers() {
                                     { loading: "Activating…", success: "User activated", error: "Failed to activate" }
                                   );
                                 }}
-                                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 :border-emerald-400/30 :bg-emerald-400/10 :text-emerald-300"
                                 title="Activate user"
                               >
                                 <UserCheck className="size-4" />
@@ -387,7 +387,7 @@ export default function AdminManageUsers() {
                                   error: "Failed to delete",
                                 });
                               }}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 :border-white/10 :bg-white/5 :text-slate-200"
                               title="Delete user"
                             >
                               <Trash2 className="size-4" />
@@ -404,18 +404,18 @@ export default function AdminManageUsers() {
         </div>
 
         {/* footer / pagination */}
-        <div className="flex items-center justify-between px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
+        <div className="flex items-center justify-between px-4 py-3 text-sm text-slate-600 :text-slate-400">
           <div>
             Showing{" "}
-            <span className="font-medium text-slate-800 dark:text-slate-200">
+            <span className="font-medium text-slate-800 :text-slate-200">
               {users.length ? (page - 1) * limit + 1 : 0}
             </span>{" "}
             –{" "}
-            <span className="font-medium text-slate-800 dark:text-slate-200">
+            <span className="font-medium text-slate-800 :text-slate-200">
               {(page - 1) * limit + users.length}
             </span>{" "}
             of{" "}
-            <span className="font-medium text-slate-800 dark:text-slate-200">
+            <span className="font-medium text-slate-800 :text-slate-200">
               {total}
             </span>
           </div>
@@ -423,7 +423,7 @@ export default function AdminManageUsers() {
             <button
               disabled={page <= 1 || isFetching}
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50 disabled:opacity-50 :border-white/10 :bg-white/5"
             >
               Prev
             </button>
@@ -433,7 +433,7 @@ export default function AdminManageUsers() {
             <button
               disabled={page >= pages || isFetching}
               onClick={() => setPage((p) => Math.min(p + 1, pages))}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50 disabled:opacity-50 :border-white/10 :bg-white/5"
             >
               Next
             </button>

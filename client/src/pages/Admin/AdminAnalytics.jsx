@@ -14,10 +14,10 @@ import {
 
 /* ================== Tiny UI primitives ================== */
 const Page = ({ children }) => (
-  <div className="relative min-h-screen px-6 py-8 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] dark:from-[#0b1020] dark:via-[#0d1224] dark:to-[#0a101e]">
+  <div className="relative min-h-screen px-6 py-8 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] :from-[#0b1020] :via-[#0d1224] :to-[#0a101e]">
     {/* soft blobs */}
-    <div className="pointer-events-none absolute -top-28 -left-24 size-[360px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-sky-400/50 to-indigo-500/40" />
-    <div className="pointer-events-none absolute -bottom-28 -right-24 size-[380px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-pink-400/50 to-pink-500/40" />
+    <div className="pointer-events-none absolute -top-28 -left-24 size-[360px] rounded-full blur-3xl opacity-30 :opacity-20 bg-gradient-to-br from-sky-400/50 to-indigo-500/40" />
+    <div className="pointer-events-none absolute -bottom-28 -right-24 size-[380px] rounded-full blur-3xl opacity-30 :opacity-20 bg-gradient-to-br from-pink-400/50 to-pink-500/40" />
     <div className="mx-auto max-w-7xl">{children}</div>
   </div>
 );
@@ -28,7 +28,7 @@ const Glass = ({ className = "", children }) => (
       "relative overflow-hidden rounded-3xl",
       "border border-white/60 bg-white/70 backdrop-blur-xl",
       "shadow-[0_8px_30px_rgba(0,0,0,0.06)]",
-      "dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]",
+      ":border-white/10 :bg-white/[0.06] :shadow-[0_8px_30px_rgba(0,0,0,0.35)]",
       className,
     ].join(" ")}
   >
@@ -40,13 +40,13 @@ const Glass = ({ className = "", children }) => (
 const Card = ({ title, value, icon, sub }) => (
   <Glass>
     <div className="flex items-center gap-3 p-4">
-      <div className="grid size-10 place-items-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-slate-200">
+      <div className="grid size-10 place-items-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 shadow-sm :border-white/10 :bg-white/10 :text-slate-200">
         {icon}
       </div>
       <div className="min-w-0">
-        <div className="text-xs text-slate-600 dark:text-slate-400">{title}</div>
-        <div className="truncate text-xl font-semibold text-slate-900 dark:text-white">{value}</div>
-        {sub ? <div className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">{sub}</div> : null}
+        <div className="text-xs text-slate-600 :text-slate-400">{title}</div>
+        <div className="truncate text-xl font-semibold text-slate-900 :text-white">{value}</div>
+        {sub ? <div className="mt-0.5 text-[11px] text-slate-500 :text-slate-400">{sub}</div> : null}
       </div>
     </div>
   </Glass>
@@ -54,8 +54,8 @@ const Card = ({ title, value, icon, sub }) => (
 
 const Section = ({ title, right, children }) => (
   <Glass>
-    <div className="flex items-center justify-between border-b border-white/60 px-4 py-3 dark:border-white/10">
-      <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{title}</h3>
+    <div className="flex items-center justify-between border-b border-white/60 px-4 py-3 :border-white/10">
+      <h3 className="text-sm font-semibold text-slate-800 :text-slate-100">{title}</h3>
       {right}
     </div>
     <div className="p-4">{children}</div>
@@ -66,7 +66,7 @@ const RangeSelect = ({ value, onChange }) => (
   <select
     value={value}
     onChange={(e) => onChange(Number(e.target.value))}
-    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-white/10 dark:text-slate-100"
+    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm :border-white/10 :bg-white/10 :text-slate-100"
   >
     <option value={7}>Last 7 days</option>
     <option value={30}>Last 30 days</option>
@@ -79,7 +79,7 @@ const Empty = ({ label = "No data available" }) => (
 );
 
 const Skel = () => (
-  <div className="h-72 rounded-2xl bg-slate-100/70 dark:bg-white/10 animate-pulse" />
+  <div className="h-72 rounded-2xl bg-slate-100/70 :bg-white/10 animate-pulse" />
 );
 
 /* ================== Helpers ================== */
@@ -110,7 +110,7 @@ const PieTooltip = ({ active, payload }) => {
   const total = payload[0].payload.__total || 0;
   const pct = total ? ((value / total) * 100).toFixed(1) : 0;
   return (
-    <div className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs dark:border-white/10 dark:bg-white/10">
+    <div className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs :border-white/10 :bg-white/10">
       <div className="font-medium">{row.label}</div>
       <div>
         {value} ({pct}%)
@@ -274,10 +274,10 @@ export default function AdminAnalytics() {
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 :text-white">
             Reports & Analytics
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-slate-600 :text-slate-400">
             User growth, engagement, and community insights.
           </p>
         </div>
@@ -297,14 +297,14 @@ export default function AdminAnalytics() {
                   qCountryDist.refetch(),
                 ]).finally(() => toast.dismiss(p));
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-slate-200"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 :border-white/10 :bg-white/10 :text-slate-200"
             >
               <RefreshCw className="size-4" />
               Refresh
             </button>
             <button
               onClick={() => downloadCSV(`users_timeseries_${range}d.csv`, qUsersTS.data || [])}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-slate-200"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 :border-white/10 :bg-white/10 :text-slate-200"
             >
               <Download className="size-4" />
               Export CSV
@@ -361,7 +361,7 @@ export default function AdminAnalytics() {
                   }))
                 )
               }
-              className="inline-flex items-center gap-2 text-xs text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100"
+              className="inline-flex items-center gap-2 text-xs text-slate-600 hover:text-slate-800 :text-slate-300 :hover:text-slate-100"
             >
               <Download className="size-3.5" />
               CSV
