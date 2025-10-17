@@ -27,8 +27,6 @@ import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
 import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 
-
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -83,33 +81,30 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      { path: "follow", element: <FollowPage /> },
-      { path: "sessions", element: <SessionsPage /> },
-      { path: "badges", element: <BadgesPage /> },
-      { path: "inbox", element: <Inbox /> },
       {
-        path:"admin", element:<AdminHome></AdminHome>
+        path: "admin",
+        element: <AdminHome></AdminHome>,
       },
       {
         path: "admin/users",
-        element: <AdminManageUsers></AdminManageUsers>
+        element: <AdminManageUsers></AdminManageUsers>,
       },
       {
-        path:'admin/reports',
-        element: <AdminAnalytics></AdminAnalytics>
+        path: "admin/reports",
+        element: <AdminAnalytics></AdminAnalytics>,
       },
       {
-        path: 'admin/announcements',
-        element: <AdminAnnouncements></AdminAnnouncements>
+        path: "admin/announcements",
+        element: <AdminAnnouncements></AdminAnnouncements>,
       },
-  
+
       { path: "/dashboard/follow", element: <FollowPage /> },
       { path: "/dashboard/sessions", element: <SessionsPage /> },
       { path: "/dashboard/badges", element: <BadgesPage /> },
       { path: "/dashboard/inbox", element: <Inbox /> },
     ],
   },
-  
+
   {
     path: "/auth",
     element: <AuthLayouts></AuthLayouts>,
