@@ -10,9 +10,9 @@ import {
 
 /* =========== Tiny UI Primitives =========== */
 const Page = ({ children }) => (
-  <div className="relative min-h-screen px-4 py-6 bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-900 dark:via-blue-950 dark:to-emerald-950">
+  <div className="relative min-h-screen px-4 py-6 bg-gradient-to-br from-slate-50 via-blue-50 to-blue-50 dark:from-gray-900 dark:via-blue-950 dark:to-emerald-950">
     <div className="pointer-events-none absolute -top-20 -left-20 size-80 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-blue-400 to-purple-500" />
-    <div className="pointer-events-none absolute -bottom-20 -right-20 size-80 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-emerald-400 to-teal-500" />
+    <div className="pointer-events-none absolute -bottom-20 -right-20 size-80 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-pink-200 to-pink-300" />
     <div className="mx-auto max-w-7xl">{children}</div>
   </div>
 );
@@ -410,7 +410,7 @@ export default function AdminAnnouncements() {
                             if (!ok) return;
                             await mAction.mutateAsync({ id: a._id, action: "publish" });
                           }}
-                          className="text-emerald-600 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+                          className="text-emerald-600 border-emerald-200 bg-indigo-50 hover:bg-pink-100 dark:border-emerald-800 dark:bg-pink-900/30 dark:text-emerald-300"
                         >
                           <Upload className="size-4" /> Publish
                         </Btn>
