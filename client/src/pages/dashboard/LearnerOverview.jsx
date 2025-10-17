@@ -1,4 +1,4 @@
-// src/pages/dashboard/Overview.jsx
+// src/pages/dashboard/LearnerOverview.jsx
 import React, { useEffect, useState } from "react";
 import NextSessionCard from "../../components/dashboard/widgets/NextSessionCard";
 import ProgressDonut from "../../components/dashboard/widgets/ProgressDonut";
@@ -8,7 +8,7 @@ import useAuth from "../../hooks/useAuth";
 const BACKEND =
   import.meta.env.VITE_API_URL || "${import.meta.env.VITE_API_URL}";
 
-export default function Overview() {
+export default function LearnerOverview() {
   const { user: authUser } = useAuth();
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);

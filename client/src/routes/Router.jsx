@@ -17,7 +17,7 @@ import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
 import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
-import Overview from "../pages/dashboard/Overview";
+
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
@@ -25,6 +25,7 @@ import AdminHome from "../pages/Admin/AdminHome";
 import AdminManageUsers from "../pages/Admin/AdminManageUsers";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
+import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 
 
 
@@ -71,8 +72,8 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
     children: [
-      { index: true, element: <Overview /> },
-      { path: "/dashboard/overview", element: <Overview /> },
+      { index: true, element: <OverviewSwitcher /> },
+      { path: "/dashboard/overview", element: <OverviewSwitcher /> },
       { path: "/dashboard/profile", element: <ProfilePage /> },
       {
         path: "/dashboard/profile/edit",
