@@ -29,7 +29,7 @@ const mergeSeries = (users = [], messages = [], sessions = []) => {
 };
 
 const Skel = ({ h = 64, rounded = "rounded-2xl" }) => (
-  <div className={`w-full ${rounded} bg-gradient-to-br from-gray-200/70 to-gray-300/60 dark:from-gray-700/40 dark:to-gray-800/40 animate-pulse`} style={{ height: h }} />
+  <div className={`w-full ${rounded} bg-gradient-to-br from-gray-200/70 to-gray-300/60 :from-gray-700/40 :to-gray-800/40 animate-pulse`} style={{ height: h }} />
 );
 
 // ---------------- Data hooks ----------------
@@ -52,9 +52,9 @@ const useDistribution = (field = "native_language") =>
 const GlassCard = ({ children, className = "" }) => (
   <div className={[
     "relative overflow-hidden",
-    "rounded-3xl border border-white/60 dark:border-white/10",
-    "bg-white/70 dark:bg-white/[0.06] backdrop-blur-xl",
-    "shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]",
+    "rounded-3xl border border-white/60 :border-white/10",
+    "bg-white/70 :bg-white/[0.06] backdrop-blur-xl",
+    "shadow-[0_8px_30px_rgb(0,0,0,0.06)] :shadow-[0_8px_30px_rgba(0,0,0,0.35)]",
     className,
   ].join(" ")}>
     {/* subtle gradient sheen */}
@@ -77,9 +77,9 @@ const KpiCard = ({ icon: Icon, title, value, sub, color }) => (
           <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 group-hover:opacity-100 transition" />
         </div>
         <div className="min-w-0">
-          <p className="text-xs tracking-wide text-gray-600 dark:text-gray-400">{title}</p>
-          <p className="text-[28px] leading-tight font-semibold text-gray-900 dark:text-white truncate">{fmt(value)}</p>
-          {!!sub && <p className="text-xs text-gray-500 dark:text-gray-400">{sub}</p>}
+          <p className="text-xs tracking-wide text-gray-600 :text-gray-400">{title}</p>
+          <p className="text-[28px] leading-tight font-semibold text-gray-900 :text-white truncate">{fmt(value)}</p>
+          {!!sub && <p className="text-xs text-gray-500 :text-gray-400">{sub}</p>}
         </div>
       </div>
     </GlassCard>
@@ -138,18 +138,18 @@ export default function AdminHome() {
   ];
 
   return (
-    <div className="relative min-h-screen p-6 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] dark:from-[#0b1020] dark:via-[#0d1224] dark:to-[#0a101e]">
+    <div className="relative min-h-screen p-6 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] :from-[#0b1020] :via-[#0d1224] :to-[#0a101e]">
       {/* Decorative blobs */}
-      <div className="pointer-events-none absolute -top-24 -left-24 size-[340px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-sky-400/40 to-indigo-500/40" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 size-[380px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-pink-400/40 to-pink-500/40" />
+      <div className="pointer-events-none absolute -top-24 -left-24 size-[340px] rounded-full blur-3xl opacity-30 :opacity-20 bg-gradient-to-br from-sky-400/40 to-indigo-500/40" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 size-[380px] rounded-full blur-3xl opacity-30 :opacity-20 bg-gradient-to-br from-pink-400/40 to-pink-500/40" />
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 :text-white">
             TalkSync Admin
           </h1>
-          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+          <p className="text-sm md:text-base text-gray-600 :text-gray-400">
             Elegant insights across your users, messages & sessions.
           </p>
         </div>
@@ -157,8 +157,8 @@ export default function AdminHome() {
 
       {/* Error */}
       {errorMsg && (
-        <GlassCard className="mb-6 p-4 border-red-200/60 dark:border-red-400/20">
-          <div className="text-red-700 dark:text-red-300 text-sm">{errorMsg}</div>
+        <GlassCard className="mb-6 p-4 border-red-200/60 :border-red-400/20">
+          <div className="text-red-700 :text-red-300 text-sm">{errorMsg}</div>
         </GlassCard>
       )}
 
@@ -177,8 +177,8 @@ export default function AdminHome() {
         {/* Trend */}
         <GlassCard className="xl:col-span-2 p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">30-Day Activity Trend</h2>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Users · Messages · Sessions</span>
+            <h2 className="text-lg font-semibold text-gray-900 :text-gray-100">30-Day Activity Trend</h2>
+            <span className="text-xs text-gray-500 :text-gray-400">Users · Messages · Sessions</span>
           </div>
           {(lu || lm || ls) ? (
             <Skel h={320} />
@@ -202,7 +202,7 @@ export default function AdminHome() {
 
         {/* Distribution */}
         <GlassCard className="p-5">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Top Native Languages</h2>
+          <h2 className="text-lg font-semibold text-gray-900 :text-gray-100 mb-4">Top Native Languages</h2>
           {ld ? (
             <Skel h={320} />
           ) : (
@@ -250,11 +250,11 @@ export default function AdminHome() {
 
       {/* System Health */}
       <GlassCard className="mt-10 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">System Health</h2>
+        <h2 className="text-lg font-semibold text-gray-900 :text-gray-100 mb-3">System Health</h2>
         {(loadingOverview && loadingAov) ? (
           <Skel h={80} />
         ) : (
-          <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
+          <ul className="text-sm text-gray-700 :text-gray-300 space-y-1.5">
             <li>✅ MongoDB Connected</li>
             <li>✅ Socket.IO Active</li>
             <li>✅ JWT Auth Enabled</li>
@@ -275,18 +275,18 @@ export default function AdminHome() {
 function Leaderboard({ title, loading, rows }) {
   return (
     <GlassCard className="p-5">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">{title}</h2>
+      <h2 className="text-lg font-semibold text-gray-900 :text-gray-100 mb-3">{title}</h2>
       {loading ? (
         <Skel h={220} />
       ) : rows?.length ? (
-        <ul className="divide-y divide-gray-200/60 dark:divide-white/10">
+        <ul className="divide-y divide-gray-200/60 :divide-white/10">
           {rows.map((r, i) => (
             <li key={i} className="py-3 flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{r.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{r.email}</p>
+                <p className="text-sm font-medium text-gray-900 :text-gray-100 truncate">{r.name}</p>
+                <p className="text-xs text-gray-500 :text-gray-400 truncate">{r.email}</p>
               </div>
-              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{fmt(r.metric)}</span>
+              <span className="text-sm font-semibold text-gray-900 :text-gray-100">{fmt(r.metric)}</span>
             </li>
           ))}
         </ul>
