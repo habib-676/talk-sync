@@ -9,7 +9,14 @@ import { formatMessageTime } from "../../../lib/utils";
 import useAuth from "../../../hooks/useAuth";
 import toast from "react-hot-toast";
 
-const STUN_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
+const STUN_SERVERS = [
+  { urls: "stun:global.xirsys.net" },
+  {
+    urls: "turn:global.xirsys.net:3478?transport=udp",
+    username: "habib676",
+    credential: "1c59b192-ab26-11f0-8d44-0242ac140002",
+  },
+];
 
 const CallModal = ({
   visible,
@@ -233,14 +240,28 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
 
     // the callee accepted and sent an answer (for caller)
     const callAcceptedHandler = async (signal) => {
-      console.log("callAccepted", signal);
+      console.log("callAccepted -> received answer", signal);
       try {
         if (pcRef.current) {
           await pcRef.current.setRemoteDescription(
             new RTCSessionDescription(signal)
           );
+          console.log(
+            "Remote description set (answer). pc.connectionState:",
+            pcRef.current.connectionState
+          );
           setCallStatusSafe("in-call");
           setCallVisible(true);
+          // try to play remote video (some browsers require a user gesture, but call was started by click)
+          try {
+            if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
+              await remoteVideoRef.current.play();
+            }
+          } catch (playErr) {
+            console.warn("Remote video play() error:", playErr);
+          }
+        } else {
+          console.warn("callAccepted but pcRef.current is null");
         }
       } catch (err) {
         console.error("Error setting remote description (answer):", err);
@@ -275,6 +296,11 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     socket.on("callDeclined", callDeclinedHandler);
     socket.on("iceCandidate", iceCandidateHandler);
     socket.on("endCall", endCallHandler);
+
+    // helpful debug events
+    socket.on("connect_error", (err) => {
+      console.error("Socket connect_error:", err);
+    });
 
     return () => {
       socket.off("incomingCall", incomingCallHandler);
@@ -315,7 +341,15 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
         audio: true,
       });
       localStreamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+        try {
+          await localVideoRef.current.play();
+        } catch (e) {
+          console.warn("Local video play() error:", e);
+        }
+      }
 
       const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
       pcRef.current = pc;
@@ -323,21 +357,116 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       // attach local tracks
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
-      // remote track handler
+      // remote track handler - robust: handle streams array empty
       pc.ontrack = (event) => {
-        const [remoteStream] = event.streams;
-        if (remoteVideoRef.current)
-          remoteVideoRef.current.srcObject = remoteStream;
+        console.log("pc.ontrack event:", event);
+
+        // prefer event.streams[0] but build fallback stream if needed
+        let remoteStream = null;
+        if (event.streams && event.streams.length > 0) {
+          remoteStream = event.streams[0];
+        } else {
+          remoteStream = new MediaStream();
+          if (event.track) remoteStream.addTrack(event.track);
+        }
+
+        // debug: log tracks info
+        try {
+          console.log("Remote stream tracks:", {
+            audio: remoteStream.getAudioTracks().map((t) => ({
+              id: t.id,
+              enabled: t.enabled,
+              kind: t.kind,
+              label: t.label,
+            })),
+            video: remoteStream.getVideoTracks().map((t) => ({
+              id: t.id,
+              enabled: t.enabled,
+              kind: t.kind,
+              label: t.label,
+            })),
+          });
+        } catch (e) {
+          console.warn("Error logging remote tracks:", e);
+        }
+
+        const videoEl = remoteVideoRef.current;
+        if (!videoEl) return;
+
+        // if same object, nothing to do
+        if (videoEl.srcObject === remoteStream) return;
+
+        // attach stream
+        videoEl.onloadedmetadata = null;
+        videoEl.srcObject = remoteStream;
+
+        // try to play; if blocked, show toast and attach one-time click play fallback
+        const playPromise = videoEl.play();
+        if (playPromise && playPromise.catch) {
+          playPromise.catch((err) => {
+            if (err && err.name === "AbortError") {
+              // spurious/interrupted load — harmless, but try again later
+              console.warn("remote video play aborted:", err);
+              return;
+            }
+            console.warn("remoteVideo play() rejected:", err);
+            toast((t) => (
+              <div>
+                Click the remote video to enable audio/video
+                <button
+                  onClick={() => {
+                    try {
+                      videoEl
+                        .play()
+                        .catch((e) =>
+                          console.error("play after click failed:", e)
+                        );
+                    } catch (e) {
+                      console.error(e);
+                    }
+                    toast.dismiss(t.id);
+                  }}
+                  className="ml-2 underline"
+                >
+                  Enable
+                </button>
+              </div>
+            ));
+
+            // one-time click handler on video to start playback (useful when autoplay blocked)
+            const onUserClick = () => {
+              videoEl
+                .play()
+                .catch((e) => console.error("user-initiated play failed:", e));
+              videoEl.removeEventListener("click", onUserClick);
+            };
+            videoEl.addEventListener("click", onUserClick, { once: true });
+          });
+        }
       };
 
       // ICE candidates -> send to callee
       pc.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log("Sending local ICE candidate:", event.candidate);
           socketRef.current.emit("iceCandidate", {
             to: otherUserIdRef.current,
             candidate: event.candidate,
           });
+        } else {
+          console.log("onicecandidate: null (gathering finished)");
         }
+      };
+
+      // connection state logging for debug
+      pc.onconnectionstatechange = () => {
+        console.log("PC connectionState:", pc.connectionState);
+      };
+      pc.oniceconnectionstatechange = () => {
+        console.log("PC iceConnectionState:", pc.iceConnectionState);
+      };
+      pc.onicegatheringstatechange = () => {
+        console.log("PC iceGatheringState:", pc.iceGatheringState);
       };
 
       // create offer
@@ -370,8 +499,17 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
         video: true,
         audio: true,
       });
+
       localStreamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+        try {
+          await localVideoRef.current.play();
+        } catch (e) {
+          console.warn("Local video play() error:", e);
+        }
+      }
 
       const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
       pcRef.current = pc;
@@ -379,18 +517,77 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
       pc.ontrack = (event) => {
-        const [remoteStream] = event.streams;
-        if (remoteVideoRef.current)
-          remoteVideoRef.current.srcObject = remoteStream;
+        console.log("pc.ontrack (callee) event:", event);
+
+        let remoteStream = null;
+        if (event.streams && event.streams.length > 0) {
+          remoteStream = event.streams[0];
+        } else {
+          remoteStream = new MediaStream();
+          if (event.track) remoteStream.addTrack(event.track);
+        }
+
+        try {
+          console.log("Callee remote stream tracks:", {
+            audio: remoteStream
+              .getAudioTracks()
+              .map((t) => ({ id: t.id, enabled: t.enabled, kind: t.kind })),
+            video: remoteStream
+              .getVideoTracks()
+              .map((t) => ({ id: t.id, enabled: t.enabled, kind: t.kind })),
+          });
+        } catch (e) {
+          console.warn("Error logging callee remote tracks:", e);
+        }
+
+        const videoEl = remoteVideoRef.current;
+        if (!videoEl) return;
+        if (videoEl.srcObject === remoteStream) return;
+        videoEl.onloadedmetadata = null;
+        videoEl.srcObject = remoteStream;
+
+        const playPromise = videoEl.play();
+        if (playPromise && playPromise.catch) {
+          playPromise.catch((err) => {
+            if (err && err.name === "AbortError") {
+              console.warn("callee remote video play aborted:", err);
+              return;
+            }
+            console.warn("callee remoteVideo play() rejected:", err);
+            toast("Click remote video to enable audio/video", {
+              duration: 4000,
+            });
+            const onUserClick = () => {
+              videoEl
+                .play()
+                .catch((e) => console.error("user play failed:", e));
+              videoEl.removeEventListener("click", onUserClick);
+            };
+            videoEl.addEventListener("click", onUserClick, { once: true });
+          });
+        }
       };
 
       pc.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log("Callee sending ICE candidate:", event.candidate);
           socketRef.current.emit("iceCandidate", {
             to: caller.from,
             candidate: event.candidate,
           });
+        } else {
+          console.log("Callee onicecandidate: null");
         }
+      };
+
+      pc.onconnectionstatechange = () => {
+        console.log("Callee PC connectionState:", pc.connectionState);
+      };
+      pc.oniceconnectionstatechange = () => {
+        console.log("Callee PC iceConnectionState:", pc.iceConnectionState);
+      };
+      pc.onicegatheringstatechange = () => {
+        console.log("Callee PC iceGatheringState:", pc.iceGatheringState);
       };
 
       // set caller's offer as remote description
