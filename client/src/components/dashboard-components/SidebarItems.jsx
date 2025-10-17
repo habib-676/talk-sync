@@ -57,6 +57,7 @@ export const AdminSidebarLinks = () => {
         label="Announcements"
         isActive={location.pathname.includes("/dashboard/admin/announcements")}
       />
+      
     </>
   );
 };

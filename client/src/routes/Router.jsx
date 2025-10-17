@@ -21,6 +21,13 @@ import Overview from "../pages/dashboard/Overview";
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
+import AdminHome from "../pages/Admin/AdminHome";
+import AdminManageUsers from "../pages/Admin/AdminManageUsers";
+import AdminAnalytics from "../pages/Admin/AdminAnalytics";
+import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
+
+
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -75,12 +82,33 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      { path: "follow", element: <FollowPage /> },
+      { path: "sessions", element: <SessionsPage /> },
+      { path: "badges", element: <BadgesPage /> },
+      { path: "inbox", element: <Inbox /> },
+      {
+        path:"admin", element:<AdminHome></AdminHome>
+      },
+      {
+        path: "admin/users",
+        element: <AdminManageUsers></AdminManageUsers>
+      },
+      {
+        path:'admin/reports',
+        element: <AdminAnalytics></AdminAnalytics>
+      },
+      {
+        path: 'admin/announcements',
+        element: <AdminAnnouncements></AdminAnnouncements>
+      },
+  
       { path: "/dashboard/follow", element: <FollowPage /> },
       { path: "/dashboard/sessions", element: <SessionsPage /> },
       { path: "/dashboard/badges", element: <BadgesPage /> },
       { path: "/dashboard/inbox", element: <Inbox /> },
     ],
   },
+  
   {
     path: "/auth",
     element: <AuthLayouts></AuthLayouts>,
