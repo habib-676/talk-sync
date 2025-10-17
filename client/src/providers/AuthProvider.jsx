@@ -32,6 +32,8 @@ const AuthProvider = ({ children }) => {
     if (socketRef.current?.connected) return; // already connected
 
     socketRef.current = io(SOCKET_URL, {
+      transports: ["polling", "websocket"],
+      withCredentials: true,
       query: { uid },
     });
 
