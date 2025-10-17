@@ -34,7 +34,7 @@ const Ads = () => {
               across cultures, and learn together through real conversations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to={"/follow"}>
+              <Link to={"/dashboard/follow"}>
                 <button className="px-8 py-4 bg-white text-blue-600 rounded-full font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 min-w-[200px]">
                   <span>
                     <Users />
