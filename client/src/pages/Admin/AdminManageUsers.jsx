@@ -163,7 +163,7 @@ export default function AdminManageUsers() {
     <div className="relative min-h-screen p-6 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] dark:from-[#0b1020] dark:via-[#0d1224] dark:to-[#0a101e]">
       {/* soft blobs */}
       <div className="pointer-events-none absolute -top-24 -left-24 size-[320px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-sky-400/40 to-indigo-500/40" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 size-[360px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-teal-400/40 to-emerald-500/40" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 size-[360px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-pink-400/40 to-pink-500/40" />
 
       {/* header + toolbar */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

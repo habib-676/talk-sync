@@ -17,7 +17,7 @@ const Page = ({ children }) => (
   <div className="relative min-h-screen px-6 py-8 bg-gradient-to-br from-[#f8fbff] via-[#f7f7ff] to-[#f6fffb] dark:from-[#0b1020] dark:via-[#0d1224] dark:to-[#0a101e]">
     {/* soft blobs */}
     <div className="pointer-events-none absolute -top-28 -left-24 size-[360px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-sky-400/50 to-indigo-500/40" />
-    <div className="pointer-events-none absolute -bottom-28 -right-24 size-[380px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-teal-400/50 to-emerald-500/40" />
+    <div className="pointer-events-none absolute -bottom-28 -right-24 size-[380px] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-pink-400/50 to-pink-500/40" />
     <div className="mx-auto max-w-7xl">{children}</div>
   </div>
 );
