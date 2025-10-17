@@ -13,8 +13,8 @@ export default function BadgesPreview({
       {
         id: "bronze",
         title: "Bronze",
-        colorFrom: "#C18B4C",
-        colorTo: "#D6A15A",
+        colorFrom: "#2563EB", 
+        colorTo: "#4F46E5", 
         icon: "🥉",
         threshold: thresholds.bronze,
         desc: "Complete 10 meaningful sessions",
@@ -22,8 +22,8 @@ export default function BadgesPreview({
       {
         id: "silver",
         title: "Silver",
-        colorFrom: "#9CA3FF",
-        colorTo: "#6D28D9",
+        colorFrom: "#60A5FA",
+        colorTo: "#818CF8",
         icon: "🥈",
         threshold: thresholds.silver,
         desc: "Earn positive feedback & 50 sessions",
@@ -31,8 +31,8 @@ export default function BadgesPreview({
       {
         id: "gold",
         title: "Gold",
-        colorFrom: "#FFD66B",
-        colorTo: "#F59E0B",
+        colorFrom: "#FACC15", 
+        colorTo: "#FBBF24",
         icon: "🥇",
         threshold: thresholds.gold,
         desc: "Mastery: 200 sessions + top ratings",
@@ -49,14 +49,14 @@ export default function BadgesPreview({
   });
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white py-16">
-      <div className="maximum-w mx-auto px-4">
+    <section className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-white py-12 md:py-16">
+      <div className="maximum-w mx-auto px-4 sm:px-6 lg:px-8">
         {/* header */}
-        <header className="mb-10 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold">
+        <header className="mb-8 md:mb-12 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
             Badges & Gamification — Level up as you speak
           </h1>
-          <p className="mt-3 text-gray-600 max-w-2xl mx-auto">
+          <p className="mt-3 text-gray-600 max-w-2xl mx-auto text-base sm:text-lg">
             Badges celebrate consistent practice — they’re visual milestones
             that motivate learners. Scroll to explore how to earn them and where
             you stand.
@@ -64,7 +64,7 @@ export default function BadgesPreview({
         </header>
 
         {/* Hero: large badges row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 items-stretch">
           {badgeProgress.map((b, i) => {
             const ringSize = 160;
             const radius = (ringSize - 18) / 2;
@@ -74,16 +74,21 @@ export default function BadgesPreview({
             return (
               <article
                 key={b.id}
-                className={`relative rounded-2xl p-6 bg-white shadow-xl border ${
-                  b.unlocked ? "border-green-50" : "border-gray-100"
-                } overflow-hidden`}
+                className={`relative rounded-2xl p-6 bg-white shadow-xl border
+                  ${b.unlocked ? "border-green-100" : "border-gray-100"}
+                  hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 ease-in-out
+                  overflow-hidden
+                `}
               >
                 {/* floating decorative sparkles */}
-                <div className="pointer-events-none absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-gradient-to-br from-indigo-400 to-pink-400 transform rotate-12" />
-                <div className="flex items-center gap-6">
+                <div className="pointer-events-none absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-gradient-to-br from-blue-400 to-indigo-400 transform rotate-12" />{" "}
+                {/* Primary gradient applied */}
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                  {" "}
+                  {/* Responsive flex */}
                   <div
                     style={{ width: ringSize }}
-                    className="relative flex-shrink-0"
+                    className="relative flex-shrink-0 mb-4 sm:mb-0"
                   >
                     <svg
                       width={ringSize}
@@ -95,7 +100,7 @@ export default function BadgesPreview({
                         cx={ringSize / 2}
                         cy={ringSize / 2}
                         r={radius}
-                        stroke="#F3F4F6"
+                        stroke="#E5E7EB"
                         strokeWidth="14"
                         fill="transparent"
                       />
@@ -118,7 +123,15 @@ export default function BadgesPreview({
                         }}
                       />
                       <defs>
-                        <linearGradient id={`g-${b.id}`} x1="0" x2="1">
+                        <linearGradient
+                          id={`g-${b.id}`}
+                          x1="0"
+                          y1="0"
+                          x2="1"
+                          y2="0"
+                        >
+                          {" "}
+                          {/* Horizontal gradient for ring */}
                           <stop offset="0%" stopColor={b.colorFrom} />
                           <stop offset="100%" stopColor={b.colorTo} />
                         </linearGradient>
@@ -127,7 +140,7 @@ export default function BadgesPreview({
 
                     <div className="absolute inset-0 grid place-items-center">
                       <div
-                        className={`w-20 h-20 rounded-full grid place-items-center text-4xl`}
+                        className={`w-20 h-20 rounded-full grid place-items-center text-4xl shadow-md`}
                         style={{ background: "white" }}
                       >
                         <span>{b.icon}</span>
@@ -138,11 +151,13 @@ export default function BadgesPreview({
                       <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-green-400 ring-2 ring-white animate-ping-slower" />
                     )}
                   </div>
-
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold">{b.title}</h3>
+                  <div className="flex-1 text-center sm:text-left">
+                    {" "}
+                    {/* Responsive text alignment */}
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      {b.title}
+                    </h3>
                     <p className="text-sm text-gray-500 mt-1">{b.desc}</p>
-
                     <div className="mt-4">
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <div>
@@ -164,9 +179,11 @@ export default function BadgesPreview({
                         />
                       </div>
 
-                      <div className="mt-3 flex gap-2">
+                      <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
+                        {" "}
+                        {/* Responsive button layout */}
                         {b.unlocked ? (
-                          <button className="px-3 py-1 text-sm rounded-full bg-green-50 text-green-700 font-semibold">
+                          <button className="px-3 py-1 text-sm rounded-full bg-green-50 text-green-700 font-semibold hover:bg-green-100 transition-colors">
                             View reward
                           </button>
                         ) : (
@@ -178,7 +195,7 @@ export default function BadgesPreview({
                                 } more points for ${b.title}`
                               )
                             }
-                            className="px-3 py-1 text-sm rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-semibold"
+                            className="px-3 py-1 text-sm rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-sm hover:shadow-md transition-all"
                           >
                             How to get it
                           </button>
@@ -187,7 +204,7 @@ export default function BadgesPreview({
                           onClick={() =>
                             alert("Open practice modal (placeholder)")
                           }
-                          className="px-3 py-1 text-sm rounded-full border border-gray-200 text-gray-700"
+                          className="px-3 py-1 text-sm rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           Practice now
                         </button>
@@ -195,9 +212,10 @@ export default function BadgesPreview({
                     </div>
                   </div>
                 </div>
-
                 {/* Expandable detail area (static here) */}
-                <div className="mt-6 text-xs text-gray-500">
+                <div className="mt-6 text-xs text-gray-500 text-center sm:text-left">
+                  {" "}
+                  {/* Responsive text alignment */}
                   {b.id === "bronze" && (
                     <span>
                       Bronze badges reward consistent beginners — each counted
@@ -224,25 +242,28 @@ export default function BadgesPreview({
         </div>
 
         {/* CTA + tips */}
-        <div className="bg-gradient-to-r from-indigo-600 to-pink-500 text-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          {" "}
           <div>
-            <h3 className="text-2xl font-bold">
+            <h3 className="text-xl sm:text-2xl font-bold">
               Ready to unlock your next badge?
             </h3>
             <p className="mt-1 text-sm opacity-90">
               Practice 3 sessions this week and get closer to Bronze.
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {" "}
+            {/* Responsive button layout */}
             <button
               onClick={() => alert("Start a practice session (placeholder)")}
-              className="px-5 py-3 rounded-full bg-white text-indigo-600 font-semibold shadow"
+              className="px-5 py-3 rounded-full bg-white text-blue-600 font-semibold shadow hover:bg-gray-100 transition-colors"
             >
               Start practice
             </button>
             <button
               onClick={() => alert("Open challenges (placeholder)")}
-              className="px-4 py-3 rounded-full border border-white/30 text-white font-medium"
+              className="px-4 py-3 rounded-full border border-white/30 text-white font-medium hover:bg-white/10 transition-colors"
             >
               View challenges
             </button>
