@@ -2,12 +2,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import useAuth from "../../hooks/useAuth";
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 =======
 const BACKEND =
   import.meta.env.VITE_API_URL || "${import.meta.env.VITE_API_URL}";
 >>>>>>> Stashed changes
+=======
+const BACKEND =
+  import.meta.env.VITE_API_URL || "${import.meta.env.VITE_API_URL}";
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
 
 export default function FriendsPage() {
   const { mongoUser, loadingMongo, refreshMongoUser } = useAuth();
@@ -76,16 +81,26 @@ export default function FriendsPage() {
   // follow API call
   const follow = async (targetUser) => {
     if (!myId) return alert("Please sign in to follow users.");
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     const targetId = String(targetUser._id || targetUser.uid || targetUser.email);
+=======
+    const targetId = String(
+      targetUser._id || targetUser.uid || targetUser.email
+    );
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
     setActionLoading(targetId);
     try {
-      const res = await fetch(`${BACKEND}/users/${encodeURIComponent(targetId)}/follow`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ currentUserId: myId }),
-      });
+      const res = await fetch(
+        `${BACKEND}/users/${encodeURIComponent(targetId)}/follow`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ currentUserId: myId }),
+        }
+      );
       const json = await res.json();
+<<<<<<< HEAD
       if (!res.ok) throw new Error(json?.message || `Follow failed (${res.status})`);
 =======
     const targetId = String(
@@ -105,6 +120,10 @@ export default function FriendsPage() {
       if (!res.ok)
         throw new Error(json?.message || `Follow failed (${res.status})`);
 >>>>>>> Stashed changes
+=======
+      if (!res.ok)
+        throw new Error(json?.message || `Follow failed (${res.status})`);
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
       // refresh local state
       await refreshMongoUser();
       // refresh whole list to reflect any changes (optional but useful)
@@ -124,16 +143,26 @@ export default function FriendsPage() {
   // unfollow API call
   const unfollow = async (targetUser) => {
     if (!myId) return alert("Please sign in to unfollow users.");
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     const targetId = String(targetUser._id || targetUser.uid || targetUser.email);
+=======
+    const targetId = String(
+      targetUser._id || targetUser.uid || targetUser.email
+    );
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
     setActionLoading(targetId);
     try {
-      const res = await fetch(`${BACKEND}/users/${encodeURIComponent(targetId)}/unfollow`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ currentUserId: myId }),
-      });
+      const res = await fetch(
+        `${BACKEND}/users/${encodeURIComponent(targetId)}/unfollow`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ currentUserId: myId }),
+        }
+      );
       const json = await res.json();
+<<<<<<< HEAD
       if (!res.ok) throw new Error(json?.message || `Unfollow failed (${res.status})`);
 =======
     const targetId = String(
@@ -153,6 +182,10 @@ export default function FriendsPage() {
       if (!res.ok)
         throw new Error(json?.message || `Unfollow failed (${res.status})`);
 >>>>>>> Stashed changes
+=======
+      if (!res.ok)
+        throw new Error(json?.message || `Unfollow failed (${res.status})`);
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
       await refreshMongoUser();
       const r2 = await fetch(`${BACKEND}/users`, { headers });
       if (r2.ok) {
@@ -168,6 +201,7 @@ export default function FriendsPage() {
   };
 
   if (loadingUsers || loadingMongo) {
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     return <div className="text-center text-gray-500 py-8">Loading people…</div>;
 =======
@@ -175,6 +209,11 @@ export default function FriendsPage() {
       <div className="text-center text-gray-500 py-8">Loading people…</div>
     );
 >>>>>>> Stashed changes
+=======
+    return (
+      <div className="text-center text-gray-500 py-8">Loading people…</div>
+    );
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
   }
 
   if (error) {
@@ -193,6 +232,7 @@ export default function FriendsPage() {
       {/* Following section */}
       <section className="bg-white rounded-2xl p-4 shadow">
         <div className="flex items-center justify-between mb-3">
+<<<<<<< HEAD
 <<<<<<< Updated upstream
           <h3 className="font-semibold text-slate-700">Following ({followingList.length})</h3>
 =======
@@ -200,10 +240,16 @@ export default function FriendsPage() {
             Following ({followingList.length})
           </h3>
 >>>>>>> Stashed changes
+=======
+          <h3 className="font-semibold text-slate-700">
+            Following ({followingList.length})
+          </h3>
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
           <p className="text-xs text-slate-400">People you follow</p>
         </div>
 
         {followingList.length === 0 ? (
+<<<<<<< HEAD
 <<<<<<< Updated upstream
           <div className="text-sm text-gray-500 py-6 text-center">You are not following anyone yet.</div>
 =======
@@ -211,17 +257,38 @@ export default function FriendsPage() {
             You are not following anyone yet.
           </div>
 >>>>>>> Stashed changes
+=======
+          <div className="text-sm text-gray-500 py-6 text-center">
+            You are not following anyone yet.
+          </div>
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {followingList.map((u) => {
               const id = String(u._id || u.uid || u.email);
               return (
+<<<<<<< HEAD
 <<<<<<< Updated upstream
                 <div key={id} className="flex items-center gap-4 p-3 rounded-lg border">
+=======
+                <div
+                  key={id}
+                  className="flex items-center gap-4 p-3 rounded-lg border"
+                >
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
                   <div className="w-12 h-12 rounded-full bg-indigo-50 grid place-items-center overflow-hidden text-indigo-700 font-bold">
-                    {u.image ? <img className="w-full h-full object-cover" src={u.image} alt={u.name || u.email} /> : (u.name || u.email || "U").slice(0, 2).toUpperCase()}
+                    {u.image ? (
+                      <img
+                        className="w-full h-full object-cover"
+                        src={u.image}
+                        alt={u.name || u.email}
+                      />
+                    ) : (
+                      (u.name || u.email || "U").slice(0, 2).toUpperCase()
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
+<<<<<<< HEAD
                     <div className="font-medium text-slate-800 truncate">{u.name || "Unnamed"}</div>
                     <div className="text-xs text-slate-400 truncate">{u.native_language || u.native || "—"}</div>
 =======
@@ -241,13 +308,18 @@ export default function FriendsPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
+=======
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
                     <div className="font-medium text-slate-800 truncate">
                       {u.name || "Unnamed"}
                     </div>
                     <div className="text-xs text-slate-400 truncate">
                       {u.native_language || u.native || "—"}
                     </div>
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
                   </div>
                   <div>
                     <button
@@ -268,6 +340,7 @@ export default function FriendsPage() {
       {/* Suggested section */}
       <section className="bg-white rounded-2xl p-4 shadow">
         <div className="flex items-center justify-between mb-3">
+<<<<<<< HEAD
 <<<<<<< Updated upstream
           <h3 className="font-semibold text-slate-700">People you may follow ({suggestedList.length})</h3>
           <p className="text-xs text-slate-400">Suggested based on language & activity</p>
@@ -289,18 +362,48 @@ export default function FriendsPage() {
             No suggestions right now — great! 👏
           </div>
 >>>>>>> Stashed changes
+=======
+          <h3 className="font-semibold text-slate-700">
+            People you may follow ({suggestedList.length})
+          </h3>
+          <p className="text-xs text-slate-400">
+            Suggested based on language & activity
+          </p>
+        </div>
+
+        {suggestedList.length === 0 ? (
+          <div className="text-sm text-gray-500 py-6 text-center">
+            No suggestions right now — great! 👏
+          </div>
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {suggestedList.map((u) => {
               const id = String(u._id || u.uid || u.email);
               return (
+<<<<<<< HEAD
 <<<<<<< Updated upstream
                 <div key={id} className="p-3 rounded-lg border flex flex-col gap-3">
+=======
+                <div
+                  key={id}
+                  className="p-3 rounded-lg border flex flex-col gap-3"
+                >
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-indigo-50 grid place-items-center overflow-hidden text-indigo-700 font-bold">
-                      {u.image ? <img className="w-full h-full object-cover" src={u.image} alt={u.name || u.email} /> : (u.name || u.email || "U").slice(0, 2).toUpperCase()}
+                      {u.image ? (
+                        <img
+                          className="w-full h-full object-cover"
+                          src={u.image}
+                          alt={u.name || u.email}
+                        />
+                      ) : (
+                        (u.name || u.email || "U").slice(0, 2).toUpperCase()
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
+<<<<<<< HEAD
                       <div className="font-medium text-slate-800 truncate">{u.name || "Unnamed"}</div>
                       <div className="text-xs text-slate-400 truncate">{u.native_language || u.native || "—"}</div>
 =======
@@ -321,17 +424,23 @@ export default function FriendsPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
+=======
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
                       <div className="font-medium text-slate-800 truncate">
                         {u.name || "Unnamed"}
                       </div>
                       <div className="text-xs text-slate-400 truncate">
                         {u.native_language || u.native || "—"}
                       </div>
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
+<<<<<<< HEAD
 <<<<<<< Updated upstream
                     <div className="text-xs text-slate-500">{u.points ?? 0} pts</div>
 =======
@@ -339,6 +448,11 @@ export default function FriendsPage() {
                       {u.points ?? 0} pts
                     </div>
 >>>>>>> Stashed changes
+=======
+                    <div className="text-xs text-slate-500">
+                      {u.points ?? 0} pts
+                    </div>
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
                     <div>
                       <button
                         onClick={() => follow(u)}
@@ -358,7 +472,10 @@ export default function FriendsPage() {
     </div>
   );
 }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0

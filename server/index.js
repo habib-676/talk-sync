@@ -210,26 +210,18 @@ async function run() {
     };
 
     // User related APIs
-    app.get("/user-role/:email", verifyToken, async (req, res) => {
+
+    app.get("/user-role", verifyToken, async (req, res) => {
       try {
-        const emailFromToken = req.decoded?.email;
-        const requestedEmail = req.params.email;
+        const email = req.decoded?.email;
+        if (!email) return res.status(401).send({ message: "Unauthorized" });
 
-        if (emailFromToken !== requestedEmail) {
-          return res
-            .status(403)
-            .send({ message: "Forbidden access: Email mismatch" });
-        }
+        const user = await usersCollections.findOne({ email });
+        if (!user) return res.status(404).send({ message: "User not found" });
 
-        const user = await usersCollections.findOne({ email: emailFromToken });
-
-        if (!user) {
-          return res.status(404).send({ message: "User not found" });
-        }
-
-        res.send({ role: user.role });
-      } catch (error) {
-        console.error("Error getting user role:", error);
+        res.send({ role: user.role || "learner" });
+      } catch (e) {
+        console.error("Error getting user role:", e);
         res.status(500).send({ message: "Server error during role retrieval" });
       }
     });

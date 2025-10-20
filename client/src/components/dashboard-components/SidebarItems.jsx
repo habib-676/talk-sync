@@ -84,6 +84,7 @@ export const LearnerSidebarLinks = () => {
         isActive={location.pathname.includes("/dashboard/inbox")}
       />
       <SidebarItem
+<<<<<<< HEAD
 <<<<<<< Updated upstream
         to="/dashboard/friends"
         icon={<Users size={20} />}
@@ -95,6 +96,12 @@ export const LearnerSidebarLinks = () => {
         label="Find a partner"
         isActive={location.pathname.includes("/dashboard/follow")}
 >>>>>>> Stashed changes
+=======
+        to="/dashboard/follow"
+        icon={<Users size={20} />}
+        label="Find a partner"
+        isActive={location.pathname.includes("/dashboard/follow")}
+>>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
       />
       <SidebarItem
         to="/dashboard/sessions"

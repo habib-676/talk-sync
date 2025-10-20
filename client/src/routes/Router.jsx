@@ -18,7 +18,6 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
 import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
 import Overview from "../pages/dashboard/Overview";
-import FriendsPage from "../pages/dashboard/FriendsPage";
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
@@ -44,19 +43,6 @@ export const router = createBrowserRouter([
         Component: BlogDetails, //added by amena
       },
 
-      {
-        path: "/dashboard",
-        element: <DashboardLayout />, // sidebar layout
-        children: [
-          { index: true, element: <Overview /> },
-          { path: "overview", element: <Overview /> },
-          { path: "profile", element: <ProfilePage /> },
-          { path: "friends", element: <FriendsPage /> },
-          { path: "sessions", element: <SessionsPage /> },
-          { path: "badges", element: <BadgesPage /> },
-          { path: "inbox", element: <Inbox /> },
-        ],
-      },
       {
         path: "/inbox",
         element: (
@@ -131,15 +117,6 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <ProfilePage />
-      </PrivateRoute>
-    ),
-  },
-
-  {
-    path: "/profile/edit",
-    element: (
-      <PrivateRoute>
-        <EditProfile />
       </PrivateRoute>
     ),
   },
