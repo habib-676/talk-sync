@@ -2,14 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import { IoIosSend, IoMdPhotos } from "react-icons/io";
 import { RiInformationLine } from "react-icons/ri";
-import { MdVideoCall, MdCallEnd } from "react-icons/md";
+import { MdVideoCall, MdCallEnd, MdArrowBackIosNew } from "react-icons/md";
 
 import logo from "../../../assets/logo/logo.png";
-import { formatMessageTime } from "../../../lib/utils";
+import { formatMessageTime, markConversationSeen } from "../../../lib/utils";
 import useAuth from "../../../hooks/useAuth";
 import toast from "react-hot-toast";
 
-const STUN_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
+const STUN_SERVERS = [
+  { urls: "stun:global.xirsys.net" },
+  {
+    urls: "turn:global.xirsys.net:3478?transport=udp",
+    username: "habib676",
+    credential: "1c59b192-ab26-11f0-8d44-0242ac140002",
+  },
+];
 
 const CallModal = ({
   visible,
@@ -176,6 +183,15 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     };
 
     fetchMessages();
+
+    // mark this conversation as seen for the current user
+    (async () => {
+      try {
+        await markConversationSeen(user.uid, selectedUser.uid);
+      } catch {
+        // no-op: best-effort
+      }
+    })();
   }, [selectedUser, user]);
 
   // socket listener for real-time incoming messages
@@ -233,14 +249,28 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
 
     // the callee accepted and sent an answer (for caller)
     const callAcceptedHandler = async (signal) => {
-      console.log("callAccepted", signal);
+      console.log("callAccepted -> received answer", signal);
       try {
         if (pcRef.current) {
           await pcRef.current.setRemoteDescription(
             new RTCSessionDescription(signal)
           );
+          console.log(
+            "Remote description set (answer). pc.connectionState:",
+            pcRef.current.connectionState
+          );
           setCallStatusSafe("in-call");
           setCallVisible(true);
+          // try to play remote video (some browsers require a user gesture, but call was started by click)
+          try {
+            if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
+              await remoteVideoRef.current.play();
+            }
+          } catch (playErr) {
+            console.warn("Remote video play() error:", playErr);
+          }
+        } else {
+          console.warn("callAccepted but pcRef.current is null");
         }
       } catch (err) {
         console.error("Error setting remote description (answer):", err);
@@ -276,6 +306,11 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     socket.on("iceCandidate", iceCandidateHandler);
     socket.on("endCall", endCallHandler);
 
+    // helpful debug events
+    socket.on("connect_error", (err) => {
+      console.error("Socket connect_error:", err);
+    });
+
     return () => {
       socket.off("incomingCall", incomingCallHandler);
       socket.off("callAccepted", callAcceptedHandler);
@@ -283,7 +318,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       socket.off("iceCandidate", iceCandidateHandler);
       socket.off("endCall", endCallHandler);
     };
-  }, [socketRef]);
+  }, [socketRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // cleanup when component unmounts
   useEffect(() => {
@@ -315,7 +350,15 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
         audio: true,
       });
       localStreamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+        try {
+          await localVideoRef.current.play();
+        } catch (e) {
+          console.warn("Local video play() error:", e);
+        }
+      }
 
       const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
       pcRef.current = pc;
@@ -323,21 +366,116 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       // attach local tracks
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
-      // remote track handler
+      // remote track handler - robust: handle streams array empty
       pc.ontrack = (event) => {
-        const [remoteStream] = event.streams;
-        if (remoteVideoRef.current)
-          remoteVideoRef.current.srcObject = remoteStream;
+        console.log("pc.ontrack event:", event);
+
+        // prefer event.streams[0] but build fallback stream if needed
+        let remoteStream = null;
+        if (event.streams && event.streams.length > 0) {
+          remoteStream = event.streams[0];
+        } else {
+          remoteStream = new MediaStream();
+          if (event.track) remoteStream.addTrack(event.track);
+        }
+
+        // debug: log tracks info
+        try {
+          console.log("Remote stream tracks:", {
+            audio: remoteStream.getAudioTracks().map((t) => ({
+              id: t.id,
+              enabled: t.enabled,
+              kind: t.kind,
+              label: t.label,
+            })),
+            video: remoteStream.getVideoTracks().map((t) => ({
+              id: t.id,
+              enabled: t.enabled,
+              kind: t.kind,
+              label: t.label,
+            })),
+          });
+        } catch (e) {
+          console.warn("Error logging remote tracks:", e);
+        }
+
+        const videoEl = remoteVideoRef.current;
+        if (!videoEl) return;
+
+        // if same object, nothing to do
+        if (videoEl.srcObject === remoteStream) return;
+
+        // attach stream
+        videoEl.onloadedmetadata = null;
+        videoEl.srcObject = remoteStream;
+
+        // try to play; if blocked, show toast and attach one-time click play fallback
+        const playPromise = videoEl.play();
+        if (playPromise && playPromise.catch) {
+          playPromise.catch((err) => {
+            if (err && err.name === "AbortError") {
+              // spurious/interrupted load — harmless, but try again later
+              console.warn("remote video play aborted:", err);
+              return;
+            }
+            console.warn("remoteVideo play() rejected:", err);
+            toast((t) => (
+              <div>
+                Click the remote video to enable audio/video
+                <button
+                  onClick={() => {
+                    try {
+                      videoEl
+                        .play()
+                        .catch((e) =>
+                          console.error("play after click failed:", e)
+                        );
+                    } catch (e) {
+                      console.error(e);
+                    }
+                    toast.dismiss(t.id);
+                  }}
+                  className="ml-2 underline"
+                >
+                  Enable
+                </button>
+              </div>
+            ));
+
+            // one-time click handler on video to start playback (useful when autoplay blocked)
+            const onUserClick = () => {
+              videoEl
+                .play()
+                .catch((e) => console.error("user-initiated play failed:", e));
+              videoEl.removeEventListener("click", onUserClick);
+            };
+            videoEl.addEventListener("click", onUserClick, { once: true });
+          });
+        }
       };
 
       // ICE candidates -> send to callee
       pc.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log("Sending local ICE candidate:", event.candidate);
           socketRef.current.emit("iceCandidate", {
             to: otherUserIdRef.current,
             candidate: event.candidate,
           });
+        } else {
+          console.log("onicecandidate: null (gathering finished)");
         }
+      };
+
+      // connection state logging for debug
+      pc.onconnectionstatechange = () => {
+        console.log("PC connectionState:", pc.connectionState);
+      };
+      pc.oniceconnectionstatechange = () => {
+        console.log("PC iceConnectionState:", pc.iceConnectionState);
+      };
+      pc.onicegatheringstatechange = () => {
+        console.log("PC iceGatheringState:", pc.iceGatheringState);
       };
 
       // create offer
@@ -370,8 +508,17 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
         video: true,
         audio: true,
       });
+
       localStreamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+        try {
+          await localVideoRef.current.play();
+        } catch (e) {
+          console.warn("Local video play() error:", e);
+        }
+      }
 
       const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
       pcRef.current = pc;
@@ -379,18 +526,77 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
       pc.ontrack = (event) => {
-        const [remoteStream] = event.streams;
-        if (remoteVideoRef.current)
-          remoteVideoRef.current.srcObject = remoteStream;
+        console.log("pc.ontrack (callee) event:", event);
+
+        let remoteStream = null;
+        if (event.streams && event.streams.length > 0) {
+          remoteStream = event.streams[0];
+        } else {
+          remoteStream = new MediaStream();
+          if (event.track) remoteStream.addTrack(event.track);
+        }
+
+        try {
+          console.log("Callee remote stream tracks:", {
+            audio: remoteStream
+              .getAudioTracks()
+              .map((t) => ({ id: t.id, enabled: t.enabled, kind: t.kind })),
+            video: remoteStream
+              .getVideoTracks()
+              .map((t) => ({ id: t.id, enabled: t.enabled, kind: t.kind })),
+          });
+        } catch (e) {
+          console.warn("Error logging callee remote tracks:", e);
+        }
+
+        const videoEl = remoteVideoRef.current;
+        if (!videoEl) return;
+        if (videoEl.srcObject === remoteStream) return;
+        videoEl.onloadedmetadata = null;
+        videoEl.srcObject = remoteStream;
+
+        const playPromise = videoEl.play();
+        if (playPromise && playPromise.catch) {
+          playPromise.catch((err) => {
+            if (err && err.name === "AbortError") {
+              console.warn("callee remote video play aborted:", err);
+              return;
+            }
+            console.warn("callee remoteVideo play() rejected:", err);
+            toast("Click remote video to enable audio/video", {
+              duration: 4000,
+            });
+            const onUserClick = () => {
+              videoEl
+                .play()
+                .catch((e) => console.error("user play failed:", e));
+              videoEl.removeEventListener("click", onUserClick);
+            };
+            videoEl.addEventListener("click", onUserClick, { once: true });
+          });
+        }
       };
 
       pc.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log("Callee sending ICE candidate:", event.candidate);
           socketRef.current.emit("iceCandidate", {
             to: caller.from,
             candidate: event.candidate,
           });
+        } else {
+          console.log("Callee onicecandidate: null");
         }
+      };
+
+      pc.onconnectionstatechange = () => {
+        console.log("Callee PC connectionState:", pc.connectionState);
+      };
+      pc.oniceconnectionstatechange = () => {
+        console.log("Callee PC iceConnectionState:", pc.iceConnectionState);
+      };
+      pc.onicegatheringstatechange = () => {
+        console.log("Callee PC iceGatheringState:", pc.iceGatheringState);
       };
 
       // set caller's offer as remote description
@@ -493,7 +699,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       if (!res.ok) {
         throw new Error("Failed to send message");
       }
-      const saved = await res.json();
+      await res.json();
       // Optionally update optimistic message with server data
     } catch (err) {
       console.error("Send message error:", err);
@@ -524,21 +730,34 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
   }
 
   return (
-    <div className="h-full overflow-scroll relative border-l border-r border-gray-300 bg-primary/5">
+    <div className="h-full overflow-y-auto relative border-l border-r border-base-300 bg-base-200/30">
       {/* header */}
-      <div className="flex items-center gap-3 py-3 mx-4 border-b border-accent">
+      <div className="flex items-center gap-3 py-3 px-4 border-b border-base-300 sticky top-0 bg-base-100/80 backdrop-blur z-10">
+        {/* Mobile back button to open sidebar */}
+        <button
+          className="md:hidden p-2 rounded-full hover:bg-base-200 text-secondary"
+          onClick={() => setSelectedUser(null)}
+          title="Back"
+        >
+          <MdArrowBackIosNew size={18} />
+        </button>
         <img
           src={selectedUser.image || selectedUser.profilePic || ""}
           alt=""
-          className="w-8 aspect-[1/1] object-cover rounded-full"
+          className="w-8 h-8 object-cover rounded-full"
         />
-        <p className="flex-1 text-lg  flex items-center gap-2">
-          {selectedUser.name || selectedUser.fullName || "Unknown"}
-          <span className="w-2 h-2 rounded-full bg-green-500"></span>
-        </p>
+        <div className="flex-1 flex items-center gap-2">
+          <p className="text-base font-medium">
+            {selectedUser.name || selectedUser.fullName || "Unknown"}
+          </p>
+          {isSelectedUserOnline && (
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+          )}
+        </div>
 
         {/* VIDEO CALL BUTTON */}
-        <div
+        <button
+          type="button"
           title={isSelectedUserOnline ? "Start video call" : "User offline"}
           onClick={() => {
             if (!isSelectedUserOnline) {
@@ -547,48 +766,45 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
             }
             initiateCall();
           }}
-          className={`cursor-pointer mr-2 ${
+          className={`p-2 rounded-lg ${
             isSelectedUserOnline
-              ? "text-primary"
+              ? "text-primary hover:bg-primary/10"
               : "opacity-40 cursor-not-allowed"
           }`}
         >
-          <MdVideoCall size={22} />
-        </div>
+          <MdVideoCall size={20} />
+        </button>
 
-        <div
-          onClick={() => setSelectedUser(null)}
-          alt=""
-          className="md:hidden max-w-7"
-        >
-          <RxAvatar />
-        </div>
-        <div className="max-md:hidden max-w-5 ">
-          <RiInformationLine size={20} />
+        <div className="hidden md:block text-secondary/70">
+          <RiInformationLine size={18} />
         </div>
       </div>
 
       {/* chat messages */}
-      <div className="flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6">
+      <div className="flex flex-col h-[calc(100%-120px)] overflow-y-auto p-4 pb-16">
         {messages.map((msg, index) => {
           const isMe = msg.senderId === user.uid;
           return (
             <div
               key={index}
-              className={`flex items-end gap-2 justify-end ${
-                !isMe && "flex-row-reverse"
+              className={`flex items-end gap-2 ${
+                isMe ? "justify-end" : "justify-start"
               }`}
             >
               {msg.image ? (
                 <img
                   src={msg.image}
                   alt=""
-                  className="max-w-[230px]  border border-primary/70 rounded-lg overflow-hidden mb-8"
+                  className={`max-w-[230px] border ${
+                    isMe ? "border-primary/70" : "border-base-300"
+                  } rounded-xl overflow-hidden mb-6`}
                 />
               ) : (
                 <p
-                  className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-8 break-all bg-primary/70 text-white ${
-                    isMe ? "rounded-br-none" : "rounded-bl-none"
+                  className={`px-3 py-2 max-w-[240px] text-sm rounded-2xl mb-3 break-words shadow-sm ${
+                    isMe
+                      ? "bg-primary/80 text-white rounded-br-sm"
+                      : "bg-base-100 text-secondary rounded-bl-sm border border-base-200"
                   }`}
                 >
                   {msg.text}
@@ -602,7 +818,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
                       ? user.photoURL || ""
                       : selectedUser.image || selectedUser.profilePic || ""
                   }
-                  className="w-7 aspect-[1/1] object-cover rounded-full"
+                  className="w-7 h-7 object-cover rounded-full"
                 />
                 <p className="text-gray-500">
                   {formatMessageTime(msg.createdAt)}
@@ -616,13 +832,13 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
 
       {/* bottom input */}
       <div className="absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3">
-        <div className="flex-1 flex items-center bg-primary/10 px-3 rounded-full">
+        <div className="flex-1 flex items-center bg-base-100/80 backdrop-blur px-3 rounded-full border border-base-300">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Send a message"
-            className="flex-1 text-sm p-3 border-none rounded-lg outline-none placeholder-gray-400 resize-none"
+            className="flex-1 text-sm p-3 border-none rounded-lg outline-none placeholder-gray-400 resize-none bg-transparent"
             rows={1}
           />
           <input type="file" id="image" accept="image/png, image/jpeg" hidden />

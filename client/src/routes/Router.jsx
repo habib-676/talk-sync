@@ -17,10 +17,16 @@ import EditProfile from "../pages/user-profile/edit-user-profile/EditProfile";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OnBoarding from "../pages/on-boarding/OnBoarding";
 import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSession";
-import Overview from "../pages/dashboard/Overview";
+
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
+import AdminHome from "../pages/Admin/AdminHome";
+import AdminManageUsers from "../pages/Admin/AdminManageUsers";
+import AdminAnalytics from "../pages/Admin/AdminAnalytics";
+import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
+import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -32,75 +38,76 @@ export const router = createBrowserRouter([
       },
       {
         path: "/about",
-        Component: AboutUs, //added by asif
+        Component: AboutUs,
       },
       {
         path: "/blogs",
-        Component: blogs, //added by amena
+        Component: blogs,
       },
       {
         path: "/blogs/:id",
-        Component: BlogDetails, //added by amena
-      },
-
-      {
-        path: "/inbox",
-        element: (
-          <PrivateRoute>
-            <Inbox />
-          </PrivateRoute>
-        ),
+        Component: BlogDetails,
       },
       {
         path: "contact-us",
         Component: ContactUs,
       },
       {
-        path: "/follow", //added by jannatul
-        Component: FollowPage,
-      },
-      {
-        path: "/schedule", //added by amena
+        path: "/schedule",
         Component: ScheduleSession,
       },
       {
         path: "/profile/:userId",
         element: <UserProfile></UserProfile>,
       },
-      {
-        path: "/profile",
-        element: (
-          <PrivateRoute>
-            <ProfilePage />
-          </PrivateRoute>
-        ),
-      },
     ],
   },
   {
     path: "/dashboard",
-    element: <DashboardLayout />, // sidebar layout
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
-      { index: true, element: <Overview /> },
-      { path: "overview", element: <Overview /> },
-      { path: "profile", element: <ProfilePage /> },
+      { index: true, element: <OverviewSwitcher /> },
+      { path: "/dashboard/overview", element: <OverviewSwitcher /> },
+      { path: "/dashboard/profile", element: <ProfilePage /> },
       {
-        path: "profile/edit",
+        path: "/dashboard/profile/edit",
         element: (
           <PrivateRoute>
             <EditProfile />
           </PrivateRoute>
         ),
       },
-      { path: "follow", element: <FollowPage /> },
-      { path: "sessions", element: <SessionsPage /> },
-      { path: "badges", element: <BadgesPage /> },
-      { path: "inbox", element: <Inbox /> },
+      {
+        path: "admin",
+        element: <AdminHome></AdminHome>,
+      },
+      {
+        path: "admin/users",
+        element: <AdminManageUsers></AdminManageUsers>,
+      },
+      {
+        path: "admin/reports",
+        element: <AdminAnalytics></AdminAnalytics>,
+      },
+      {
+        path: "admin/announcements",
+        element: <AdminAnnouncements></AdminAnnouncements>,
+      },
+
+      { path: "/dashboard/follow", element: <FollowPage /> },
+      { path: "/dashboard/sessions", element: <SessionsPage /> },
+      { path: "/dashboard/badges", element: <BadgesPage /> },
+      { path: "/dashboard/inbox", element: <Inbox /> },
     ],
   },
+
   {
     path: "/auth",
-    element: <AuthLayouts></AuthLayouts>, //added by Jannatul
+    element: <AuthLayouts></AuthLayouts>,
     children: [
       {
         path: "/auth/signin",
@@ -113,15 +120,6 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/profile",
-    element: (
-      <PrivateRoute>
-        <ProfilePage />
-      </PrivateRoute>
-    ),
-  },
-
-  {
     path: "/onboarding",
     element: (
       <PrivateRoute>
@@ -129,7 +127,6 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
-
 
   {
     path: "*",

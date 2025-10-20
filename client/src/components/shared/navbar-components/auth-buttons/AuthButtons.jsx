@@ -22,7 +22,7 @@ const AuthButtons = () => {
       {user ? (
         <div className="flex items-center gap-4">
           {/* Avatar or default icon that links to Profile */}
-          <Link to="/profile">
+          <Link to="">
             <div className="avatar cursor-pointer">
               <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                 <img

@@ -14,7 +14,7 @@ const Footer = () => {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-300 rounded-full blur-3xl opacity-30"></div>
 
       {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto py-14 px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div className="relative maximum-w mx-auto py-14 px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* About */}
         <div>
           <LogoForFooter />

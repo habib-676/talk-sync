@@ -6,11 +6,34 @@ import { FiMenu } from "react-icons/fi";
 import { MdClose } from "react-icons/md";
 import TalkSyncLogo from "../../logo/TalkSyncLogo";
 import AuthBtnMobile from "./auth-buttons/AuthBtnMobile";
+import useAuth from "../../../hooks/useAuth";
 
 const MobileNav = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const menuItems = [
+    { to: "/", label: "Home" },
+    { to: "/about", label: "About Us" },
+    { to: "/chat", label: "Chat" },
+    { to: "/blogs", label: "Blogs" },
+    { to: "/contact-us", label: "Contact Us" },
+  ];
+
+  if (user) {
+    menuItems.push({ to: "/dashboard", label: "Dashboard" });
+  }
   return (
-    <div className="lg:hidden">
+    <div className="lg:hidden flex items-center gap-4">
+      {user && (
+        <div className="avatar cursor-pointer">
+          <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+            <img
+              src={user?.photoURL || "/default-avatar.png"}
+              alt={user?.displayName || "User"}
+            />
+          </div>
+        </div>
+      )}
       {/* open/close button + icon */}
       <button onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? <MdClose size={30} /> : <FiMenu size={25} />}
@@ -31,13 +54,7 @@ const MobileNav = () => {
 
         {/* aside links */}
         <ul className="flex flex-col items-start gap- my-12">
-          {[
-            { to: "/", label: "Home" },
-            { to: "/about", label: "About Us" },
-            { to: "/chat", label: "Chat" },
-            { to: "/blogs", label: "Blogs" },
-            { to: "/contact-us", label: "Contact Us" },
-          ].map(({ to, label }) => (
+          {menuItems.map(({ to, label }) => (
             <li key={to} className="w-full">
               <NavLink
                 to={to}
