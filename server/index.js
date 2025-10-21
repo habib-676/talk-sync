@@ -64,6 +64,7 @@ async function run() {
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
     const announcementsCollection = database.collection("announcements");
+    const feedbackCollection = database.collection("feedbacks");
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -1717,6 +1718,65 @@ async function run() {
       } catch (err) {
         console.error("POST /sessions/:id/accept error:", err);
         res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // feedbacks related apis
+    app.get("/feedback/:email", async (req, res) => {
+      try {
+        const email = req.params.email.toLowerCase().trim();
+        const feedback = await feedbackCollection
+          .find({ toEmail: email })
+          .sort({ createdAt: -1 })
+          .toArray();
+
+        res.status(200).json({ success: true, feedback });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    app.post("/feedback", async (req, res) => {
+      try {
+        const feedbackData = req.body;
+
+        const { fromEmail, toEmail, rating, comment, learned } = feedbackData;
+
+        if (!fromEmail || !toEmail || !rating || !comment) {
+          return res.status(400).json({
+            success: false,
+            message: "fromEmail, toEmail, rating, and comment are required.",
+          });
+        }
+
+        //feedback object
+        const newFeedback = {
+          fromEmail: fromEmail.toLowerCase.trim(),
+          toEmail: toEmail.toLowerCase.trim(),
+          rating: Number(rating),
+          comment: comment.trim(),
+          learned: learned || "",
+          createdAt: new Date().toISOString(),
+        };
+
+        const result = await feedbackCollection.insertOne(newFeedback);
+
+        //store a reference in user's document (for quick access)
+        await usersCollections.updateOne(
+          {
+            email: toEmail.toLowerCase().trim(),
+          },
+          { $push: { feedback: newFeedback } }
+        );
+
+        res.status(201).json({
+          success: true,
+          message: "Feedback submitted successfully",
+          feedbackId: result.insertedId,
+        });
+      } catch (error) {
+        console.error("❌ Error in /feedback:", error);
+        res.status(500).json({ success: false, message: error.message });
       }
     });
 
