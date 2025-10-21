@@ -14,17 +14,37 @@ const ScheduleSession = () => {
   const [showModal, setShowModal] = useState(false);
 
   // ✅ Fetch JSON data from public folder
-  useEffect(() => {
-    fetch("/wordsData.json")
-      .then((res) => res.json())
-      .then((data) => setWordsData(data))
-      .catch((err) => console.error("Failed to load words JSON", err));
+  
+  // useEffect(() => {
+  //   fetch("/wordsData.json")
+  //     .then((res) => res.json())
+  //     .then((data) => setWordsData(data))
+  //     .catch((err) => console.error("Failed to load words JSON", err));
 
-    fetch("/readingData.json")
-      .then((res) => res.json())
-      .then((data) => setReadingData(data))
-      .catch((err) => console.error("Failed to load reading JSON", err));
-  }, []);
+  //   // fetch("/readingData.json")
+  //   //   .then((res) => res.json())
+  //   //   .then((data) => setReadingData(data))
+  //   //   .catch((err) => console.error("Failed to load reading JSON", err));
+  // }, []);
+
+
+// Read
+useEffect(() => {
+  fetch("http://localhost:5000/books") // fetch from backend instead of local JSON
+    .then((res) => res.json())
+    .then((data) => setReadingData(data))
+    .catch((err) => console.error("Failed to load books from backend", err));
+}, []);
+// Words
+useEffect(() => {
+  fetch("http://localhost:5000/words")
+    .then((res) => res.json())
+    .then((data) => setWordsData(data))
+    .catch((err) => console.error("Failed to load words from backend", err));
+}, []);
+
+
+
 
   // ✅ Reset selections when switching tabs
   const resetSelections = () => {

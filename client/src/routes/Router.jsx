@@ -26,6 +26,10 @@ import AdminManageUsers from "../pages/Admin/AdminManageUsers";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
 import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
+import Courses from "../pages/dashboard/Courses/Courses";
+import TutorDetails from "../pages/dashboard/Courses/TutorDetails";
+
+
 
 export const router = createBrowserRouter([
   {
@@ -97,6 +101,12 @@ export const router = createBrowserRouter([
         path: "admin/announcements",
         element: <AdminAnnouncements></AdminAnnouncements>,
       },
+  { path: "/dashboard/courses", element:  <Courses></Courses>},
+{
+  path: "/dashboard/tutor/:id",
+  element: <TutorDetails></TutorDetails>,
+},
+
 
       { path: "/dashboard/follow", element: <FollowPage /> },
       { path: "/dashboard/sessions", element: <SessionsPage /> },

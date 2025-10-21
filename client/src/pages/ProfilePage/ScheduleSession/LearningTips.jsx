@@ -21,11 +21,7 @@ const LearningTips = () => {
       title: "Read Short Stories or Comics",
       description: "Enjoy learning through easy-to-read stories that enhance comprehension and vocabulary.",
       icon: <FaRegLightbulb size={35} />,
-<<<<<<< Updated upstream
-      link: "https://www.jilliantamaki.com/short-comics",
-=======
       link: "https://www.english-for-students.com/short-stories.html",
->>>>>>> Stashed changes
     },
     {
       id: 4,

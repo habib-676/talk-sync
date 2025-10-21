@@ -16,15 +16,7 @@ const useAuth = () => {
     try {
       setLoadingMongo(true);
       const response = await fetch(
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-        `http://localhost:5000/users/${authInfo.user.email}`
-=======
         `${import.meta.env.VITE_API_URL}/users/${authInfo.user.email}`
->>>>>>> Stashed changes
-=======
-        `${import.meta.env.VITE_API_URL}/users/${authInfo.user.email}`
->>>>>>> e9ab4032b463353a7abc31fbc945f83783bedff0
       );
       const data = await response.json();
 
