@@ -1,9 +1,23 @@
 import React from "react";
 import { AdminSidebarLinks, LearnerSidebarLinks } from "./SidebarItems";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { X } from "lucide-react";
+import useAuth from "../../hooks/useAuth";
 
 const DashboardSidebar = ({ role, sidebarOpen, setSidebarOpen }) => {
+  const navigate = useNavigate();
+  const { logOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await logOut();
+    } catch (err) {
+      console.error("Error during logout:", err);
+    } finally {
+      setSidebarOpen(false);
+      navigate("/");
+    }
+  };
   return (
     <>
       {/* Mobile overlay */}
@@ -61,7 +75,10 @@ const DashboardSidebar = ({ role, sidebarOpen, setSidebarOpen }) => {
             {/* {darkMode ? "🌞 Light Mode" : "🌙 Dark Mode"} */}
             Theme
           </button>
-          <button className="flex items-center gap-3 w-full p-3 btn btn-error rounded-lg transition-colors">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 w-full p-3 btn btn-error rounded-lg transition-colors"
+          >
             🔓 Sign Out
           </button>
         </div>
