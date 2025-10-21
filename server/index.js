@@ -65,6 +65,12 @@ async function run() {
     const messagesCollections = database.collection("messages");
     const announcementsCollection = database.collection("announcements");
 
+    // Read Collection 
+    const booksCollections = database.collection("books");
+    const wordsCollections = database.collection("words");
+    const tutorsCollections = database.collection("tutors");
+
+
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -124,6 +130,119 @@ async function run() {
           .send({ message: "Server error during role verification" });
       }
     };
+
+// ---------APIS Data of Reading ----------
+// 1. Get all books
+app.get("/books", async (req, res) => {
+  const books = await booksCollections.find().toArray();
+  res.json(books);
+});
+// 2. Get single book by ID
+app.get("/books/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const book = await booksCollections.findOne(query);
+  res.json(book);
+});
+// 3. Post new book
+app.post("/books", async (req, res) => {
+  const newBook = req.body;
+  const result = await booksCollections.insertOne(newBook);
+  res.status(201).json({ message: "Book added successfully", id: result.insertedId });
+});
+// ---------APIS Data of Words ----------
+//1. Get All Words
+app.get("/words", async (req, res) => {
+  try {
+    const words = await wordsCollections.find().toArray();
+    res.json(words);
+  } catch (error) {
+    console.error("Failed to fetch words:", error);
+    res.status(500).json({ message: "Failed to fetch words" });
+  }
+});
+// 2. Get Word by ID
+app.get("/words/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const word = await wordsCollections.findOne(query);
+    if (!word) {
+      return res.status(404).json({ message: "Word not found" });
+    }
+    res.json(word);
+  } catch (error) {
+    console.error("Failed to fetch word:", error);
+    res.status(500).json({ message: "Failed to fetch word" });
+  }
+});
+// 3. Add New Word Document
+app.post("/words", async (req, res) => {
+  try {
+    const newWord = req.body; // expects a JSON object like your dummy data
+    const result = await wordsCollections.insertOne(newWord);
+
+    res.status(201).json({
+      message: "Word document added successfully",
+      id: result.insertedId,
+    });
+  } catch (error) {
+    console.error("Failed to add word:", error);
+    res.status(500).json({ message: "Failed to add word" });
+  }
+});
+// 1. Get All Tutors
+app.get("/tutors", async (req, res) => {
+  try {
+    const tutors = await tutorsCollections.find().toArray();
+    res.json(tutors);
+  } catch (error) {
+    console.error("Failed to fetch tutors:", error);
+    res.status(500).json({ message: "Failed to fetch tutors" });
+  }
+});
+// 2. Get Tutor by ID
+app.get("/tutors/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Check if id is a valid ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid tutor ID format" });
+    }
+
+    const tutor = await tutorsCollections.findOne({ _id: new ObjectId(id) });
+
+    if (!tutor) {
+      return res.status(404).json({ message: "Tutor not found" });
+    }
+
+    res.json(tutor);
+  } catch (error) {
+    console.error("Error fetching tutor:", error);
+    res.status(500).json({ message: "Server error while fetching tutor" });
+  }
+});
+// 3. Add a New Tutor
+app.post("/tutors", async (req, res) => {
+  try {
+    const newTutor = req.body; // expects full tutor object (name, language, etc.)
+    const result = await tutorsCollections.insertOne(newTutor);
+
+    res.status(201).json({
+      message: "Tutor added successfully",
+      id: result.insertedId,
+    });
+  } catch (error) {
+    console.error("Failed to add tutor:", error);
+    res.status(500).json({ message: "Failed to add tutor" });
+  }
+});
+
+
+
+
+
 
     //  Learner dashboard route
     app.get("/dashboard/learner", verifyToken, async (req, res) => {
