@@ -806,7 +806,7 @@ async function run() {
       }
     });
     // inside run() after you define usersCollections, messagesCollections
-    const sessionsCollections = database.collection("sessions");
+   
 
     /**
      * GET /users/following/:email
@@ -880,6 +880,7 @@ async function run() {
      * Create a session request (status: pending)
      * Body: { fromEmail, toEmail, scheduledAt(optional ISO string), durationMinutes (optional) , message (optional) }
      */
+    const sessionsCollections = database.collection("sessions");
     app.post("/sessions/request", async (req, res) => {
       try {
         const {
@@ -966,6 +967,58 @@ async function run() {
         res.json({ success: true, sessions });
       } catch (err) {
         console.error("GET /sessions error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+        /**
+     * POST /sessions/:id/accept
+     * Accept a session request. Body: { actionByEmail } // must be receiver
+     */
+    app.post("/sessions/:id/accept", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const { actionByEmail } = req.body;
+        if (!actionByEmail)
+          return res
+            .status(400)
+            .json({ success: false, message: "actionByEmail required" });
+
+        const session = await sessionsCollections.findOne({
+          _id: new ObjectId(id),
+        });
+        if (!session)
+          return res
+            .status(404)
+            .json({ success: false, message: "Session not found" });
+
+        // only the receiver (toEmail) can accept
+        if (session.toEmail.toLowerCase() !== actionByEmail.toLowerCase()) {
+          return res
+            .status(403)
+            .json({ success: false, message: "Only receiver can accept" });
+        }
+
+        const update = {
+          $set: {
+            status: "accepted",
+            updatedAt: new Date().toISOString(),
+          },
+        };
+
+        await sessionsCollections.updateOne({ _id: new ObjectId(id) }, update);
+
+        // notify the requester
+        const requesterSocketId = userSocketMap[session.fromUserId];
+        if (requesterSocketId) {
+          io.to(requesterSocketId).emit("sessionAccepted", {
+            sessionId: id,
+            session: { ...session, status: "accepted" },
+          });
+        }
+
+        res.json({ success: true, message: "Session accepted" });
+      } catch (err) {
+        console.error("POST /sessions/:id/accept error:", err);
         res.status(500).json({ success: false, message: err.message });
       }
     });
@@ -1666,59 +1719,6 @@ async function run() {
         }
       }
     );
-
-    /**
-     * POST /sessions/:id/accept
-     * Accept a session request. Body: { actionByEmail } // must be receiver
-     */
-    app.post("/sessions/:id/accept", async (req, res) => {
-      try {
-        const { id } = req.params;
-        const { actionByEmail } = req.body;
-        if (!actionByEmail)
-          return res
-            .status(400)
-            .json({ success: false, message: "actionByEmail required" });
-
-        const session = await sessionsCollections.findOne({
-          _id: new ObjectId(id),
-        });
-        if (!session)
-          return res
-            .status(404)
-            .json({ success: false, message: "Session not found" });
-
-        // only the receiver (toEmail) can accept
-        if (session.toEmail.toLowerCase() !== actionByEmail.toLowerCase()) {
-          return res
-            .status(403)
-            .json({ success: false, message: "Only receiver can accept" });
-        }
-
-        const update = {
-          $set: {
-            status: "accepted",
-            updatedAt: new Date().toISOString(),
-          },
-        };
-
-        await sessionsCollections.updateOne({ _id: new ObjectId(id) }, update);
-
-        // notify the requester
-        const requesterSocketId = userSocketMap[session.fromUserId];
-        if (requesterSocketId) {
-          io.to(requesterSocketId).emit("sessionAccepted", {
-            sessionId: id,
-            session: { ...session, status: "accepted" },
-          });
-        }
-
-        res.json({ success: true, message: "Session accepted" });
-      } catch (err) {
-        console.error("POST /sessions/:id/accept error:", err);
-        res.status(500).json({ success: false, message: err.message });
-      }
-    });
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");
