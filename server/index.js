@@ -64,6 +64,14 @@ async function run() {
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
     const announcementsCollection = database.collection("announcements");
+    const sessionsCollections = database.collection("sessions");
+    const feedbackCollection = database.collection("feedbacks");
+
+    // Read Collection 
+    const booksCollections = database.collection("books");
+    const wordsCollections = database.collection("words");
+    const tutorsCollections = database.collection("tutors");
+
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -125,6 +133,119 @@ async function run() {
       }
     };
 
+// ---------APIS Data of Reading ----------
+// 1. Get all books
+app.get("/books", async (req, res) => {
+  const books = await booksCollections.find().toArray();
+  res.json(books);
+});
+// 2. Get single book by ID
+app.get("/books/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const book = await booksCollections.findOne(query);
+  res.json(book);
+});
+// 3. Post new book
+app.post("/books", async (req, res) => {
+  const newBook = req.body;
+  const result = await booksCollections.insertOne(newBook);
+  res.status(201).json({ message: "Book added successfully", id: result.insertedId });
+});
+// ---------APIS Data of Words ----------
+//1. Get All Words
+app.get("/words", async (req, res) => {
+  try {
+    const words = await wordsCollections.find().toArray();
+    res.json(words);
+  } catch (error) {
+    console.error("Failed to fetch words:", error);
+    res.status(500).json({ message: "Failed to fetch words" });
+  }
+});
+// 2. Get Word by ID
+app.get("/words/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const word = await wordsCollections.findOne(query);
+    if (!word) {
+      return res.status(404).json({ message: "Word not found" });
+    }
+    res.json(word);
+  } catch (error) {
+    console.error("Failed to fetch word:", error);
+    res.status(500).json({ message: "Failed to fetch word" });
+  }
+});
+// 3. Add New Word Document
+app.post("/words", async (req, res) => {
+  try {
+    const newWord = req.body; // expects a JSON object like your dummy data
+    const result = await wordsCollections.insertOne(newWord);
+
+    res.status(201).json({
+      message: "Word document added successfully",
+      id: result.insertedId,
+    });
+  } catch (error) {
+    console.error("Failed to add word:", error);
+    res.status(500).json({ message: "Failed to add word" });
+  }
+});
+// 1. Get All Tutors
+app.get("/tutors", async (req, res) => {
+  try {
+    const tutors = await tutorsCollections.find().toArray();
+    res.json(tutors);
+  } catch (error) {
+    console.error("Failed to fetch tutors:", error);
+    res.status(500).json({ message: "Failed to fetch tutors" });
+  }
+});
+// 2. Get Tutor by ID
+app.get("/tutors/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Check if id is a valid ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid tutor ID format" });
+    }
+
+    const tutor = await tutorsCollections.findOne({ _id: new ObjectId(id) });
+
+    if (!tutor) {
+      return res.status(404).json({ message: "Tutor not found" });
+    }
+
+    res.json(tutor);
+  } catch (error) {
+    console.error("Error fetching tutor:", error);
+    res.status(500).json({ message: "Server error while fetching tutor" });
+  }
+});
+// 3. Add a New Tutor
+app.post("/tutors", async (req, res) => {
+  try {
+    const newTutor = req.body; // expects full tutor object (name, language, etc.)
+    const result = await tutorsCollections.insertOne(newTutor);
+
+    res.status(201).json({
+      message: "Tutor added successfully",
+      id: result.insertedId,
+    });
+  } catch (error) {
+    console.error("Failed to add tutor:", error);
+    res.status(500).json({ message: "Failed to add tutor" });
+  }
+});
+
+
+
+
+
+
     //  Learner dashboard route
     app.get("/dashboard/learner", verifyToken, async (req, res) => {
       res.send({ message: "Welcome Learner Dashboard!" });
@@ -166,7 +287,6 @@ async function run() {
           });
         }
       });
-
       // When user accepts a call
       socket.on("acceptCall", ({ to, signal }) => {
         const callerSocketId = userSocketMap[to];
@@ -212,6 +332,21 @@ async function run() {
     };
 
     // User related APIs
+
+    app.get("/user-role", verifyToken, async (req, res) => {
+      try {
+        const email = req.decoded?.email;
+        if (!email) return res.status(401).send({ message: "Unauthorized" });
+
+        const user = await usersCollections.findOne({ email });
+        if (!user) return res.status(404).send({ message: "User not found" });
+
+        res.send({ role: user.role || "learner" });
+      } catch (e) {
+        console.error("Error getting user role:", e);
+        res.status(500).send({ message: "Server error during role retrieval" });
+      }
+    });
 
     app.get("/user-role", verifyToken, async (req, res) => {
       try {
@@ -747,8 +882,8 @@ async function run() {
         const learning = Array.isArray(user.learning_language)
           ? user.learning_language
           : user.learning_language
-          ? [user.learning_language]
-          : [];
+            ? [user.learning_language]
+            : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
@@ -880,7 +1015,7 @@ async function run() {
      * Create a session request (status: pending)
      * Body: { fromEmail, toEmail, scheduledAt(optional ISO string), durationMinutes (optional) , message (optional) }
      */
-    const sessionsCollections = database.collection("sessions");
+    
     app.post("/sessions/request", async (req, res) => {
       try {
         const {
@@ -970,7 +1105,7 @@ async function run() {
         res.status(500).json({ success: false, message: err.message });
       }
     });
-        /**
+
      * POST /sessions/:id/accept
      * Accept a session request. Body: { actionByEmail } // must be receiver
      */
@@ -1023,6 +1158,64 @@ async function run() {
       }
     });
 
+    // feedbacks related apis
+    app.get("/feedback/:email", async (req, res) => {
+      try {
+        const email = req.params.email.toLowerCase().trim();
+        const feedback = await feedbackCollection
+          .find({ toEmail: email })
+          .sort({ createdAt: -1 })
+          .toArray();
+
+        res.status(200).json({ success: true, feedback });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+
+    app.post("/feedback", async (req, res) => {
+      try {
+        const feedbackData = req.body;
+
+        const { fromEmail, toEmail, rating, comment, learned } = feedbackData;
+
+        if (!fromEmail || !toEmail || !rating || !comment) {
+          return res.status(400).json({
+            success: false,
+            message: "fromEmail, toEmail, rating, and comment are required.",
+          });
+        }
+
+        //feedback object
+        const newFeedback = {
+          fromEmail: fromEmail.toLowerCase.trim(),
+          toEmail: toEmail.toLowerCase.trim(),
+          rating: Number(rating),
+          comment: comment.trim(),
+          learned: learned || "",
+          createdAt: new Date().toISOString(),
+        };
+
+        const result = await feedbackCollection.insertOne(newFeedback);
+
+        //store a reference in user's document (for quick access)
+        await usersCollections.updateOne(
+          {
+            email: toEmail.toLowerCase().trim(),
+          },
+          { $push: { feedback: newFeedback } }
+        );
+
+        res.status(201).json({
+          success: true,
+          message: "Feedback submitted successfully",
+          feedbackId: result.insertedId,
+        });
+      } catch (error) {
+        console.error("❌ Error in /feedback:", error);
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
     // admin
 
     // Admin overview (requires admin)
@@ -1719,6 +1912,8 @@ async function run() {
         }
       }
     );
+
+    
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");
