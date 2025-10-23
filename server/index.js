@@ -133,113 +133,113 @@ async function run() {
       }
     };
 
-// ---------APIS Data of Reading ----------
-// 1. Get all books
-app.get("/books", async (req, res) => {
-  const books = await booksCollections.find().toArray();
-  res.json(books);
-});
-// 2. Get single book by ID
-app.get("/books/:id", async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  const book = await booksCollections.findOne(query);
-  res.json(book);
-});
-// 3. Post new book
-app.post("/books", async (req, res) => {
-  const newBook = req.body;
-  const result = await booksCollections.insertOne(newBook);
-  res.status(201).json({ message: "Book added successfully", id: result.insertedId });
-});
-// ---------APIS Data of Words ----------
-//1. Get All Words
-app.get("/words", async (req, res) => {
-  try {
-    const words = await wordsCollections.find().toArray();
-    res.json(words);
-  } catch (error) {
-    console.error("Failed to fetch words:", error);
-    res.status(500).json({ message: "Failed to fetch words" });
-  }
-});
-// 2. Get Word by ID
-app.get("/words/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const query = { _id: new ObjectId(id) };
-    const word = await wordsCollections.findOne(query);
-    if (!word) {
-      return res.status(404).json({ message: "Word not found" });
-    }
-    res.json(word);
-  } catch (error) {
-    console.error("Failed to fetch word:", error);
-    res.status(500).json({ message: "Failed to fetch word" });
-  }
-});
-// 3. Add New Word Document
-app.post("/words", async (req, res) => {
-  try {
-    const newWord = req.body; // expects a JSON object like your dummy data
-    const result = await wordsCollections.insertOne(newWord);
-
-    res.status(201).json({
-      message: "Word document added successfully",
-      id: result.insertedId,
+    // ---------APIS Data of Reading ----------
+    // 1. Get all books
+    app.get("/books", async (req, res) => {
+      const books = await booksCollections.find().toArray();
+      res.json(books);
     });
-  } catch (error) {
-    console.error("Failed to add word:", error);
-    res.status(500).json({ message: "Failed to add word" });
-  }
-});
-// 1. Get All Tutors
-app.get("/tutors", async (req, res) => {
-  try {
-    const tutors = await tutorsCollections.find().toArray();
-    res.json(tutors);
-  } catch (error) {
-    console.error("Failed to fetch tutors:", error);
-    res.status(500).json({ message: "Failed to fetch tutors" });
-  }
-});
-// 2. Get Tutor by ID
-app.get("/tutors/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    // Check if id is a valid ObjectId
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid tutor ID format" });
-    }
-
-    const tutor = await tutorsCollections.findOne({ _id: new ObjectId(id) });
-
-    if (!tutor) {
-      return res.status(404).json({ message: "Tutor not found" });
-    }
-
-    res.json(tutor);
-  } catch (error) {
-    console.error("Error fetching tutor:", error);
-    res.status(500).json({ message: "Server error while fetching tutor" });
-  }
-});
-// 3. Add a New Tutor
-app.post("/tutors", async (req, res) => {
-  try {
-    const newTutor = req.body; // expects full tutor object (name, language, etc.)
-    const result = await tutorsCollections.insertOne(newTutor);
-
-    res.status(201).json({
-      message: "Tutor added successfully",
-      id: result.insertedId,
+    // 2. Get single book by ID
+    app.get("/books/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const book = await booksCollections.findOne(query);
+      res.json(book);
     });
-  } catch (error) {
-    console.error("Failed to add tutor:", error);
-    res.status(500).json({ message: "Failed to add tutor" });
-  }
-});
+    // 3. Post new book
+    app.post("/books", async (req, res) => {
+      const newBook = req.body;
+      const result = await booksCollections.insertOne(newBook);
+      res.status(201).json({ message: "Book added successfully", id: result.insertedId });
+    });
+    // ---------APIS Data of Words ----------
+    //1. Get All Words
+    app.get("/words", async (req, res) => {
+      try {
+        const words = await wordsCollections.find().toArray();
+        res.json(words);
+      } catch (error) {
+        console.error("Failed to fetch words:", error);
+        res.status(500).json({ message: "Failed to fetch words" });
+      }
+    });
+    // 2. Get Word by ID
+    app.get("/words/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const word = await wordsCollections.findOne(query);
+        if (!word) {
+          return res.status(404).json({ message: "Word not found" });
+        }
+        res.json(word);
+      } catch (error) {
+        console.error("Failed to fetch word:", error);
+        res.status(500).json({ message: "Failed to fetch word" });
+      }
+    });
+    // 3. Add New Word Document
+    app.post("/words", async (req, res) => {
+      try {
+        const newWord = req.body; // expects a JSON object like your dummy data
+        const result = await wordsCollections.insertOne(newWord);
+
+        res.status(201).json({
+          message: "Word document added successfully",
+          id: result.insertedId,
+        });
+      } catch (error) {
+        console.error("Failed to add word:", error);
+        res.status(500).json({ message: "Failed to add word" });
+      }
+    });
+    // 1. Get All Tutors
+    app.get("/tutors", async (req, res) => {
+      try {
+        const tutors = await tutorsCollections.find().toArray();
+        res.json(tutors);
+      } catch (error) {
+        console.error("Failed to fetch tutors:", error);
+        res.status(500).json({ message: "Failed to fetch tutors" });
+      }
+    });
+    // 2. Get Tutor by ID
+    app.get("/tutors/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+
+        // Check if id is a valid ObjectId
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).json({ message: "Invalid tutor ID format" });
+        }
+
+        const tutor = await tutorsCollections.findOne({ _id: new ObjectId(id) });
+
+        if (!tutor) {
+          return res.status(404).json({ message: "Tutor not found" });
+        }
+
+        res.json(tutor);
+      } catch (error) {
+        console.error("Error fetching tutor:", error);
+        res.status(500).json({ message: "Server error while fetching tutor" });
+      }
+    });
+    // 3. Add a New Tutor
+    app.post("/tutors", async (req, res) => {
+      try {
+        const newTutor = req.body; // expects full tutor object (name, language, etc.)
+        const result = await tutorsCollections.insertOne(newTutor);
+
+        res.status(201).json({
+          message: "Tutor added successfully",
+          id: result.insertedId,
+        });
+      } catch (error) {
+        console.error("Failed to add tutor:", error);
+        res.status(500).json({ message: "Failed to add tutor" });
+      }
+    });
 
 
 
@@ -941,7 +941,7 @@ app.post("/tutors", async (req, res) => {
       }
     });
     // inside run() after you define usersCollections, messagesCollections
-   
+
 
     /**
      * GET /users/following/:email
@@ -1015,7 +1015,7 @@ app.post("/tutors", async (req, res) => {
      * Create a session request (status: pending)
      * Body: { fromEmail, toEmail, scheduledAt(optional ISO string), durationMinutes (optional) , message (optional) }
      */
-    
+
     app.post("/sessions/request", async (req, res) => {
       try {
         const {
@@ -1106,9 +1106,10 @@ app.post("/tutors", async (req, res) => {
       }
     });
 
-     * POST /sessions/:id/accept
-     * Accept a session request. Body: { actionByEmail } // must be receiver
-     */
+    /**
+       * POST /sessions/:id/accept
+       * Accept a session request. Body: { actionByEmail } // must be receiver
+       */
     app.post("/sessions/:id/accept", async (req, res) => {
       try {
         const { id } = req.params;
@@ -1158,64 +1159,222 @@ app.post("/tutors", async (req, res) => {
       }
     });
 
-    // feedbacks related apis
-    app.get("/feedback/:email", async (req, res) => {
-      try {
-        const email = req.params.email.toLowerCase().trim();
-        const feedback = await feedbackCollection
-          .find({ toEmail: email })
-          .sort({ createdAt: -1 })
-          .toArray();
+//feedback
+/**
+ * GET /feedback/:email
+ * Returns all feedbacks that target a specific user (across sessions).
+ * This is useful for admin / profile pages listing feedback about a user.
+ */
+app.get("/feedback/:email", async (req, res) => {
+  try {
+    const email = (req.params.email || "").toLowerCase().trim();
+    if (!email) {
+      return res.status(400).json({ success: false, message: "email is required" });
+    }
 
-        res.status(200).json({ success: true, feedback });
-      } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-      }
-    });
+    // Find feedback documents where any response or review concerns the email OR session participants contains email
+    // Here we look for feedback docs where participants contain the email OR responses.[email] exists OR reviews.reviewForEmail == email
+    const cursor = feedbackCollection.find({
+      $or: [
+        { participants: email },
+        { [`responses.${email}`]: { $exists: true } },
+        { "reviews.reviewForEmail": email }
+      ]
+    }).sort({ createdAt: -1 });
 
-    app.post("/feedback", async (req, res) => {
-      try {
-        const feedbackData = req.body;
+    const feedback = await cursor.toArray();
 
-        const { fromEmail, toEmail, rating, comment, learned } = feedbackData;
+    res.status(200).json({ success: true, feedback });
+  } catch (error) {
+    console.error("GET /feedback/:email error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
-        if (!fromEmail || !toEmail || !rating || !comment) {
-          return res.status(400).json({
-            success: false,
-            message: "fromEmail, toEmail, rating, and comment are required.",
-          });
+/**
+ * GET /sessions/:id/feedback?email=...
+ * Returns the feedback doc for a single session (if any).
+ * Responds with an empty shape when there's no doc (so front-end can show form).
+ */
+app.get("/sessions/:id/feedback", async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+    if (!sessionId) return res.status(400).json({ success: false, message: "session id required" });
+
+    // optional: email used by frontend to check specific response
+    const email = (req.query.email || "").toLowerCase().trim();
+
+    // verify session exists
+    const session = await sessionsCollections.findOne({ _id: new ObjectId(sessionId) });
+    if (!session) return res.status(404).json({ success: false, message: "session not found" });
+
+    const doc = await feedbackCollection.findOne({ sessionId });
+
+    if (!doc) {
+      // return an empty structure
+      return res.json({
+        success: true,
+        feedback: {
+          sessionId,
+          participants: [session.fromEmail, session.toEmail],
+          responses: {},
+          reviews: [],
+          createdAt: null,
+          updatedAt: null
         }
+      });
+    }
 
-        //feedback object
-        const newFeedback = {
-          fromEmail: fromEmail.toLowerCase.trim(),
-          toEmail: toEmail.toLowerCase.trim(),
-          rating: Number(rating),
-          comment: comment.trim(),
-          learned: learned || "",
-          createdAt: new Date().toISOString(),
-        };
+    res.json({ success: true, feedback: doc });
+  } catch (err) {
+    console.error("GET /sessions/:id/feedback error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
-        const result = await feedbackCollection.insertOne(newFeedback);
+/**
+ * POST /sessions/:id/feedback
+ * Submit or update feedback for a session.
+ * Body: { email, words, sentences, confidenceBefore, confidenceAfter, notes }
+ *
+ * NOTE: In production you should verify identity with verifyToken and derive email from the token,
+ * instead of trusting the body email. For dev, body-email is OK.
+ */
+app.post("/sessions/:id/feedback", async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+    const {
+      email,
+      words = [],
+      sentences = [],
+      confidenceBefore = null,
+      confidenceAfter = null,
+      notes = ""
+    } = req.body || {};
 
-        //store a reference in user's document (for quick access)
-        await usersCollections.updateOne(
-          {
-            email: toEmail.toLowerCase().trim(),
-          },
-          { $push: { feedback: newFeedback } }
-        );
+    if (!sessionId) return res.status(400).json({ success: false, message: "session id required" });
+    if (!email) return res.status(400).json({ success: false, message: "email required" });
 
-        res.status(201).json({
-          success: true,
-          message: "Feedback submitted successfully",
-          feedbackId: result.insertedId,
-        });
-      } catch (error) {
-        console.error("❌ Error in /feedback:", error);
-        res.status(500).json({ success: false, message: error.message });
+    const normalized = email.toLowerCase().trim();
+
+    // fetch session and verify participant
+    const session = await sessionsCollections.findOne({ _id: new ObjectId(sessionId) });
+    if (!session) return res.status(404).json({ success: false, message: "session not found" });
+
+    const allowed = [ (session.fromEmail || "").toLowerCase(), (session.toEmail || "").toLowerCase() ];
+    if (!allowed.includes(normalized)) {
+      return res.status(403).json({ success: false, message: "Only session participants can submit feedback" });
+    }
+
+    const now = new Date().toISOString();
+    const responseObj = {
+      submittedAt: now,
+      words: Array.isArray(words) ? words : [],
+      sentences: Array.isArray(sentences) ? sentences : [],
+      confidenceBefore: typeof confidenceBefore === "number" ? confidenceBefore : null,
+      confidenceAfter: typeof confidenceAfter === "number" ? confidenceAfter : null,
+      notes: notes || ""
+    };
+
+    // upsert: set createdAt on insert, always set updatedAt and set responses.<email>
+    const respKey = `responses.${normalized}`;
+    const update = {
+      $set: {
+        updatedAt: now,
+        [respKey]: responseObj
+      },
+      $setOnInsert: {
+        sessionId,
+        participants: [session.fromEmail, session.toEmail],
+        createdAt: now
       }
-    });
+    };
+
+    await feedbackCollection.updateOne({ sessionId }, update, { upsert: true });
+
+    // push small summary to user's doc for quick access (optional)
+    // Note: don't push huge objects repeatedly — we're pushing a small summary only.
+    await usersCollections.updateOne(
+      { email: session.toEmail.toLowerCase() },
+      { $addToSet: { feedback: { sessionId, from: normalized, submittedAt: now } } }
+    );
+
+    // notify partner via socket if connected
+    const partnerEmail = normalized === (session.fromEmail || "").toLowerCase() ? session.toEmail : session.fromEmail;
+    const partnerUser = await usersCollections.findOne({ email: partnerEmail });
+    if (partnerUser) {
+      const socketId = userSocketMap[partnerUser._id.toString()];
+      if (socketId) io.to(socketId).emit("sessionFeedbackSubmitted", { sessionId, from: normalized });
+    }
+
+    res.status(201).json({ success: true, message: "Feedback saved", status: "submitted" });
+  } catch (err) {
+    console.error("POST /sessions/:id/feedback error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * POST /sessions/:id/feedback/grade
+ * Submit a review/grade for partner's feedback.
+ * Body: { reviewerEmail, reviewForEmail, grade, comments, detailed: [{word, correction, score}] }
+ */
+app.post("/sessions/:id/feedback/grade", async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+    const { reviewerEmail, reviewForEmail, grade, comments = "", detailed = [] } = req.body || {};
+
+    if (!sessionId) return res.status(400).json({ success: false, message: "session id required" });
+    if (!reviewerEmail || !reviewForEmail) return res.status(400).json({ success: false, message: "both reviewerEmail and reviewForEmail are required" });
+
+    const normReviewer = reviewerEmail.toLowerCase().trim();
+    const normFor = reviewForEmail.toLowerCase().trim();
+
+    // fetch session and verify both participants
+    const session = await sessionsCollections.findOne({ _id: new ObjectId(sessionId) });
+    if (!session) return res.status(404).json({ success: false, message: "session not found" });
+
+    const allowed = [ (session.fromEmail || "").toLowerCase(), (session.toEmail || "").toLowerCase() ];
+    if (!allowed.includes(normReviewer) || !allowed.includes(normFor)) {
+      return res.status(403).json({ success: false, message: "Both reviewer and review target must be session participants" });
+    }
+    if (normReviewer === normFor) {
+      return res.status(400).json({ success: false, message: "Cannot review yourself" });
+    }
+
+    const review = {
+      reviewerEmail: normReviewer,
+      reviewForEmail: normFor,
+      grade: Number(grade || 0),
+      comments: comments || "",
+      detailed: Array.isArray(detailed) ? detailed : [],
+      createdAt: new Date().toISOString()
+    };
+
+    await feedbackCollection.updateOne(
+      { sessionId },
+      {
+        $push: { reviews: review },
+        $setOnInsert: { sessionId, participants: [session.fromEmail, session.toEmail], createdAt: new Date().toISOString() },
+        $set: { updatedAt: new Date().toISOString() }
+      },
+      { upsert: true }
+    );
+
+    // notify reviewed user via socket (optional)
+    const reviewedUser = await usersCollections.findOne({ email: normFor });
+    if (reviewedUser) {
+      const socketId = userSocketMap[reviewedUser._id.toString()];
+      if (socketId) io.to(socketId).emit("feedbackReviewed", { sessionId, reviewer: normReviewer });
+    }
+
+    res.json({ success: true, message: "Review submitted" });
+  } catch (err) {
+    console.error("POST /sessions/:id/feedback/grade error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
     // admin
 
     // Admin overview (requires admin)
@@ -1528,8 +1687,8 @@ app.post("/tutors", async (req, res) => {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-              ? messagesCollections
-              : sessionsCollections;
+                ? messagesCollections
+                : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1705,8 +1864,8 @@ app.post("/tutors", async (req, res) => {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-        ? false
-        : v;
+          ? false
+          : v;
 
     app.get(
       "/admin/announcements",
@@ -1913,7 +2072,7 @@ app.post("/tutors", async (req, res) => {
       }
     );
 
-    
+
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");

@@ -17,11 +17,10 @@ export const SidebarItem = ({ to, icon, label, isActive }) => {
   return (
     <Link
       to={to}
-      className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
-        isActive
+      className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${isActive
           ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-r-2 border-blue-600"
           : "text-accent hover:bg-base-300"
-      }`}
+        }`}
     >
       {icon}
       <span className="font-medium">{label}</span>
@@ -57,7 +56,7 @@ export const AdminSidebarLinks = () => {
         label="Announcements"
         isActive={location.pathname.includes("/dashboard/admin/announcements")}
       />
-      
+
     </>
   );
 };
@@ -66,7 +65,7 @@ export const LearnerSidebarLinks = () => {
   const location = useLocation();
   return (
     <>
-    <SidebarItem
+      <SidebarItem
         to="/dashboard/overview"
         icon={<LayoutDashboard size={20} />}
         label="Overview"
@@ -85,12 +84,12 @@ export const LearnerSidebarLinks = () => {
         isActive={location.pathname.includes("/dashboard/inbox")}
       />
 
-<SidebarItem
-  to="/dashboard/courses"
-  icon={<BookOpen size={20} />}  
-  label="Courses"
-  isActive={location.pathname.includes("/dashboard/courses")}
-/>
+      <SidebarItem
+        to="/dashboard/courses"
+        icon={<BookOpen size={20} />}
+        label="Courses"
+        isActive={location.pathname.includes("/dashboard/courses")}
+      />
 
 
       <SidebarItem
