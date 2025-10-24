@@ -1,6 +1,5 @@
 import React from "react";
 import { AdminSidebarLinks, LearnerSidebarLinks } from "./SidebarItems";
-<<<<<<< HEAD
 import { Link } from "react-router"; 
 import { X, LogOut, Sun } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
@@ -17,26 +16,6 @@ const DashboardSidebar = ({ role, sidebarOpen, setSidebarOpen }) => {
     });
   };
 
-=======
-import { Link, useNavigate } from "react-router";
-import { X } from "lucide-react";
-import useAuth from "../../hooks/useAuth";
-
-const DashboardSidebar = ({ role, sidebarOpen, setSidebarOpen }) => {
-  const navigate = useNavigate();
-  const { logOut } = useAuth();
-
-  const handleSignOut = async () => {
-    try {
-      await logOut();
-    } catch (err) {
-      console.error("Error during logout:", err);
-    } finally {
-      setSidebarOpen(false);
-      navigate("/");
-    }
-  };
->>>>>>> aa3ab7f199f876cebe11c193c9240494f2d9b2e9
   return (
     <>
       {/* Mobile overlay */}
@@ -103,20 +82,13 @@ const DashboardSidebar = ({ role, sidebarOpen, setSidebarOpen }) => {
           >
             <Sun size={20} className="text-yellow-500" /> Light Mode
           </button>
-<<<<<<< HEAD
+
           {/* Sign Out Button */}
           <button
             onClick={handleLogout}
             className="flex items-center justify-center gap-3 w-full p-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-lg hover:from-red-600 hover:to-rose-700 transition-all duration-200 shadow-md"
           >
             <LogOut size={20} /> Sign Out
-=======
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-3 w-full p-3 btn btn-error rounded-lg transition-colors"
-          >
-            🔓 Sign Out
->>>>>>> aa3ab7f199f876cebe11c193c9240494f2d9b2e9
           </button>
         </div>
       </aside>
