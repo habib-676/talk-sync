@@ -1,8 +1,7 @@
-// TalkSyncLogin.jsx
 import React, { useState } from "react";
 import { Mail, Lock, EyeOff, Eye } from "lucide-react";
 import Lottie from "lottie-react";
-import languageAnimation from "./Login.json"; // your Lottie file
+import languageAnimation from "./Login.json";
 import { Link, useNavigate } from "react-router";
 import TalkSyncLogo from "../../../logo/TalkSyncLogo";
 import useAuth from "../../../../hooks/useAuth";
