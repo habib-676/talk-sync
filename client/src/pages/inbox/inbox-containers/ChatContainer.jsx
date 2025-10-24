@@ -8,6 +8,7 @@ import logo from "../../../assets/logo/logo.png";
 import { formatMessageTime, markConversationSeen } from "../../../lib/utils";
 import useAuth from "../../../hooks/useAuth";
 import toast from "react-hot-toast";
+import FeedbackModal from "../../../modals/FeedbackModal";
 
 const STUN_SERVERS = [
   { urls: "stun:global.xirsys.net" },
@@ -147,6 +148,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
   const [callVisible, setCallVisible] = useState(false);
   const [callStatus, setCallStatus] = useState("idle"); // 'idle'|'calling'|'ringing'|'in-call'
   const [incomingCaller, setIncomingCaller] = useState(null); // { from, name, signal }
+  const [feedbackVisible, setFeedbackVisible] = useState(false);
 
   // helper to set state + ref
   const setCallStatusSafe = (s) => {
@@ -297,6 +299,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     const endCallHandler = () => {
       console.log("endCall");
       toast.error("Call ended");
+      setFeedbackVisible(true);
       cleanUpCall();
     };
 
@@ -635,6 +638,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       ? otherUserIdRef.current
       : incomingCaller?.from;
     if (otherId) socketRef.current.emit("endCall", { to: otherId });
+    setFeedbackVisible(true);
     cleanUpCall();
   };
 
@@ -872,6 +876,18 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
         onCancel={cancelOutgoingCall}
         localVideoRef={localVideoRef}
         remoteVideoRef={remoteVideoRef}
+      />
+      {/* Feedback modal after call end */}
+      <FeedbackModal
+        visible={feedbackVisible}
+        onClose={() => setFeedbackVisible(false)}
+        onSubmitted={() => setFeedbackVisible(false)}
+        fromUser={{ uid: user?.uid, name: user?.displayName || user?.email }}
+        toUser={{
+          uid: selectedUser?.uid,
+          name:
+            selectedUser?.name || selectedUser?.fullName || selectedUser?.email,
+        }}
       />
     </div>
   );
