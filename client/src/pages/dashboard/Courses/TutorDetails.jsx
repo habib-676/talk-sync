@@ -17,21 +17,7 @@ const TutorDetails = () => {
   const [tutor, setTutor] = useState(null);
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-
-  // Pulic folder data come
-  // useEffect(() => {
-  //   fetch("/tutor.json")
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       const foundTutor = data.find((t) => t.id === parseInt(id));
-  //       setTutor(foundTutor);
-  //     })
-  //     .catch((err) => console.error("Error loading tutor:", err));
-  // }, [id]);
-
-
-
-
+  
 useEffect(() => {
   fetch(`http://localhost:5000/tutors/${id}`)
     .then(res => res.json())
@@ -39,7 +25,6 @@ useEffect(() => {
     .catch(err => console.error("Failed to load tutor:", err));
 }, [id]);
 ;
-
 
   if (!tutor) {
     return (
@@ -98,7 +83,7 @@ useEffect(() => {
 
         {/* Languages */}
         <div>
-          <h3 className="font-semibold mt-4 mb-2 text-xl">Speaks:</h3>
+         
           <ul className="flex flex-wrap gap-2">
             {/* Speaks Section */}
 {tutor.speaks && (
@@ -120,9 +105,7 @@ useEffect(() => {
         </div>
         {/* Specialties */}
         <div>
-          <h3 className="font-semibold mt-4 mb- text-xl">Specialist In:</h3>
           <ul className="flex flex-wrap gap-2">
-
 
             {tutor.specialist && (
   <div>
