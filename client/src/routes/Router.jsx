@@ -29,8 +29,6 @@ import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 import Courses from "../pages/dashboard/Courses/Courses";
 import TutorDetails from "../pages/dashboard/Courses/TutorDetails";
 
-
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -79,11 +77,7 @@ export const router = createBrowserRouter([
       { path: "/dashboard/profile", element: <ProfilePage /> },
       {
         path: "/dashboard/profile/edit",
-        element: (
-          <PrivateRoute>
-            <EditProfile />
-          </PrivateRoute>
-        ),
+        element: <EditProfile />,
       },
       {
         path: "admin",
@@ -101,12 +95,11 @@ export const router = createBrowserRouter([
         path: "admin/announcements",
         element: <AdminAnnouncements></AdminAnnouncements>,
       },
-  { path: "/dashboard/courses", element:  <Courses></Courses>},
-{
-  path: "/dashboard/tutor/:id",
-  element: <TutorDetails></TutorDetails>,
-},
-
+      { path: "/dashboard/courses", element: <Courses></Courses> },
+      {
+        path: "/dashboard/tutor/:id",
+        element: <TutorDetails></TutorDetails>,
+      },
 
       { path: "/dashboard/follow", element: <FollowPage /> },
       { path: "/dashboard/sessions", element: <SessionsPage /> },

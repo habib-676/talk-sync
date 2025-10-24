@@ -26,7 +26,7 @@ export const SidebarItem = ({ to, icon, label }) => {
       className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-base font-medium
         ${
           isActive
-            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105" 
+            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105"
             : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         }`}
     >
@@ -59,11 +59,11 @@ export const AdminSidebarLinks = () => {
         icon={<Megaphone size={20} />}
         label="Announcements"
       />
-      <SidebarItem
+      {/* <SidebarItem
         to="/dashboard/admin/settings"
         icon={<Settings size={20} />}
         label="Settings"
-      />
+      /> */}
     </>
   );
 };
@@ -106,11 +106,11 @@ export const LearnerSidebarLinks = () => {
         icon={<Star size={20} />}
         label="Badges & Rewards"
       />
-      <SidebarItem
+      {/* <SidebarItem
         to="/dashboard/settings"
         icon={<Settings size={20} />}
         label="Settings"
-      />
+      /> */}
     </>
   );
 };
