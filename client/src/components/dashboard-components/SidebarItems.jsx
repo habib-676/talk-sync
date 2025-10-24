@@ -23,11 +23,17 @@ export const SidebarItem = ({ to, icon, label }) => {
   return (
     <NavLink
       to={to}
+<<<<<<< HEAD
       className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-base font-medium
         ${
           isActive
             ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105"
             : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+=======
+      className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${isActive
+          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-r-2 border-blue-600"
+          : "text-accent hover:bg-base-300"
+>>>>>>> aa3ab7f199f876cebe11c193c9240494f2d9b2e9
         }`}
     >
       {icon}
@@ -59,11 +65,15 @@ export const AdminSidebarLinks = () => {
         icon={<Megaphone size={20} />}
         label="Announcements"
       />
+<<<<<<< HEAD
       {/* <SidebarItem
         to="/dashboard/admin/settings"
         icon={<Settings size={20} />}
         label="Settings"
       /> */}
+=======
+
+>>>>>>> aa3ab7f199f876cebe11c193c9240494f2d9b2e9
     </>
   );
 };
@@ -86,11 +96,23 @@ export const LearnerSidebarLinks = () => {
         icon={<MessageSquare size={20} />}
         label="Inbox"
       />
+<<<<<<< HEAD
       <SidebarItem
         to="/dashboard/courses"
         icon={<BookOpen size={20} />}
         label="My Courses"
       />
+=======
+
+      <SidebarItem
+        to="/dashboard/courses"
+        icon={<BookOpen size={20} />}
+        label="Courses"
+        isActive={location.pathname.includes("/dashboard/courses")}
+      />
+
+
+>>>>>>> aa3ab7f199f876cebe11c193c9240494f2d9b2e9
       <SidebarItem
         to="/dashboard/follow"
         icon={<Users size={20} />}
