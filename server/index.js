@@ -239,11 +239,6 @@ app.post("/tutors", async (req, res) => {
   }
 });
 
-
-
-
-
-
     //  Learner dashboard route
     app.get("/dashboard/learner", verifyToken, async (req, res) => {
       res.send({ message: "Welcome Learner Dashboard!" });
