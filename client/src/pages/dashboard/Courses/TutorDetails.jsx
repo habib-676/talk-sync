@@ -12,7 +12,6 @@ import {
 import { useParams } from "react-router";
 
 const TutorDetails = () => {
-  
   const { id } = useParams();
   const [tutor, setTutor] = useState(null);
   const [showTrialModal, setShowTrialModal] = useState(false);
@@ -29,18 +28,12 @@ const TutorDetails = () => {
   //     .catch((err) => console.error("Error loading tutor:", err));
   // }, [id]);
 
-
-
-
-useEffect(() => {
-  fetch(`http://localhost:5000/tutors/${id}`)
-    .then(res => res.json())
-    .then(data => setTutor(data))
-    .catch(err => console.error("Failed to load tutor:", err));
-}, [id]);
-;
-
-
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/tutors/${id}`)
+      .then((res) => res.json())
+      .then((data) => setTutor(data))
+      .catch((err) => console.error("Failed to load tutor:", err));
+  }, [id]);
   if (!tutor) {
     return (
       <p className="text-center text-lg mt-20 font-semibold text-gray-500">
@@ -92,7 +85,8 @@ useEffect(() => {
             <FaUsers className="text-pink-400" /> {tutor.lessons} lessons
           </div>
           <div className="flex items-center gap-1">
-            <FaCalendarAlt className="text-blue-400" /> {tutor.students} students
+            <FaCalendarAlt className="text-blue-400" /> {tutor.students}{" "}
+            students
           </div>
         </div>
 
@@ -101,44 +95,44 @@ useEffect(() => {
           <h3 className="font-semibold mt-4 mb-2 text-xl">Speaks:</h3>
           <ul className="flex flex-wrap gap-2">
             {/* Speaks Section */}
-{tutor.speaks && (
-  <div>
-    <h3 className="font-semibold mt-4 mb-2 text-xl">Speaks:</h3>
-    <ul className="flex flex-wrap gap-2">
-      {tutor.speaks.map((lang, i) => (
-        <li
-          key={i}
-          className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
-        >
-          {lang.language} ({lang.level})
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+            {tutor.speaks && (
+              <div>
+                <h3 className="font-semibold mt-4 mb-2 text-xl">Speaks:</h3>
+                <ul className="flex flex-wrap gap-2">
+                  {tutor.speaks.map((lang, i) => (
+                    <li
+                      key={i}
+                      className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                    >
+                      {lang.language} ({lang.level})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </ul>
         </div>
         {/* Specialties */}
         <div>
           <h3 className="font-semibold mt-4 mb- text-xl">Specialist In:</h3>
           <ul className="flex flex-wrap gap-2">
-
-
             {tutor.specialist && (
-  <div>
-    <h3 className="font-semibold mt-4 mb-2 text-xl">Specialist In:</h3>
-    <ul className="flex flex-wrap gap-2">
-      {tutor.specialist.map((item, i) => (
-        <li
-          key={i}
-          className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm"
-        >
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+              <div>
+                <h3 className="font-semibold mt-4 mb-2 text-xl">
+                  Specialist In:
+                </h3>
+                <ul className="flex flex-wrap gap-2">
+                  {tutor.specialist.map((item, i) => (
+                    <li
+                      key={i}
+                      className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </ul>
         </div>
       </div>
@@ -213,18 +207,27 @@ useEffect(() => {
             </div>
 
             {/* Available Times */}
-            <h3 className="font-semibold text-gray-800 mb-2">Available Slots:</h3>
+            <h3 className="font-semibold text-gray-800 mb-2">
+              Available Slots:
+            </h3>
             <div className="grid grid-cols-3 gap-3 text-sm text-center">
-              {["11:30 AM", "12:00 PM", "1:30 PM", "2:30 PM", "3:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"].map(
-                (time) => (
-                  <button
-                    key={time}
-                    className="border border-gray-300 hover:bg-pink-100 rounded-lg py-2"
-                  >
-                    {time}
-                  </button>
-                )
-              )}
+              {[
+                "11:30 AM",
+                "12:00 PM",
+                "1:30 PM",
+                "2:30 PM",
+                "3:00 PM",
+                "7:00 PM",
+                "8:00 PM",
+                "9:00 PM",
+              ].map((time) => (
+                <button
+                  key={time}
+                  className="border border-gray-300 hover:bg-pink-100 rounded-lg py-2"
+                >
+                  {time}
+                </button>
+              ))}
             </div>
 
             <button className="w-full mt-6 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-medium">
@@ -267,7 +270,8 @@ useEffect(() => {
                     <p className="font-semibold text-gray-800">{tutor.name}</p>
                   </div>
                   <div className="flex items-center gap-1 text-sm text-yellow-500">
-                    <FaStar /> <span className="text-gray-600">{tutor.rating}</span>
+                    <FaStar />{" "}
+                    <span className="text-gray-600">{tutor.rating}</span>
                     <span className="text-gray-400">
                       ({tutor.reviews} reviews)
                     </span>
@@ -284,13 +288,17 @@ useEffect(() => {
               <input
                 type="text"
                 readOnly
-                value={`https://preply.in/${tutor.name.replace(/\s+/g, "").toUpperCase()}${tutor.id}`}
+                value={`https://preply.in/${tutor.name
+                  .replace(/\s+/g, "")
+                  .toUpperCase()}${tutor.id}`}
                 className="w-full bg-transparent text-sm text-gray-700 outline-none px-2"
               />
               <button
                 onClick={() =>
                   navigator.clipboard.writeText(
-                    `https://preply.in/${tutor.name.replace(/\s+/g, "").toUpperCase()}${tutor.id}`
+                    `https://preply.in/${tutor.name
+                      .replace(/\s+/g, "")
+                      .toUpperCase()}${tutor.id}`
                   )
                 }
                 className="bg-pink-500 hover:bg-pink-600 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-all"

@@ -3,25 +3,69 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 
+const ratingMeta = {
+  1: { label: "Terrible", emoji: "😢", colors: "from-red-400 to-orange-400" },
+  2: { label: "Bad", emoji: "🙁", colors: "from-orange-400 to-amber-400" },
+  3: { label: "Medium", emoji: "😐", colors: "from-amber-400 to-yellow-300" },
+  4: { label: "Good", emoji: "🙂", colors: "from-lime-400 to-green-400" },
+  5: { label: "Great", emoji: "🥰", colors: "from-green-400 to-emerald-400" },
+};
+
 const RatingInput = ({ value, onChange }) => {
-  const options = [1, 2, 3, 4, 5];
+  const opts = [1, 2, 3, 4, 5];
+  const current = ratingMeta[value] || ratingMeta[3];
+
   return (
-    <div className="flex gap-2">
-      {options.map((n) => (
-        <button
-          key={n}
-          type="button"
-          onClick={() => onChange(n)}
-          className={`w-10 h-10 rounded-full border flex items-center justify-center text-sm font-medium transition-colors ${
-            value >= n
-              ? "bg-yellow-400/90 border-yellow-500 text-black"
-              : "bg-base-100 border-base-300 text-secondary/70"
-          }`}
-          title={`${n} star${n > 1 ? "s" : ""}`}
-        >
-          {n}
-        </button>
-      ))}
+    <div className="w-full flex flex-col items-center">
+      {/* emoji row */}
+      <div className="relative flex items-center justify-center gap-3 md:gap-4">
+        {opts.map((n) => {
+          const meta = ratingMeta[n];
+          const isActive = n === value;
+          return (
+            <motion.button
+              key={n}
+              type="button"
+              onClick={() => onChange(n)}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.98 }}
+              className={`relative isolate grid place-items-center rounded-full transition-all duration-200 ${
+                isActive ? "" : "grayscale opacity-70"
+              }`}
+              aria-label={meta.label}
+              title={meta.label}
+            >
+              {/* glow ring for active */}
+              {isActive && (
+                <span
+                  className={`absolute -inset-2 rounded-full bg-gradient-to-tr ${meta.colors} opacity-70 blur-md`}
+                  aria-hidden
+                />
+              )}
+              <span
+                className={`${
+                  isActive ? "text-5xl md:text-6xl" : "text-3xl md:text-4xl"
+                } relative z-[1]`}
+              >
+                {meta.emoji}
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* label chip with caret */}
+      <motion.div
+        key={current.label}
+        initial={{ y: 8, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="mt-3 px-3 py-1 rounded-full bg-base-300/70 text-xs text-secondary shadow-sm relative"
+      >
+        {current.label}
+        {/* caret */}
+        <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-6 border-l-transparent border-r-6 border-r-transparent border-b-6 border-b-base-300/70" />
+      </motion.div>
     </div>
   );
 };
@@ -51,7 +95,12 @@ const ChipsInput = ({ label, placeholder, max = 10, values, setValues }) => {
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">{label}</label>
+      <label className="block text-sm font-medium mb-1">
+        {label}
+        <span className="ml-2 text-[11px] text-secondary/70">
+          {values.length}/{max}
+        </span>
+      </label>
       <div className="flex flex-wrap gap-2 mb-2">
         {values.map((v, i) => (
           <span
@@ -82,7 +131,9 @@ const ChipsInput = ({ label, placeholder, max = 10, values, setValues }) => {
           Add
         </button>
       </div>
-      <p className="mt-1 text-xs text-secondary/60">Max {max}</p>
+      <p className="mt-1 text-xs text-secondary/60">
+        Press Enter to add. Max {max}.
+      </p>
     </div>
   );
 };
@@ -106,7 +157,12 @@ const SentencesInput = ({ values, setValues, max = 3 }) => {
   };
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">Sentences</label>
+      <label className="block text-sm font-medium mb-1">
+        Sentences
+        <span className="ml-2 text-[11px] text-secondary/70">
+          {values.length}/{max}
+        </span>
+      </label>
       <div className="flex flex-col gap-2">
         {values.map((v, i) => (
           <div key={i} className="flex gap-2 items-start">
@@ -130,7 +186,9 @@ const SentencesInput = ({ values, setValues, max = 3 }) => {
         <button type="button" onClick={addField} className="btn btn-sm">
           Add sentence
         </button>
-        <p className="text-xs text-secondary/60">Max {max}</p>
+        <p className="text-xs text-secondary/60">
+          Keep them short and specific. Max {max}.
+        </p>
       </div>
     </div>
   );
@@ -184,7 +242,7 @@ const FeedbackModal = ({
         to: toUser.uid,
         rating,
         words,
-        sentences: sentences.filter((s) => s && s.trim()).slice(0, 5),
+        sentences: sentences.filter((s) => s && s.trim()).slice(0, 3),
         notes,
       };
       const { data } = await axios.post(
@@ -258,7 +316,7 @@ const FeedbackModal = ({
 
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 className="text-lg font-semibold">Share feedback</h3>
+                <h3 className="text-lg font-bold">Share feedback</h3>
                 <p className="text-xs text-secondary/70">
                   For {toUser?.name || toUser?.email || toUser?.uid}
                 </p>
@@ -275,23 +333,9 @@ const FeedbackModal = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Rating
+                  <label className="block text-sm font-medium mb-2">
+                    How was the session?
                   </label>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xl" title="Poor">
-                      😕
-                    </span>
-                    <span className="text-xl" title="Okay">
-                      🙂
-                    </span>
-                    <span className="text-xl" title="Good">
-                      😃
-                    </span>
-                    <span className="text-xl" title="Great">
-                      🤩
-                    </span>
-                  </div>
                   <RatingInput value={rating} onChange={setRating} />
                 </div>
                 <ChipsInput
