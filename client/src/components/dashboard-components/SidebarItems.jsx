@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import {
   LayoutDashboard,
   User,
@@ -11,78 +11,82 @@ import {
   Megaphone,
   BookOpen,
   Settings,
+  Star,
 } from "lucide-react";
 
-export const SidebarItem = ({ to, icon, label, isActive }) => {
+export const SidebarItem = ({ to, icon, label }) => {
+  const location = useLocation();
+  const isActive =
+    location.pathname === to ||
+    (to !== "/dashboard" && location.pathname.startsWith(to));
+
   return (
-    <Link
+    <NavLink
       to={to}
-      className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${isActive
-          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-r-2 border-blue-600"
-          : "text-accent hover:bg-base-300"
+      className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-base font-medium
+        ${
+          isActive
+            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105"
+            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         }`}
     >
       {icon}
-      <span className="font-medium">{label}</span>
-    </Link>
+      <span>{label}</span>
+    </NavLink>
   );
 };
 
 export const AdminSidebarLinks = () => {
-  const location = useLocation();
   return (
     <>
       <SidebarItem
         to="/dashboard/admin"
         icon={<LayoutDashboard size={20} />}
         label="Admin Home"
-        isActive={location.pathname === "/dashboard/admin"}
       />
       <SidebarItem
         to="/dashboard/admin/users"
         icon={<Users size={20} />}
         label="Manage Users"
-        isActive={location.pathname.includes("/dashboard/admin/users")}
       />
       <SidebarItem
         to="/dashboard/admin/reports"
         icon={<BarChart3 size={20} />}
         label="Reports & Analytics"
-        isActive={location.pathname.includes("/dashboard/admin/reports")}
       />
       <SidebarItem
         to="/dashboard/admin/announcements"
         icon={<Megaphone size={20} />}
         label="Announcements"
-        isActive={location.pathname.includes("/dashboard/admin/announcements")}
       />
-
+      {/* <SidebarItem
+        to="/dashboard/admin/settings"
+        icon={<Settings size={20} />}
+        label="Settings"
+      /> */}
     </>
   );
 };
 
 export const LearnerSidebarLinks = () => {
-  const location = useLocation();
   return (
     <>
       <SidebarItem
         to="/dashboard/overview"
         icon={<LayoutDashboard size={20} />}
         label="Overview"
-        isActive={location.pathname === "/dashboard/overview"}
       />
       <SidebarItem
         to="/dashboard/profile"
         icon={<User size={20} />}
         label="Profile"
-        isActive={location.pathname === "/dashboard/profile"}
       />
       <SidebarItem
         to="/dashboard/inbox"
         icon={<MessageSquare size={20} />}
         label="Inbox"
-        isActive={location.pathname.includes("/dashboard/inbox")}
       />
+
 
       <SidebarItem
         to="/dashboard/courses"
@@ -93,23 +97,30 @@ export const LearnerSidebarLinks = () => {
 
 
       <SidebarItem
+        to="/dashboard/courses"
+        icon={<BookOpen size={20} />}
+        label="My Courses"
+      />
+      <SidebarItem
         to="/dashboard/follow"
         icon={<Users size={20} />}
-        label="Find a partner"
-        isActive={location.pathname.includes("/dashboard/follow")}
+        label="Find a Partner"
       />
       <SidebarItem
         to="/dashboard/sessions"
         icon={<Video size={20} />}
-        label="Sessions"
-        isActive={location.pathname.includes("/dashboard/sessions")}
+        label="Live Sessions"
       />
       <SidebarItem
         to="/dashboard/badges"
-        icon={<Award size={20} />}
-        label="Badges"
-        isActive={location.pathname.includes("/dashboard/badges")}
+        icon={<Star size={20} />}
+        label="Badges & Rewards"
       />
+      {/* <SidebarItem
+        to="/dashboard/settings"
+        icon={<Settings size={20} />}
+        label="Settings"
+      /> */}
     </>
   );
 };
