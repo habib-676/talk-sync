@@ -40,7 +40,7 @@ const Courses = () => {
 
 // ✅ Fetch tutor data from MongoDB API once on mount
 useEffect(() => {
-  fetch("http://localhost:5000/tutors")
+  fetch(`${import.meta.env.VITE_API_URL}/tutors`)
     .then((res) => res.json())
     .then((data) => {
       setTutorsData(data);
@@ -80,7 +80,7 @@ useEffect(() => {
 
         <div className="p-6 lg:p-10">
       {/* Tabs */}
-      <div className="flex justify-center gap-6 border-b border-gray-200 dark:border-gray-700 mb-8">
+      <div className="flex justify-center gap-6 border-b border-gray-200 :border-gray-700 mb-8">
         {/* Learn Tab */}
         <button
           onClick={() => {
@@ -113,15 +113,15 @@ useEffect(() => {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute left-0 mt-2 w-52 bg-white dark:bg-gray-800 shadow-xl rounded-xl z-20 border border-gray-100 dark:border-gray-700">
+            <div className="absolute left-0 mt-2 w-52 bg-white :bg-gray-800 shadow-xl rounded-xl z-20 border border-gray-100 :border-gray-700">
               {languages.map((lang) => (
                 <button
                   key={lang}
                   onClick={() => handleLanguageClick(lang)}
                   className={`block w-full text-left px-4 py-2 rounded-md transition-colors ${
                     selectedLanguage === lang
-                      ? "bg-blue-100 dark:bg-blue-900/40 font-semibold text-blue-700 dark:text-blue-200"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                      ? "bg-blue-100 :bg-blue-900/40 font-semibold text-blue-700 :text-blue-200"
+                      : "text-gray-700 :text-gray-200 hover:bg-blue-50 :hover:bg-blue-900/30"
                   }`}
                 >
                   {lang}
@@ -137,7 +137,7 @@ useEffect(() => {
         <h2 className="text-3xl font-bold text-blue-600 flex justify-center items-center gap-2">
           <BookOpen size={28} /> Learn from the Best Tutors Around the World
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 mt-3 leading-relaxed">
+        <p className="text-gray-600 :text-gray-300 mt-3 leading-relaxed">
           Connect with expert tutors, master new languages, and achieve fluency through personalized lessons.
           Choose your preferred language and start learning now.
         </p>
@@ -148,7 +148,7 @@ useEffect(() => {
         {filteredTutors.map((tutor) => (
           <div
             key={tutor.id}
-            className="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden"
+            className="group bg-white :bg-gray-900 border border-gray-200 :border-gray-700 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden"
           >
             {/* Image */}
             <div className="relative w-full h-64 overflow-hidden">
@@ -162,13 +162,13 @@ useEffect(() => {
             {/* Info */}
             <div className="p-6 flex flex-col">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-gray-900 :text-white flex items-center gap-2">
                   {tutor.name}
                   {tutor.flag && (
                     <img
                       src={tutor.flag}
                       alt="flag"
-                      className="w-6 h-4 object-cover rounded border border-gray-300 dark:border-gray-600"
+                      className="w-6 h-4 object-cover rounded border border-gray-300 :border-gray-600"
                     />
                   )}
                 </h3>
@@ -176,21 +176,21 @@ useEffect(() => {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-3">
-                <span className="flex items-center gap-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 text-xs font-semibold px-2.5 py-1 rounded-full">
+                <span className="flex items-center gap-1 bg-blue-100 :bg-blue-800 text-blue-800 :text-blue-100 text-xs font-semibold px-2.5 py-1 rounded-full">
                   <BookOpen size={14} /> {tutor.type}
                 </span>
                 {tutor.badge && (
-                  <span className="flex items-center gap-1 bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-100 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  <span className="flex items-center gap-1 bg-pink-100 :bg-pink-800 text-pink-800 :text-pink-100 text-xs font-semibold px-2.5 py-1 rounded-full">
                     🏅 {tutor.badge}
                   </span>
                 )}
               </div>
 
-              <p className="mt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              <p className="mt-3 text-sm text-gray-700 :text-gray-300 leading-relaxed">
                 {tutor.description}
               </p>
 
-              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <div className="mt-4 text-sm text-gray-600 :text-gray-400 space-y-1">
                 <p>
                   🌍 <strong>{tutor.language}</strong> Tutor —{" "}
                   <span className="text-gray-500">{tutor.experience}+ yrs exp.</span>
@@ -206,10 +206,10 @@ useEffect(() => {
               </div>
 
               {/* Stats */}
-              <div className="mt-4 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-3">
+              <div className="mt-4 flex items-center justify-between text-xs text-gray-500 :text-gray-400 border-t border-gray-100 :border-gray-700 pt-3">
                 <div className="flex items-center gap-1">
                   ⭐
-                  <span className="font-medium text-gray-800 dark:text-gray-200">
+                  <span className="font-medium text-gray-800 :text-gray-200">
                     {tutor.rating}
                   </span>
                   <span className="ml-1">({tutor.reviews} reviews)</span>

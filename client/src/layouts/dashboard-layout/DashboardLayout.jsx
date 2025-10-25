@@ -8,14 +8,13 @@ import useAuth from "../../hooks/useAuth";
 const DashboardLayout = () => {
   const { role, isLoading } = useRole();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const [darkMode, setDarkMode] = useState(false);
   const { user } = useAuth();
 
   // simple loader
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>{" "}
       </div>
     );
   }
@@ -23,39 +22,35 @@ const DashboardLayout = () => {
   if (!role) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-2">⚠️</div>
-          <p className="text-gray-700">Unable to determine role</p>
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+          <div className="text-red-500 text-3xl mb-4 animate-bounce">⚠️</div>
+          <p className="text-gray-700 text-lg font-semibold">
+            Unable to determine user role. Please try again.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`flex h-screen overflow-hidden `}>
-      {/* coming from dashboard-components */}
+    <div className="flex h-screen overflow-hidden font-sans">
       <DashboardSidebar
         role={role}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        // darkMode={darkMode}
-        // setDarkMode={setDarkMode}
       />
-
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <TopNav
           role={role}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
-          // darkMode={darkMode}
-          // setDarkMode={setDarkMode}
           user={user}
         />
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
+        <div className="flex-1 overflow-y-auto bg-gray-100">
+          <div className="p-6 md:p-8 lg:p-10">
             <Outlet />
           </div>
         </div>

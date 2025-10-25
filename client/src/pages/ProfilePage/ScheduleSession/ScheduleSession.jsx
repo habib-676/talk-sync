@@ -14,7 +14,7 @@ const ScheduleSession = () => {
   const [showModal, setShowModal] = useState(false);
 
   // ✅ Fetch JSON data from public folder
-  
+
   // useEffect(() => {
   //   fetch("/wordsData.json")
   //     .then((res) => res.json())
@@ -27,24 +27,20 @@ const ScheduleSession = () => {
   //   //   .catch((err) => console.error("Failed to load reading JSON", err));
   // }, []);
 
-
-// Read
-useEffect(() => {
-  fetch("http://localhost:5000/books") // fetch from backend instead of local JSON
-    .then((res) => res.json())
-    .then((data) => setReadingData(data))
-    .catch((err) => console.error("Failed to load books from backend", err));
-}, []);
-// Words
-useEffect(() => {
-  fetch("http://localhost:5000/words")
-    .then((res) => res.json())
-    .then((data) => setWordsData(data))
-    .catch((err) => console.error("Failed to load words from backend", err));
-}, []);
-
-
-
+  // Read
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/books`) // fetch from backend instead of local JSON
+      .then((res) => res.json())
+      .then((data) => setReadingData(data))
+      .catch((err) => console.error("Failed to load books from backend", err));
+  }, []);
+  // Words
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/words`)
+      .then((res) => res.json())
+      .then((data) => setWordsData(data))
+      .catch((err) => console.error("Failed to load words from backend", err));
+  }, []);
 
   // ✅ Reset selections when switching tabs
   const resetSelections = () => {
@@ -69,7 +65,8 @@ useEffect(() => {
           Discover Your English Level — For Free
         </h1>
         <p className="text-gray-600 mb-6">
-          Take a quick test or book a live class to improve your communication skills.
+          Take a quick test or book a live class to improve your communication
+          skills.
         </p>
       </section>
 
@@ -102,7 +99,8 @@ useEffect(() => {
               Improve Your English with Words 💬
             </h2>
             <p className="text-gray-600 mt-2">
-              Build your vocabulary one level at a time — simple, fun, and effective!
+              Build your vocabulary one level at a time — simple, fun, and
+              effective!
             </p>
           </>
         )}
@@ -132,7 +130,8 @@ useEffect(() => {
               Explore All English Learning Levels 🌍
             </h2>
             <p className="text-gray-600 mt-2">
-              Begin your English journey — choose a level and start learning instantly.
+              Begin your English journey — choose a level and start learning
+              instantly.
             </p>
           </>
         )}
@@ -156,7 +155,9 @@ useEffect(() => {
                     alt={level.level}
                     className="w-24 h-24 mx-auto mb-4 rounded-full shadow"
                   />
-                  <h3 className="text-xl font-semibold text-indigo-700">{level.level}</h3>
+                  <h3 className="text-xl font-semibold text-indigo-700">
+                    {level.level}
+                  </h3>
                   <p className="text-gray-600 mt-2">{level.description}</p>
                 </div>
               ))}
@@ -177,7 +178,9 @@ useEffect(() => {
                     className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform text-center border-t-4 border-purple-300"
                   >
                     <div className="text-4xl mb-3">{cat.icon}</div>
-                    <h4 className="text-lg font-semibold text-indigo-700">{cat.name}</h4>
+                    <h4 className="text-lg font-semibold text-indigo-700">
+                      {cat.name}
+                    </h4>
                   </div>
                 ))}
               </>
@@ -263,7 +266,9 @@ useEffect(() => {
                     onClick={() => setSelectedCategory(set)}
                     className="cursor-pointer bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-transform border-t-4 border-purple-300"
                   >
-                    <h4 className="text-lg font-semibold text-indigo-700">{set.set}</h4>
+                    <h4 className="text-lg font-semibold text-indigo-700">
+                      {set.set}
+                    </h4>
                     <p className="text-gray-600 mt-2">
                       {set.lessons?.length || 0} lessons available
                     </p>
@@ -296,8 +301,12 @@ useEffect(() => {
                         alt={lesson.title}
                         className="w-full h-40 object-cover rounded-lg mb-3"
                       />
-                      <p className="font-semibold text-gray-800">{lesson.title}</p>
-                      <p className="text-sm text-gray-600">{lesson.description}</p>
+                      <p className="font-semibold text-gray-800">
+                        {lesson.title}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {lesson.description}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -316,7 +325,9 @@ useEffect(() => {
                 <h3 className="text-3xl font-bold text-indigo-700 mb-3">
                   {selectedLesson.title}
                 </h3>
-                <p className="text-gray-700 mb-5">{selectedLesson.description}</p>
+                <p className="text-gray-700 mb-5">
+                  {selectedLesson.description}
+                </p>
                 <img
                   src={selectedLesson.image}
                   alt={selectedLesson.title}
@@ -389,7 +400,9 @@ useEffect(() => {
       </section>
 
       {/* Speaking Modal */}
-      {showModal && <SpeakingModal isOpen={showModal} onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <SpeakingModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      )}
 
       {/* Daily Challenge + Tips */}
       <section className="mt-20">
