@@ -87,19 +87,17 @@ export const LearnerSidebarLinks = () => {
         label="Inbox"
       />
 
+      {/* <SidebarItem
+        to="/dashboard/courses"
+        icon={<BookOpen size={20} />}
+        label="Courses"
+        isActive={location.pathname.includes("/dashboard/courses")}
+      /> */}
 
       <SidebarItem
         to="/dashboard/courses"
         icon={<BookOpen size={20} />}
         label="Courses"
-        isActive={location.pathname.includes("/dashboard/courses")}
-      />
-
-
-      <SidebarItem
-        to="/dashboard/courses"
-        icon={<BookOpen size={20} />}
-        label="My Courses"
       />
       <SidebarItem
         to="/dashboard/follow"
