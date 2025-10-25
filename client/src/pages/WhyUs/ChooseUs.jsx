@@ -101,12 +101,12 @@ const WhyChooseTalkSync = () => {
       </div>
 
       {/* Bottom Wave Divider */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 -mb-1 text-gray-100">
+      <div className="absolute bottom-0 left-0 right-0 h-16 -mb-1 text-gray-100 bg-white">
         <svg
           viewBox="0 0 1440 48"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full"
+          className="w-full h-full bg-white"
           preserveAspectRatio="none"
         >
           <path

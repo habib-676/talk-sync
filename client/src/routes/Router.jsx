@@ -77,9 +77,7 @@ export const router = createBrowserRouter([
       { path: "/dashboard/profile", element: <ProfilePage /> },
       {
         path: "/dashboard/profile/edit",
-        element: (
-            <EditProfile />
-        ),
+        element: <EditProfile />,
       },
       { path: "/dashboard/courses", element: <Courses></Courses> },
       {
