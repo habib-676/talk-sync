@@ -20,7 +20,6 @@ import ScheduleSession from "../pages/ProfilePage/ScheduleSession/ScheduleSessio
 
 import SessionsPage from "../pages/dashboard/SessionsPage";
 import BadgesPage from "../pages/dashboard/BadgesPage";
-import FeedbackForm from "../pages/dashboard/FeedbackForm";
 import DashboardLayout from "../layouts/dashboard-layout/DashboardLayout";
 import AdminHome from "../pages/Admin/AdminHome";
 import AdminManageUsers from "../pages/Admin/AdminManageUsers";
@@ -91,7 +90,6 @@ export const router = createBrowserRouter([
       { path: "/dashboard/sessions", element: <SessionsPage /> },
       { path: "/dashboard/badges", element: <BadgesPage /> },
       { path: "/dashboard/inbox", element: <Inbox /> },
-      { path: "/dashboard/feedback/:sessionId", element: <FeedbackForm /> },
       {
         path: "admin",
         element: <AdminHome></AdminHome>,

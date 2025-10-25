@@ -40,7 +40,7 @@ const Courses = () => {
 
 // ✅ Fetch tutor data from MongoDB API once on mount
 useEffect(() => {
-  fetch("http://localhost:5000/tutors")
+  fetch(`${import.meta.env.VITE_API_URL}/tutors`)
     .then((res) => res.json())
     .then((data) => {
       setTutorsData(data);

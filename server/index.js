@@ -67,11 +67,10 @@ async function run() {
     const sessionsCollections = database.collection("sessions");
     const feedbackCollection = database.collection("feedbacks");
 
-    // Read Collection 
+    // Read Collection
     const booksCollections = database.collection("books");
     const wordsCollections = database.collection("words");
     const tutorsCollections = database.collection("tutors");
-
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -150,7 +149,9 @@ async function run() {
     app.post("/books", async (req, res) => {
       const newBook = req.body;
       const result = await booksCollections.insertOne(newBook);
-      res.status(201).json({ message: "Book added successfully", id: result.insertedId });
+      res
+        .status(201)
+        .json({ message: "Book added successfully", id: result.insertedId });
     });
     // ---------APIS Data of Words ----------
     //1. Get All Words
@@ -213,7 +214,9 @@ async function run() {
           return res.status(400).json({ message: "Invalid tutor ID format" });
         }
 
-        const tutor = await tutorsCollections.findOne({ _id: new ObjectId(id) });
+        const tutor = await tutorsCollections.findOne({
+          _id: new ObjectId(id),
+        });
 
         if (!tutor) {
           return res.status(404).json({ message: "Tutor not found" });
@@ -240,11 +243,6 @@ async function run() {
         res.status(500).json({ message: "Failed to add tutor" });
       }
     });
-
-
-
-
-
 
     //  Learner dashboard route
     app.get("/dashboard/learner", verifyToken, async (req, res) => {
@@ -798,6 +796,86 @@ async function run() {
       }
     });
 
+    // -------- Feedback APIs --------
+    // POST /feedbacks — store session feedback
+    app.post("/feedbacks", async (req, res) => {
+      try {
+        const {
+          from,
+          to,
+          rating,
+          words = [],
+          sentences = [],
+          notes = "",
+          sessionId,
+        } = req.body || {};
+
+        if (!from || !to) {
+          return res
+            .status(400)
+            .json({ success: false, message: "'from' and 'to' are required" });
+        }
+
+        const r = Number(rating);
+        if (!Number.isFinite(r) || r < 1 || r > 5) {
+          return res
+            .status(400)
+            .json({ success: false, message: "rating must be 1-5" });
+        }
+
+        const wordsArr = Array.isArray(words)
+          ? words
+              .map((w) => (typeof w === "string" ? w.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 10)
+          : [];
+        const sentencesArr = Array.isArray(sentences)
+          ? sentences
+              .map((s) => (typeof s === "string" ? s.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 5)
+          : [];
+
+        const doc = {
+          from,
+          to,
+          rating: r,
+          words: wordsArr,
+          sentences: sentencesArr,
+          notes: typeof notes === "string" ? notes.trim() : "",
+          sessionId: sessionId || null,
+          createdAt: new Date().toISOString(),
+        };
+
+        const result = await feedbackCollection.insertOne(doc);
+        res
+          .status(201)
+          .json({ success: true, id: result.insertedId, data: doc });
+      } catch (err) {
+        console.error("POST /feedbacks error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // GET /feedbacks?to=&from= — retrieve feedbacks
+    app.get("/feedbacks", async (req, res) => {
+      try {
+        const { to, from } = req.query || {};
+        const q = {};
+        if (to) q.to = to;
+        if (from) q.from = from;
+
+        const list = await feedbackCollection
+          .find(q)
+          .sort({ createdAt: -1 })
+          .toArray();
+        res.json({ success: true, data: list });
+      } catch (err) {
+        console.error("GET /feedbacks error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
     // Unread counts grouped by sender for a given user
     app.get("/messages/unread-counts", async (req, res) => {
       try {
@@ -882,8 +960,8 @@ async function run() {
         const learning = Array.isArray(user.learning_language)
           ? user.learning_language
           : user.learning_language
-            ? [user.learning_language]
-            : [];
+          ? [user.learning_language]
+          : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
@@ -941,7 +1019,6 @@ async function run() {
       }
     });
     // inside run() after you define usersCollections, messagesCollections
-
 
     /**
      * GET /users/following/:email
@@ -1107,9 +1184,9 @@ async function run() {
     });
 
     /**
-       * POST /sessions/:id/accept
-       * Accept a session request. Body: { actionByEmail } // must be receiver
-       */
+     * POST /sessions/:id/accept
+     * Accept a session request. Body: { actionByEmail } // must be receiver
+     */
     app.post("/sessions/:id/accept", async (req, res) => {
       try {
         const { id } = req.params;
@@ -1158,222 +1235,6 @@ async function run() {
         res.status(500).json({ success: false, message: err.message });
       }
     });
-
-//feedback
-/**
- * GET /feedback/:email
- * Returns all feedbacks that target a specific user (across sessions).
- * This is useful for admin / profile pages listing feedback about a user.
- */
-app.get("/feedback/:email", async (req, res) => {
-  try {
-    const email = (req.params.email || "").toLowerCase().trim();
-    if (!email) {
-      return res.status(400).json({ success: false, message: "email is required" });
-    }
-
-    // Find feedback documents where any response or review concerns the email OR session participants contains email
-    // Here we look for feedback docs where participants contain the email OR responses.[email] exists OR reviews.reviewForEmail == email
-    const cursor = feedbackCollection.find({
-      $or: [
-        { participants: email },
-        { [`responses.${email}`]: { $exists: true } },
-        { "reviews.reviewForEmail": email }
-      ]
-    }).sort({ createdAt: -1 });
-
-    const feedback = await cursor.toArray();
-
-    res.status(200).json({ success: true, feedback });
-  } catch (error) {
-    console.error("GET /feedback/:email error:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-/**
- * GET /sessions/:id/feedback?email=...
- * Returns the feedback doc for a single session (if any).
- * Responds with an empty shape when there's no doc (so front-end can show form).
- */
-app.get("/sessions/:id/feedback", async (req, res) => {
-  try {
-    const sessionId = req.params.id;
-    if (!sessionId) return res.status(400).json({ success: false, message: "session id required" });
-
-    // optional: email used by frontend to check specific response
-    const email = (req.query.email || "").toLowerCase().trim();
-
-    // verify session exists
-    const session = await sessionsCollections.findOne({ _id: new ObjectId(sessionId) });
-    if (!session) return res.status(404).json({ success: false, message: "session not found" });
-
-    const doc = await feedbackCollection.findOne({ sessionId });
-
-    if (!doc) {
-      // return an empty structure
-      return res.json({
-        success: true,
-        feedback: {
-          sessionId,
-          participants: [session.fromEmail, session.toEmail],
-          responses: {},
-          reviews: [],
-          createdAt: null,
-          updatedAt: null
-        }
-      });
-    }
-
-    res.json({ success: true, feedback: doc });
-  } catch (err) {
-    console.error("GET /sessions/:id/feedback error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/**
- * POST /sessions/:id/feedback
- * Submit or update feedback for a session.
- * Body: { email, words, sentences, confidenceBefore, confidenceAfter, notes }
- *
- * NOTE: In production you should verify identity with verifyToken and derive email from the token,
- * instead of trusting the body email. For dev, body-email is OK.
- */
-app.post("/sessions/:id/feedback", async (req, res) => {
-  try {
-    const sessionId = req.params.id;
-    const {
-      email,
-      words = [],
-      sentences = [],
-      confidenceBefore = null,
-      confidenceAfter = null,
-      notes = ""
-    } = req.body || {};
-
-    if (!sessionId) return res.status(400).json({ success: false, message: "session id required" });
-    if (!email) return res.status(400).json({ success: false, message: "email required" });
-
-    const normalized = email.toLowerCase().trim();
-
-    // fetch session and verify participant
-    const session = await sessionsCollections.findOne({ _id: new ObjectId(sessionId) });
-    if (!session) return res.status(404).json({ success: false, message: "session not found" });
-
-    const allowed = [ (session.fromEmail || "").toLowerCase(), (session.toEmail || "").toLowerCase() ];
-    if (!allowed.includes(normalized)) {
-      return res.status(403).json({ success: false, message: "Only session participants can submit feedback" });
-    }
-
-    const now = new Date().toISOString();
-    const responseObj = {
-      submittedAt: now,
-      words: Array.isArray(words) ? words : [],
-      sentences: Array.isArray(sentences) ? sentences : [],
-      confidenceBefore: typeof confidenceBefore === "number" ? confidenceBefore : null,
-      confidenceAfter: typeof confidenceAfter === "number" ? confidenceAfter : null,
-      notes: notes || ""
-    };
-
-    // upsert: set createdAt on insert, always set updatedAt and set responses.<email>
-    const respKey = `responses.${normalized}`;
-    const update = {
-      $set: {
-        updatedAt: now,
-        [respKey]: responseObj
-      },
-      $setOnInsert: {
-        sessionId,
-        participants: [session.fromEmail, session.toEmail],
-        createdAt: now
-      }
-    };
-
-    await feedbackCollection.updateOne({ sessionId }, update, { upsert: true });
-
-    // push small summary to user's doc for quick access (optional)
-    // Note: don't push huge objects repeatedly — we're pushing a small summary only.
-    await usersCollections.updateOne(
-      { email: session.toEmail.toLowerCase() },
-      { $addToSet: { feedback: { sessionId, from: normalized, submittedAt: now } } }
-    );
-
-    // notify partner via socket if connected
-    const partnerEmail = normalized === (session.fromEmail || "").toLowerCase() ? session.toEmail : session.fromEmail;
-    const partnerUser = await usersCollections.findOne({ email: partnerEmail });
-    if (partnerUser) {
-      const socketId = userSocketMap[partnerUser._id.toString()];
-      if (socketId) io.to(socketId).emit("sessionFeedbackSubmitted", { sessionId, from: normalized });
-    }
-
-    res.status(201).json({ success: true, message: "Feedback saved", status: "submitted" });
-  } catch (err) {
-    console.error("POST /sessions/:id/feedback error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/**
- * POST /sessions/:id/feedback/grade
- * Submit a review/grade for partner's feedback.
- * Body: { reviewerEmail, reviewForEmail, grade, comments, detailed: [{word, correction, score}] }
- */
-app.post("/sessions/:id/feedback/grade", async (req, res) => {
-  try {
-    const sessionId = req.params.id;
-    const { reviewerEmail, reviewForEmail, grade, comments = "", detailed = [] } = req.body || {};
-
-    if (!sessionId) return res.status(400).json({ success: false, message: "session id required" });
-    if (!reviewerEmail || !reviewForEmail) return res.status(400).json({ success: false, message: "both reviewerEmail and reviewForEmail are required" });
-
-    const normReviewer = reviewerEmail.toLowerCase().trim();
-    const normFor = reviewForEmail.toLowerCase().trim();
-
-    // fetch session and verify both participants
-    const session = await sessionsCollections.findOne({ _id: new ObjectId(sessionId) });
-    if (!session) return res.status(404).json({ success: false, message: "session not found" });
-
-    const allowed = [ (session.fromEmail || "").toLowerCase(), (session.toEmail || "").toLowerCase() ];
-    if (!allowed.includes(normReviewer) || !allowed.includes(normFor)) {
-      return res.status(403).json({ success: false, message: "Both reviewer and review target must be session participants" });
-    }
-    if (normReviewer === normFor) {
-      return res.status(400).json({ success: false, message: "Cannot review yourself" });
-    }
-
-    const review = {
-      reviewerEmail: normReviewer,
-      reviewForEmail: normFor,
-      grade: Number(grade || 0),
-      comments: comments || "",
-      detailed: Array.isArray(detailed) ? detailed : [],
-      createdAt: new Date().toISOString()
-    };
-
-    await feedbackCollection.updateOne(
-      { sessionId },
-      {
-        $push: { reviews: review },
-        $setOnInsert: { sessionId, participants: [session.fromEmail, session.toEmail], createdAt: new Date().toISOString() },
-        $set: { updatedAt: new Date().toISOString() }
-      },
-      { upsert: true }
-    );
-
-    // notify reviewed user via socket (optional)
-    const reviewedUser = await usersCollections.findOne({ email: normFor });
-    if (reviewedUser) {
-      const socketId = userSocketMap[reviewedUser._id.toString()];
-      if (socketId) io.to(socketId).emit("feedbackReviewed", { sessionId, reviewer: normReviewer });
-    }
-
-    res.json({ success: true, message: "Review submitted" });
-  } catch (err) {
-    console.error("POST /sessions/:id/feedback/grade error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
 
     // admin
 
@@ -1687,8 +1548,8 @@ app.post("/sessions/:id/feedback/grade", async (req, res) => {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-                ? messagesCollections
-                : sessionsCollections;
+              ? messagesCollections
+              : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1864,8 +1725,8 @@ app.post("/sessions/:id/feedback/grade", async (req, res) => {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-          ? false
-          : v;
+        ? false
+        : v;
 
     app.get(
       "/admin/announcements",
@@ -2071,8 +1932,6 @@ app.post("/sessions/:id/feedback/grade", async (req, res) => {
         }
       }
     );
-
-
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");
