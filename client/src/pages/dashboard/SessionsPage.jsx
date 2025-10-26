@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import { Clock, Send, Check, X, UserPlus, Calendar } from "lucide-react";
+import FeedbackTable from "../../components/tables/FeedbackTable";
 
 const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -26,7 +27,7 @@ export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
 
-  const [tab, setTab] = useState("friends"); // friends | incoming | outgoing | upcoming | history
+  const [tab, setTab] = useState("friends"); // friends | incoming | outgoing | upcoming | history | feedback
   const [error, setError] = useState(null);
 
   // modal state
@@ -48,7 +49,9 @@ export default function SessionsPage() {
     (async () => {
       setLoadingFriends(true);
       try {
-        const friendIds = Array.isArray(mongoUser?.friends) ? mongoUser.friends : [];
+        const friendIds = Array.isArray(mongoUser?.friends)
+          ? mongoUser.friends
+          : [];
 
         if (!friendIds.length) {
           if (mounted) setFriends([]);
@@ -58,7 +61,9 @@ export default function SessionsPage() {
         const results = await Promise.all(
           friendIds.map(async (id) => {
             try {
-              const res = await fetch(`${BACKEND}/users/id/${encodeURIComponent(id)}`);
+              const res = await fetch(
+                `${BACKEND}/users/id/${encodeURIComponent(id)}`
+              );
               const json = await res.json();
               // backend returns { success:true, user } OR raw user; handle both
               return json?.user ?? json;
@@ -89,7 +94,9 @@ export default function SessionsPage() {
         setSessions([]);
         return;
       }
-      const res = await fetch(`${BACKEND}/sessions?email=${encodeURIComponent(myEmail)}`);
+      const res = await fetch(
+        `${BACKEND}/sessions?email=${encodeURIComponent(myEmail)}`
+      );
       const json = await res.json();
       const data = json?.sessions ?? (json?.success ? json.sessions : json);
       setSessions(Array.isArray(data) ? data : []);
@@ -124,7 +131,9 @@ export default function SessionsPage() {
           accepted.map(async (s) => {
             try {
               const res = await fetch(
-                `${BACKEND}/sessions/${encodeURIComponent(s._id)}/feedback?email=${encodeURIComponent(myEmail)}`
+                `${BACKEND}/sessions/${encodeURIComponent(
+                  s._id
+                )}/feedback?email=${encodeURIComponent(myEmail)}`
               );
               if (!res.ok) {
                 // we still return a default shape
@@ -132,10 +141,16 @@ export default function SessionsPage() {
               }
               const json = await res.json();
               if (!json.success) {
-                return [s._id, { meSubmitted: false, doc: json.feedback || null }];
+                return [
+                  s._id,
+                  { meSubmitted: false, doc: json.feedback || null },
+                ];
               }
               const doc = json.feedback || json; // backend shape may vary
-              const meResp = (doc.responses && doc.responses[myEmail]) || (Array.isArray(doc.responses) && doc.responses.find(r => r.email === myEmail));
+              const meResp =
+                (doc.responses && doc.responses[myEmail]) ||
+                (Array.isArray(doc.responses) &&
+                  doc.responses.find((r) => r.email === myEmail));
               const meSubmitted = Boolean(meResp);
               return [s._id, { meSubmitted, doc }];
             } catch (err) {
@@ -214,11 +229,14 @@ export default function SessionsPage() {
   const acceptSession = async (sessionId) => {
     if (!myEmail) return alert("Sign in first");
     try {
-      const res = await fetch(`${BACKEND}/sessions/${encodeURIComponent(sessionId)}/accept`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ actionByEmail: myEmail }),
-      });
+      const res = await fetch(
+        `${BACKEND}/sessions/${encodeURIComponent(sessionId)}/accept`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ actionByEmail: myEmail }),
+        }
+      );
       const json = await res.json();
       if (json?.success) {
         await loadSessions();
@@ -235,11 +253,14 @@ export default function SessionsPage() {
   const rejectSession = async (sessionId) => {
     if (!window.confirm("Reject this session request?")) return;
     try {
-      const res = await fetch(`${BACKEND}/sessions/${encodeURIComponent(sessionId)}/reject`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ actionByEmail: myEmail }),
-      });
+      const res = await fetch(
+        `${BACKEND}/sessions/${encodeURIComponent(sessionId)}/reject`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ actionByEmail: myEmail }),
+        }
+      );
       const json = await res.json();
       if (json?.success) {
         await loadSessions();
@@ -314,6 +335,7 @@ export default function SessionsPage() {
           { key: "outgoing", label: `Outgoing (${outgoing.length})` },
           { key: "upcoming", label: `Upcoming (${accepted.length})` },
           { key: "history", label: `History (${history.length})` },
+          { key: "feedback", label: "Feedback" },
         ].map((t) => (
           <button
             key={t.key}
@@ -338,7 +360,9 @@ export default function SessionsPage() {
           <section>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {loadingFriends ? (
-                Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+                Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))
               ) : friends.length ? (
                 friends.map((f) => (
                   <div
@@ -362,7 +386,9 @@ export default function SessionsPage() {
                               {f.name || f.email}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {f.native_language ? `${f.native_language} • ` : ""}
+                              {f.native_language
+                                ? `${f.native_language} • `
+                                : ""}
                               {f.email}
                             </div>
                           </div>
@@ -382,7 +408,9 @@ export default function SessionsPage() {
                           Native: {f.native_language || "—"}
                         </span>
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs">
-                          Learning: {(f.learning_language && f.learning_language[0]) || "—"}
+                          Learning:{" "}
+                          {(f.learning_language && f.learning_language[0]) ||
+                            "—"}
                         </span>
                       </div>
 
@@ -394,7 +422,9 @@ export default function SessionsPage() {
                           <Send size={14} /> Request
                         </button>
                         <Link
-                          to={`/dashboard/profile?user=${encodeURIComponent(f.email)}`}
+                          to={`/dashboard/profile?user=${encodeURIComponent(
+                            f.email
+                          )}`}
                           className="text-xs text-gray-500 hover:underline"
                         >
                           View
@@ -424,7 +454,9 @@ export default function SessionsPage() {
                     className="p-4 rounded-2xl bg-gradient-to-r from-pink-50 to-white shadow flex justify-between items-center"
                   >
                     <div>
-                      <div className="font-semibold">{s.fromName || s.fromEmail}</div>
+                      <div className="font-semibold">
+                        {s.fromName || s.fromEmail}
+                      </div>
                       <div className="text-sm text-gray-600">{s.message}</div>
                       <div className="text-xs text-gray-400 mt-2">
                         Requested: {new Date(s.createdAt).toLocaleString()}
@@ -465,14 +497,18 @@ export default function SessionsPage() {
                     className="p-4 rounded-2xl bg-white shadow flex justify-between items-center"
                   >
                     <div>
-                      <div className="font-semibold">To {s.toName || s.toEmail}</div>
+                      <div className="font-semibold">
+                        To {s.toName || s.toEmail}
+                      </div>
                       <div className="text-sm text-gray-600">{s.message}</div>
                       <div className="text-xs text-gray-400 mt-2">
                         Requested: {new Date(s.createdAt).toLocaleString()}
                       </div>
                     </div>
                     <div>
-                      <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">Pending</span>
+                      <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">
+                        Pending
+                      </span>
                     </div>
                   </div>
                 ))
@@ -490,7 +526,9 @@ export default function SessionsPage() {
                 <div>Loading...</div>
               ) : accepted.length ? (
                 accepted.map((s) => {
-                  const status = feedbackStatus[s._id] || { meSubmitted: false };
+                  const status = feedbackStatus[s._id] || {
+                    meSubmitted: false,
+                  };
                   const meSubmitted = !!status.meSubmitted;
                   return (
                     <div
@@ -499,10 +537,15 @@ export default function SessionsPage() {
                     >
                       <div>
                         <div className="font-semibold">
-                          {s.fromEmail === myEmail ? `With ${s.toName || s.toEmail}` : `With ${s.fromName || s.fromEmail}`}
+                          {s.fromEmail === myEmail
+                            ? `With ${s.toName || s.toEmail}`
+                            : `With ${s.fromName || s.fromEmail}`}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Scheduled: {s.scheduledAt ? new Date(s.scheduledAt).toLocaleString() : "No scheduled time"}
+                          Scheduled:{" "}
+                          {s.scheduledAt
+                            ? new Date(s.scheduledAt).toLocaleString()
+                            : "No scheduled time"}
                         </div>
                       </div>
                       <div className="flex gap-2 items-center">
@@ -523,7 +566,9 @@ export default function SessionsPage() {
                           </button>
                         ) : (
                           <Link
-                            to={`/dashboard/feedback/${encodeURIComponent(s._id)}`}
+                            to={`/dashboard/feedback/${encodeURIComponent(
+                              s._id
+                            )}`}
                             className="px-3 py-1 rounded bg-gradient-to-r from-indigo-600 to-pink-500 text-white inline-flex items-center gap-2"
                             title="Give feedback for this session"
                           >
@@ -554,14 +599,22 @@ export default function SessionsPage() {
                   >
                     <div>
                       <div className="font-medium">
-                        {s.fromEmail === myEmail ? `With ${s.toName || s.toEmail}` : `With ${s.fromName || s.fromEmail}`}
+                        {s.fromEmail === myEmail
+                          ? `With ${s.toName || s.toEmail}`
+                          : `With ${s.fromName || s.fromEmail}`}
                       </div>
                       <div className="text-xs text-gray-500">
                         {s.status} •{" "}
-                        {s.endTime ? `Ended ${new Date(s.endTime).toLocaleString()}` : `Requested ${new Date(s.createdAt).toLocaleString()}`}
+                        {s.endTime
+                          ? `Ended ${new Date(s.endTime).toLocaleString()}`
+                          : `Requested ${new Date(
+                              s.createdAt
+                            ).toLocaleString()}`}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500">{s.durationMinutes ? `${s.durationMinutes} min` : "-"}</div>
+                    <div className="text-sm text-gray-500">
+                      {s.durationMinutes ? `${s.durationMinutes} min` : "-"}
+                    </div>
                   </div>
                 ))
               ) : (
@@ -570,32 +623,62 @@ export default function SessionsPage() {
             </div>
           </section>
         )}
+
+        {tab === "feedback" && (
+          <section>
+            <FeedbackTable />
+          </section>
+        )}
       </div>
 
       {/* -------- REQUEST MODAL -------- */}
       {modalOpen && modalTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
-          <form onSubmit={submitRequest} className="relative z-60 max-w-2xl w-full bg-white rounded-2xl p-6 shadow-xl">
+          <form
+            onSubmit={submitRequest}
+            className="relative z-60 max-w-2xl w-full bg-white rounded-2xl p-6 shadow-xl"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full grid place-items-center bg-gradient-to-br from-indigo-100 to-pink-100 text-indigo-700 font-bold">
-                  {modalTarget.name ? modalTarget.name.split(" ").map((n) => n[0]).slice(0, 2).join("") : (modalTarget.email || "U")[0].toUpperCase()}
+                  {modalTarget.name
+                    ? modalTarget.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .slice(0, 2)
+                        .join("")
+                    : (modalTarget.email || "U")[0].toUpperCase()}
                 </div>
                 <div>
-                  <div className="font-semibold">{modalTarget.name || modalTarget.email}</div>
-                  <div className="text-xs text-gray-500">{modalTarget.email}</div>
+                  <div className="font-semibold">
+                    {modalTarget.name || modalTarget.email}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {modalTarget.email}
+                  </div>
                 </div>
               </div>
-              <button type="button" onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X />
               </button>
             </div>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
               <label className="flex flex-col">
-                <span className="text-xs text-gray-600 mb-1">Schedule (optional)</span>
-                <input type="datetime-local" value={scheduleAt} onChange={(e) => setScheduleAt(e.target.value)} className="px-3 py-2 rounded border focus:outline-none" />
+                <span className="text-xs text-gray-600 mb-1">
+                  Schedule (optional)
+                </span>
+                <input
+                  type="datetime-local"
+                  value={scheduleAt}
+                  onChange={(e) => setScheduleAt(e.target.value)}
+                  className="px-3 py-2 rounded border focus:outline-none"
+                />
               </label>
 
               <label className="flex flex-col">
@@ -609,18 +692,36 @@ export default function SessionsPage() {
 
             <label className="block mt-4">
               <span className="text-xs text-gray-600">Message</span>
-              <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} className="w-full mt-2 p-3 rounded border focus:outline-none" />
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                className="w-full mt-2 p-3 rounded border focus:outline-none"
+              />
             </label>
 
             <div className="mt-4 flex items-center justify-between gap-3">
               <div className="text-sm text-gray-500">
                 <Calendar size={14} className="inline-block mr-1" />
-                {scheduleAt ? `Scheduled for ${new Date(scheduleAt).toLocaleString()}` : "No scheduled time — request will be sent as pending"}
+                {scheduleAt
+                  ? `Scheduled for ${new Date(scheduleAt).toLocaleString()}`
+                  : "No scheduled time — request will be sent as pending"}
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={closeModal} className="px-4 py-2 rounded border">Cancel</button>
-                <button type="submit" disabled={submitting} className="inline-flex items-center gap-2 px-4 py-2 rounded bg-gradient-to-r from-indigo-600 to-pink-500 text-white shadow">
-                  <Send size={14} /> {submitting ? "Sending..." : "Send Request"}
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-4 py-2 rounded border"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded bg-gradient-to-r from-indigo-600 to-pink-500 text-white shadow"
+                >
+                  <Send size={14} />{" "}
+                  {submitting ? "Sending..." : "Send Request"}
                 </button>
               </div>
             </div>
