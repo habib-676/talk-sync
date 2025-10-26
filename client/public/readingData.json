@@ -1,0 +1,245 @@
+[
+  {
+    "level": "Level 1",
+    "image": "https://i.ibb.co.com/gZ422Zxv/Learning-languages-pana.png",
+    "sets": [
+      {
+        "set": "Set 1",
+        "lessons": [
+          {
+            "id": 101,
+            "title": "The Little Prince",
+            "description": "A young prince explores planets and learns about love and friendship.",
+            "image": "https://i.ibb.co.com/KxVt5KZK/l1-1PNG.png",
+            "youtubeLink": "https://youtu.be/BKJBiFhCEmw",
+            "pdfLink": "https://www.planetebook.com/free-ebooks/the-little-prince.pdf"
+          },
+          {
+            "id": 102,
+            "title": "Robinson Crusoe - Level 1",
+            "description": "MY NAME IS ROB INSON. I AM FROM ENGLAND. ",
+            "image": "https://i.ibb.co.com/Y4X52wp2/l1-2.png",
+            "youtubeLink": "https://youtu.be/F2w1FBg4CuM?si=1prgz7_53p2zlUDM",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2020/12/Robinson-Crusoe-in-Levels-PDF.pdf"
+          },
+          {
+            "id": 103,
+            "title": "Rich Man, Poor Man",
+            "description": "One day a postman came to my village....",
+            "image": "https://i.ibb.co.com/RpgFhqNt/l1-3.png",
+            "youtubeLink": "https://youtu.be/tELWkyJdUto?si=cnTq6wufKTAthmil",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/03/Short-story-in-english-Rich-Man-Poor-Man.pdf"
+          } 
+        ]
+      },
+      {
+        "set": "Set 2",
+        "lessons": [
+          {
+            "id": 106,
+            "title": "THE YOUNG KING",
+            "description": "THERE WAS ONCE AN OLD KING.HE HAD NO SON....",
+            "image": "https://i.ibb.co.com/cSBY8RWc/l1-4.png",
+            "youtubeLink": "https://youtu.be/_urA6QPHXEo?si=CEUtiMxC2SP9wWJO",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/10/The-Young-King-and-Other-Stories-by-Oscar-Wilde-book-PDF.pdf"
+          },
+          {
+            "id": 107,
+            "title": "SISTER LOVE",
+            "description": "Marcia met Howard Collins at church...",
+            "image": "https://i.ibb.co.com/ksH9vRt9/L1-5.png",
+            "youtubeLink": "https://youtu.be/BeVva7i8vl8?si=s6_TPo0aygIGjFaT",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/11/Sister-Love-By-John-Escott-book-PDF.pdf"
+          },
+          {
+            "id": 108,
+            "title": "The Story of Doctor Dolittle",
+            "description": "There are some of us now reaching middle age who discover themselves....",
+            "image": "https://i.ibb.co.com/B2rXzqtK/l1-6PNG.png",
+            "youtubeLink": "https://youtu.be/uP1qQgvtgzc?si=ifIm3DhD3voteB26",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/11/The-Story-of-Doctor-Dolittle-book-PDF-httpslearnenglish-new.com_.pdf"
+          }
+        
+        ]
+      },
+      {
+        "set": "Set 3",
+        "lessons": [
+          {
+            "id": 111,
+            "title": "Alice's Adventures in Wonderland",
+            "description": " Alice was beginning to get very bored. She and her sister...",
+            "image": "https://i.ibb.co.com/gMn4XRd2/l1-7.png",
+            "youtubeLink": "https://youtu.be/-BFS9lUupYY?si=5z25BlbEdEVNd3gE",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/12/Alices-Adventures-in-Wonderland-By-Lewis-Carroll-Retold-by-Jennifer-Bassett-book-PDF.pdf"
+          },
+          {
+            "id": 112,
+            "title": "The Thief of Smells",
+            "description": "The Thief of Smells....A tale from America",
+            "image": "https://i.ibb.co.com/BHy5w4m1/l1-8.png",
+            "youtubeLink": "https://youtu.be/yEOukylHnB4?si=Q5bs2ag5-JZSDZei",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/01/The-Thief-of-Smells-A-tale-from-America-book-PDF.pdf"
+          }
+          
+        ]
+      }
+    ]
+  },
+  {
+    "level": "Level 2",
+    "sets": [
+      {
+        "set": "Set 1",
+        "lessons": [
+          {
+            "id": 201,
+            "title": "Gulliver’s Travels",
+            "description": "A Journey to Lilliput....",
+            "image": "https://i.ibb.co.com/vC0Qn5s0/l1-9.png",
+            "youtubeLink": "https://youtu.be/dcOdIDDi2K4?si=toKyU-AAtlTyfRwG",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2023/09/Gullivers-Travels-By-Jonathan-Swift-Retold-By-Pauline-Francis-Book-PDF.pdf"
+          },
+          {
+            "id": 202,
+            "title": "Alien at School",
+            "description": "The New Teacher.Jennifer Dale. My friends call me Jenny..",
+            "image": "https://i.ibb.co.com/tMyWFsxH/l1-10.png",
+            "youtubeLink": "https://youtu.be/t9apqj77oA4?si=VNxEN3xKy30xPCj3",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/02/Alien-at-School-by-Michelle-Brown-book-PDF.pdf"
+          },
+          {
+            "id": 203,
+            "title": "Marcel and the Shakespeare Letters",
+            "description": "Marcel is a French mouse. He's a detective and he lives in Paris...",
+            "image": "https://i.ibb.co.com/LDCHNw6P/l1-11.png",
+            "youtubeLink": "https://youtu.be/OclKqF0tato?si=efrINYgHBv6gAUhL",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2021/11/Marcel-and-the-Shakespeare-Letters-By-Stephen-Rabley-book-PDF-httpslearnenglish-new.com_.pdf"
+          } 
+        ]
+      },
+      {
+        "set": "Set 2",
+        "lessons": [
+          {
+            "id": 206,
+            "title": "The Fox and the Grapes",
+            "description": "A fox dismisses what he cannot have.",
+            "image": "https://i.ibb.co.com/M5k1XV7n/l1-12.jpg",
+            "youtubeLink": "https://youtu.be/fhD9wxcrg94?si=OjS5ryeWtJKIkXKh",
+            "pdfLink": "https://teach.files.bbci.co.uk/schoolradio/08_fox_and_grapes.pdf"
+          },
+          {
+            "id": 207,
+            "title": "The Goose That Laid the Golden Eggs",
+            "description": "Greed leads to loss of fortune.",
+            "image": "https://i.ibb.co.com/j9w4L337/l1-12.png",
+            "youtubeLink": "https://youtu.be/KgAH866XHNo?si=xvDXJHUF58pTC6F0",
+            "pdfLink": "https://www.amnh.org/content/download/173919/2737219/file/silkroadfables.pdf"
+          },
+
+          {
+            "id": 208,
+            "title": "The Farmer and His Sons",
+            "description": "Hard work is the real treasure.",
+            "image": "https://i.ibb.co.com/23hCfq42/l1-13.jpg",
+            "youtubeLink": "https://youtu.be/mvwx-Ys4HIw?si=RX7utn_8AotRN_Lk",
+            "pdfLink": "https://www.kestonprimary.org.uk/wp-content/uploads/2020/04/English-Comprehension.pdf"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "level": "Level 3",
+    "sets": [
+      {
+        "set": "Set 1",
+        "lessons": [
+          {
+            "id": 301,
+            "title": "Anne of Green Gables",
+            "description": "One fine spring afternoon in Avonlea, Mrs. Rachel Lynde sat by...",
+            "image": "https://i.ibb.co.com/mF2jZTT8/l1-14.png",
+            "youtubeLink": "https://youtu.be/PeClEPsTg5U?si=kTbsvqnnIX-9VSQg",
+            "pdfLink": "https://www.gutenberg.org/ebooks/7256"
+          },
+          {
+            "id": 302,
+            "title": "The Adventures of Tom Sawyer",
+            "description": "Tom Sawyer likes adventures.When other people are sleeping in their beds, Tom Sawyer is climbing out...",
+            "image": "https://i.ibb.co.com/DPCR8PGq/l1-13.png",
+            "youtubeLink": "https://youtu.be/_GPjJ9GBbxM?si=HUnmR1MQp_p2imwq",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/02/The-Adventures-of-Tom-Sawyer-By-MARK-TWAIN-Retold-by-Nick-Bullard-Book-PDF.pdf"
+          },
+          {
+            "id": 303,
+            "title": "A Little Princess",
+            "description": "Sara Crewe is a very rich little girl. She first comes to England when she seven, and her father takes her to Miss Minchin’s school in London..",
+            "image": "https://i.ibb.co.com/r2G766QC/l1-15.png",
+            "youtubeLink": "https://youtu.be/es9i3L5ffPw?si=VpqHMB_ORZ3WW7uk",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/02/A-Little-Princess-By-Frances-Hodgson-Burnett-Retold-by-Jennifer-Bassett-Book-PDF.pdf"
+          },
+          {
+            "id": 304,
+            "title": "Aladdin and the Enchanted Lamp",
+            "description": "Many years ago, in a city in Arabia, there was a boy called Aladdin. He lived with his mother in a little house near the market, and they were very poor. ",
+            "image": "https://i.ibb.co.com/1YHk12Yr/l1-15.jpg",
+            "youtubeLink": "https://youtu.be/Sr9oEq31afo?si=4pl_LMYZl8EEEDn5",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2022/03/Aladdin-and-the-Enchanted-Lamp-Retold-by-Judith-Dean-book-PDF.pdf"
+          }
+        ]
+      },
+      {
+        "set": "Set 2",
+        "lessons": [
+          {
+            "id": 306,
+            "title": "Mr. Harris and the Night Train",
+            "description": "Mr. Harris liked trains. He was afraid of aeroplanes, and didn’t like buses. But trains –  they were big and noisy and exciting. ",
+            "image": "https://i.ibb.co.com/TBhF7qTh/l1-16.png",
+            "youtubeLink": "https://youtu.be/cip9ukbmpP0?si=RZja4H_xMPJf1WWm",
+            "pdfLink": "https://learnenglish-new.com/very-simple-short-stories-in-english/"
+          },
+          {
+            "id": 307,
+            "title": "Round the World in Eighty Days",
+            "description": "In 1872, the Reform Club in London's Pall Mall was a club for men only.Phileas Fogg went to the Preform Club every day. He left his house at 7 Savile Row...",
+            "image": "https://i.ibb.co.com/zVNSdPTW/l1-17.png",
+            "youtubeLink": "https://youtu.be/R8DK7dOr7bo?si=cSO4hprUefIMuZm5",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2023/07/Round-the-World-in-Eighty-Days-By-Jules-Verne-PDF.pdf"
+          },
+          {
+            "id": 308,
+            "title": "The Lottery",
+            "description": "The morning of June 27th is a clear, warm summer day. There are many colorful flowers and the grass is beautiful and green. At about 10 o’clock in the morning, the people of the village begin to arrive in the town square, located between the post office and the bank.",
+            "image": "https://i.ibb.co.com/DgRv0nN8/l1-18.png",
+            "youtubeLink": "https://youtu.be/uI9iESNUj0g?si=j331WmV1NsuXIy2b",
+            "pdfLink": "https://learnenglish-new.com/wp-content/uploads/2025/01/The-Lottery-By-Shirley-Jackson-Edited-By-Joshua-Cashill-PDF-Book.pdf"
+          }      
+        ]
+      },
+      {
+        "set": "Set 3",
+        "lessons": [
+          {
+            "id": 311,
+            "title": "The Adventure of the Speckled Band",
+            "description": "Sherlock Holmes solves a mysterious death in a locked room.",
+            "image": "https://i.ibb.co.com/Zpqy0YsG/l1-19.png",
+            "youtubeLink": "https://youtu.be/8ZR1OuNY8qY?si=_y8Zz1XfTOpa1lv-",
+            "pdfLink": "https://sherlock-holm.es/stories/pdf/letter/1-sided/spec.pdf"
+          },
+          {
+            "id": 312,
+            "title": "The Open Boat",
+            "description": "Four shipwrecked men struggle against nature’s indifference.",
+            "image": "https://i.ibb.co.com/F45jLS3k/l1-20.png",
+            "youtubeLink": "https://youtu.be/79AKfXnfrpo?si=WO4gzsGrGQEAQrvv",
+            "pdfLink": "https://americanenglish.state.gov/files/ae/resource_files/the-open-boat.pdf"
+          }
+        ]
+      }
+    ]
+  }
+]
