@@ -12,6 +12,8 @@ const EvaluationModal = ({
   visible,
   onClose,
   feedback, // the feedback doc { _id?, from, to, words[], sentences[], notes, createdAt }
+  evaluation = null, // optional: { feedbackId, senderId, receiverId, words:[{text,correct}], sentences:[{text,correct}], breakdown, totalMarks }
+  readOnly = false,
   onEvaluated, // callback with result
   points = { word: WORD_POINT, sentence: SENTENCE_POINT },
 }) => {
@@ -24,24 +26,42 @@ const EvaluationModal = ({
   // small helper to detect a Mongo ObjectId-like string
   const looksLikeObjectId = (v) => /^[a-f\d]{24}$/i.test(String(v || ""));
 
-  const initialWords = useMemo(
-    () => (feedback?.words || []).map(() => false),
-    [feedback?.words]
-  );
-  const initialSentences = useMemo(
-    () => (feedback?.sentences || []).map(() => false),
-    [feedback?.sentences]
-  );
+  // Determine display lists using evaluation when provided
+  const displayWords = useMemo(() => {
+    if (evaluation?.words?.length) return evaluation.words.map((w) => w.text);
+    return feedback?.words || [];
+  }, [evaluation?.words, feedback?.words]);
+  const displaySentences = useMemo(() => {
+    if (evaluation?.sentences?.length)
+      return evaluation.sentences.map((s) => s.text);
+    return feedback?.sentences || [];
+  }, [evaluation?.sentences, feedback?.sentences]);
+
+  const initialWords = useMemo(() => {
+    if (evaluation?.words?.length)
+      return evaluation.words.map((w) => !!w.correct);
+    return displayWords.map(() => false);
+  }, [evaluation?.words, displayWords]);
+  const initialSentences = useMemo(() => {
+    if (evaluation?.sentences?.length)
+      return evaluation.sentences.map((s) => !!s.correct);
+    return displaySentences.map(() => false);
+  }, [evaluation?.sentences, displaySentences]);
   const [wordChecks, setWordChecks] = useState(initialWords);
   const [sentenceChecks, setSentenceChecks] = useState(initialSentences);
 
   useEffect(() => {
     // reset when opening for a different feedback
     if (visible) {
-      setWordChecks((feedback?.words || []).map(() => false));
-      setSentenceChecks((feedback?.sentences || []).map(() => false));
+      if (evaluation) {
+        setWordChecks(initialWords);
+        setSentenceChecks(initialSentences);
+      } else {
+        setWordChecks((feedback?.words || []).map(() => false));
+        setSentenceChecks((feedback?.sentences || []).map(() => false));
+      }
     }
-  }, [visible, feedback]);
+  }, [visible, feedback, evaluation, initialWords, initialSentences]);
 
   // try to hydrate sender name gracefully
   useEffect(() => {
@@ -58,7 +78,7 @@ const EvaluationModal = ({
         return;
       }
 
-      const id = feedback?.from;
+      const id = evaluation?.senderId || feedback?.from;
       if (!id) return;
 
       try {
@@ -94,7 +114,7 @@ const EvaluationModal = ({
     return () => {
       cancelled = true;
     };
-  }, [visible, feedback]);
+  }, [visible, feedback, evaluation]);
 
   const wordsCorrect = useMemo(
     () => wordChecks.filter(Boolean).length,
@@ -211,7 +231,7 @@ const EvaluationModal = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {(feedback?.words || []).map((w, i) => (
+                    {(displayWords || []).map((w, i) => (
                       <tr key={i} className="border-t border-[#cedbe8]">
                         <td className="px-4 py-3 text-[#0d141c] text-sm">
                           {w}
@@ -219,10 +239,13 @@ const EvaluationModal = ({
                         <td className="px-4 py-3">
                           <button
                             type="button"
-                            onClick={() =>
-                              setWordChecks((prev) =>
-                                prev.map((v, idx) => (idx === i ? !v : v))
-                              )
+                            onClick={
+                              readOnly
+                                ? undefined
+                                : () =>
+                                    setWordChecks((prev) =>
+                                      prev.map((v, idx) => (idx === i ? !v : v))
+                                    )
                             }
                             className={`flex items-center justify-center h-8 px-4 rounded-xl text-sm font-medium w-full max-w-[200px] ${
                               wordChecks[i]
@@ -239,7 +262,7 @@ const EvaluationModal = ({
                 </table>
               </div>
               <div className="mt-2 text-xs text-slate-500">
-                Correct: {wordsCorrect}/{feedback?.words?.length || 0}
+                Correct: {wordsCorrect}/{displayWords?.length || 0}
               </div>
             </div>
 
@@ -261,7 +284,7 @@ const EvaluationModal = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {(feedback?.sentences || []).map((s, i) => (
+                    {(displaySentences || []).map((s, i) => (
                       <tr key={i} className="border-t border-[#cedbe8]">
                         <td className="px-4 py-3 text-[#0d141c] text-sm">
                           {s}
@@ -269,10 +292,13 @@ const EvaluationModal = ({
                         <td className="px-4 py-3">
                           <button
                             type="button"
-                            onClick={() =>
-                              setSentenceChecks((prev) =>
-                                prev.map((v, idx) => (idx === i ? !v : v))
-                              )
+                            onClick={
+                              readOnly
+                                ? undefined
+                                : () =>
+                                    setSentenceChecks((prev) =>
+                                      prev.map((v, idx) => (idx === i ? !v : v))
+                                    )
                             }
                             className={`flex items-center justify-center h-8 px-4 rounded-xl text-sm font-bold tracking-[0.015em] w-full max-w-[200px] ${
                               sentenceChecks[i]
@@ -289,7 +315,7 @@ const EvaluationModal = ({
                 </table>
               </div>
               <div className="mt-2 text-xs text-slate-500">
-                Correct: {sentencesCorrect}/{feedback?.sentences?.length || 0}
+                Correct: {sentencesCorrect}/{displaySentences?.length || 0}
               </div>
             </div>
 
@@ -302,8 +328,8 @@ const EvaluationModal = ({
                 <p className="text-[#49739c] text-sm">Total Marks</p>
                 <p className="text-[#0d141c] text-sm">
                   {wordsCorrect + sentencesCorrect}/
-                  {(feedback?.words?.length || 0) +
-                    (feedback?.sentences?.length || 0)}
+                  {(displayWords?.length || 0) +
+                    (displaySentences?.length || 0)}
                   <span className="ml-2 text-xs text-slate-500">
                     points: {totalMarks} (word {points?.word ?? WORD_POINT}/ea,
                     sentence {points?.sentence ?? SENTENCE_POINT}/ea)
@@ -321,15 +347,19 @@ const EvaluationModal = ({
               >
                 Cancel
               </button>
-              <button
-                className={`flex items-center justify-center rounded-xl h-10 px-4 text-sm font-bold tracking-[0.015em] text-white ${
-                  saving ? "bg-[#0d80f2]/70 cursor-not-allowed" : "bg-[#0d80f2]"
-                }`}
-                onClick={submit}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save evaluation"}
-              </button>
+              {!readOnly && (
+                <button
+                  className={`flex items-center justify-center rounded-xl h-10 px-4 text-sm font-bold tracking-[0.015em] text-white ${
+                    saving
+                      ? "bg-[#0d80f2]/70 cursor-not-allowed"
+                      : "bg-[#0d80f2]"
+                  }`}
+                  onClick={submit}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save evaluation"}
+                </button>
+              )}
             </div>
           </MotionDiv>
         </MotionDiv>

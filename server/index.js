@@ -942,13 +942,7 @@ async function run() {
 
         const list = await evaluationsColl
           .find(q)
-          .project({
-            feedbackId: 1,
-            senderId: 1,
-            receiverId: 1,
-            totalMarks: 1,
-            createdAt: 1,
-          })
+          .sort({ createdAt: -1 })
           .toArray();
         res.json({ success: true, data: list });
       } catch (err) {
