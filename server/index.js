@@ -913,18 +913,40 @@ async function run() {
 
         const result = await evaluationsColl.insertOne(doc);
 
-        // Optional: increment sender's points on users collection
+        // Increment sender's points and evaluation/session count
         const inc = Number.isFinite(totalMarks) ? Number(totalMarks) : 0;
-        if (inc > 0) {
+        await usersCollections.updateOne(
+          { uid: senderId },
+          { $inc: { points: inc, evaluationsCount: 1 } }
+        );
+
+        // Badge thresholds based on number of evaluations (considered completed sessions)
+        const updatedUser = await usersCollections.findOne(
+          { uid: senderId },
+          { projection: { evaluationsCount: 1, badges: 1 } }
+        );
+
+        const count = updatedUser?.evaluationsCount || 0;
+        const toAdd = [];
+        if (count >= 5) toAdd.push("bronze");
+        if (count >= 20) toAdd.push("silver");
+        if (count >= 50) toAdd.push("gold");
+
+        if (toAdd.length) {
           await usersCollections.updateOne(
             { uid: senderId },
-            { $inc: { points: inc } }
+            { $addToSet: { badges: { $each: toAdd } } }
           );
         }
 
         res
           .status(201)
-          .json({ success: true, id: result.insertedId, data: doc });
+          .json({
+            success: true,
+            id: result.insertedId,
+            data: doc,
+            badgesUnlocked: toAdd || [],
+          });
       } catch (err) {
         console.error("POST /feedbacks/evaluate error:", err);
         res.status(500).json({ success: false, message: err.message });
