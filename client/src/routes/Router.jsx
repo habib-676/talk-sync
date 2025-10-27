@@ -28,6 +28,7 @@ import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
 import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 import Courses from "../pages/dashboard/Courses/Courses";
 import TutorDetails from "../pages/dashboard/Courses/TutorDetails";
+import AIChat from "../pages/AIAgent/AIChat";
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +63,11 @@ export const router = createBrowserRouter([
         path: "/profile/:userId",
         element: <UserProfile></UserProfile>,
       },
+      {
+        path:'aiAgent',
+        Component:AIChat
+
+      }
     ],
   },
   {
