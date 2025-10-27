@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 
 const http = require("http");
 const { Server } = require("socket.io");
+const { queryAgent } = require("./rag/queryGemini");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1932,6 +1933,70 @@ async function run() {
         }
       }
     );
+
+    // AI agent
+// AI Agent Route - This should be placed BEFORE other routes
+    app.post("/agent/chat", async (req, res) => {
+      try {
+        const { question } = req.body || {};
+        if (!question) {
+          return res.status(400).json({ success: false, message: "question required" });
+        }
+
+        if (!process.env.GEMINI_API_KEY) {
+          return res.status(500).json({ 
+            success: false, 
+            message: "GEMINI_API_KEY missing" 
+          });
+        }
+
+        console.log("AI Agent question:", question);
+        const answer = await queryAgent(question);
+        
+        res.json({ success: true, answer });
+      } catch (err) {
+        console.error("AI Agent Error:", err);
+        res.status(500).json({ 
+          success: false, 
+          message: err?.message || "Agent failed" 
+        });
+      }
+    });
+
+    // Test route for AI agent
+    app.get("/agent/test", async (req, res) => {
+      try {
+        if (!process.env.GEMINI_API_KEY) {
+          return res.json({ success: false, message: "No API key configured" });
+        }
+        
+        const { GoogleGenerativeAI } = require("@google/generative-ai");
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        
+        // Test with a simple model
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        
+        const result = await model.generateContent("Say 'Hello from TalkSync AI' in one sentence.");
+        const response = result.response;
+        const text = response.text();
+        
+        res.json({ 
+          success: true, 
+          message: "Gemini API is working!",
+          response: text,
+          model: "gemini-pro"
+        });
+      } catch (err) {
+        console.error("Gemini API test failed:", err);
+        res.status(500).json({ 
+          success: false, 
+          error: err.message,
+          details: "Check your API key and model name"
+        });
+      }
+    });
+
+
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");
