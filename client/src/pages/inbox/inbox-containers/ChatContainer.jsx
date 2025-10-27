@@ -11,11 +11,21 @@ import toast from "react-hot-toast";
 import FeedbackModal from "../../../modals/FeedbackModal";
 
 const STUN_SERVERS = [
-  { urls: "stun:global.xirsys.net" },
   {
-    urls: "turn:global.xirsys.net:3478?transport=udp",
-    username: "habib676",
-    credential: "1c59b192-ab26-11f0-8d44-0242ac140002",
+    urls: ["stun:bn-turn1.xirsys.com"],
+  },
+  {
+    username:
+      "xxPmirUoZbALzFf7UqN3XIl3TvHunmpgFdmVa1lYVGW9F2eQxEKEUut5170vwt-RAAAAAGj-iupoYWJpYjY3Ng==",
+    credential: "3347e7ae-b2ae-11f0-bbed-0242ac140004",
+    urls: [
+      "turn:bn-turn1.xirsys.com:80?transport=udp",
+      "turn:bn-turn1.xirsys.com:3478?transport=udp",
+      "turn:bn-turn1.xirsys.com:80?transport=tcp",
+      "turn:bn-turn1.xirsys.com:3478?transport=tcp",
+      "turns:bn-turn1.xirsys.com:443?transport=tcp",
+      "turns:bn-turn1.xirsys.com:5349?transport=tcp",
+    ],
   },
 ];
 
