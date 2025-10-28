@@ -7,9 +7,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
+
 const http = require("http");
 const { Server } = require("socket.io");
-const { queryAgent } = require("./rag/queryGemini");
+const { queryAgent } = require("./agent/queryGemini");
+const speakingGemini = require("./routes/speaking");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -23,6 +25,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use("/speaking", speakingGemini);
 
 // Create HTTP server
 const server = http.createServer(app);
