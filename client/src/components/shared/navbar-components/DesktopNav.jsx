@@ -23,7 +23,7 @@ const DesktopNav = ({ user }) => {
           <NavLink
             className={({ isActive }) =>
               `px-6 py-2 ${
-                isActive ? "bg-accent/10 text-accent" : "bg-none text-accent"
+                isActive ? "bg-blue-200 rounded-3xl " : "bg-none "
               } transition-colors duration-300 text-lg font-medium`
             }
             to={to}

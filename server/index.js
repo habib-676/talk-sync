@@ -75,6 +75,10 @@ async function run() {
     const wordsCollections = database.collection("words");
     const tutorsCollections = database.collection("tutors");
 
+    // all Quizze.........
+    const allquies = database.collection('quizzes');
+    const quizResult = database.collection('quizResults')
+
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -828,15 +832,15 @@ async function run() {
 
         const wordsArr = Array.isArray(words)
           ? words
-              .map((w) => (typeof w === "string" ? w.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 10)
+            .map((w) => (typeof w === "string" ? w.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 10)
           : [];
         const sentencesArr = Array.isArray(sentences)
           ? sentences
-              .map((s) => (typeof s === "string" ? s.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 5)
+            .map((s) => (typeof s === "string" ? s.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 5)
           : [];
 
         const doc = {
@@ -1057,8 +1061,8 @@ async function run() {
         const learning = Array.isArray(user.learning_language)
           ? user.learning_language
           : user.learning_language
-          ? [user.learning_language]
-          : [];
+            ? [user.learning_language]
+            : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
@@ -1645,8 +1649,8 @@ async function run() {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-              ? messagesCollections
-              : sessionsCollections;
+                ? messagesCollections
+                : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1797,6 +1801,73 @@ async function run() {
       }
     );
 
+    // all quizzes realedted here ....
+
+    // addmin add the quizzes
+    app.post("/admin/quizzes", async (req, res) => {
+      const result = await allquies.insertOne(req.body);
+      res.send(result);
+    });
+
+    // get the all quizzes for user ....
+    app.get("/quizzes", async (req, res) => {
+      const result = await allquies.find().toArray();
+      res.send(result);
+    });
+
+    // addmin manage about quizzes.....
+    app.delete("/quizzes/:id", async (req, res) => {
+      const result = await allquies.deleteOne({ _id: new ObjectId(req.params.id) });
+      res.send(result);
+    });
+
+    //  POST quiz results......
+    app.post("/quizResults", async (req, res) => {
+      try {
+        const result = req.body;
+
+        if (!result.email || !result.totalQuestions) {
+          return res.status(400).send({ error: "Missing required fields" });
+        }
+
+        result.createdAt = new Date();
+
+        const save = await quizResult.insertOne(result);
+        res.send({ success: true, message: "Result saved", id: save.insertedId });
+      } catch (error) {
+        console.error("❌ Error saving result:", error);
+        res.status(500).send({ error: "Failed to save quiz result" });
+      }
+    });
+
+    //  Get quiz result by email for user......
+    app.get("/quizResults/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const result = await quizResult.findOne({ email });
+
+        if (!result) {
+          return res.status(404).json({ success: false, message: "No result found" });
+        }
+
+        res.json({ success: true, data: result });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+
+    //  Get all quiz results (optional for admin)
+    app.get("/quizResults", async (req, res) => {
+      try {
+        const results = await quizResult.find().toArray();
+        res.json({ success: true, data: results });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+
     // announcements
 
     try {
@@ -1822,8 +1893,8 @@ async function run() {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-        ? false
-        : v;
+          ? false
+          : v;
 
     app.get(
       "/admin/announcements",

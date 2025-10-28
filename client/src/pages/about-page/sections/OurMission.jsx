@@ -21,7 +21,7 @@ const OurMission = () => {
   return (
     <section className="bg-base-100 py-12">
       <div className="maximum-w mx-auto px-4  flex flex-col items-center gap-6 sm:gap-8">
-        <h1 className="text-3xl sm:text-5xl font-bold text-accent">
+        <h1 className="text-3xl sm:text-4xl font-bold ">
           Our Mission
         </h1>
         <p className="text-center max-w-5xl mx-auto text-accent-neutral">

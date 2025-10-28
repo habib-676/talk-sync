@@ -147,10 +147,11 @@ const Reviews = () => {
       variants={containerVariants}
     >
       <motion.h2
-        className="text-4xl font-bold text-center mb-12"
+        className="text-3xl font-bold text-center mb-12"
         variants={headerVariants}
       >
-        What People Say
+        WHAT PEOPLE SAY
+
       </motion.h2>
 
       <motion.div
