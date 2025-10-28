@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 
 const http = require("http");
 const { Server } = require("socket.io");
+const { AccessToken, RoomGrant } = require("livekit-server-sdk");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -77,8 +78,8 @@ async function run() {
     const tutorsCollections = database.collection("tutors");
 
     // all Quizze.........
-    const allquies = database.collection('quizzes');
-    const quizResult = database.collection('quizResults')
+    const allquies = database.collection("quizzes");
+    const quizResult = database.collection("quizResults");
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -252,41 +253,41 @@ async function run() {
     });
 
     // ✅ Get all speaking levels
-app.get("/speakingPhrases", async (req, res) => {
-  try {
-    const result = await speakingCollections.findOne({});
-    res.send(result);
-  } catch (error) {
-    console.error("Error fetching speaking phrases:", error);
-    res.status(500).send({ message: "Failed to fetch speaking phrases" });
-  }
-});
-// ✅ GET SINGLE PHRASE BY ID
-app.get("/speakingPhrases/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const query = { _id: new ObjectId(id) };
-    const result = await speakingCollections.findOne(query);
-    if (!result) {
-      return res.status(404).send({ message: "Phrase not found" });
-    }
-    res.send(result);
-  } catch (error) {
-    console.error("Error fetching single phrase:", error);
-    res.status(500).send({ message: "Failed to fetch phrase" });
-  }
-});
-// ✅ POST NEW PHRASES DATA
-app.post("/speakingPhrases", async (req, res) => {
-  try {
-    const newData = req.body;
-    const result = await speakingCollections.insertOne(newData);
-    res.send(result);
-  } catch (error) {
-    console.error("Error adding new phrase:", error);
-    res.status(500).send({ message: "Failed to add phrase" });
-  }
-});
+    app.get("/speakingPhrases", async (req, res) => {
+      try {
+        const result = await speakingCollections.findOne({});
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching speaking phrases:", error);
+        res.status(500).send({ message: "Failed to fetch speaking phrases" });
+      }
+    });
+    // ✅ GET SINGLE PHRASE BY ID
+    app.get("/speakingPhrases/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await speakingCollections.findOne(query);
+        if (!result) {
+          return res.status(404).send({ message: "Phrase not found" });
+        }
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching single phrase:", error);
+        res.status(500).send({ message: "Failed to fetch phrase" });
+      }
+    });
+    // ✅ POST NEW PHRASES DATA
+    app.post("/speakingPhrases", async (req, res) => {
+      try {
+        const newData = req.body;
+        const result = await speakingCollections.insertOne(newData);
+        res.send(result);
+      } catch (error) {
+        console.error("Error adding new phrase:", error);
+        res.status(500).send({ message: "Failed to add phrase" });
+      }
+    });
     //  Learner dashboard route
     app.get("/dashboard/learner", verifyToken, async (req, res) => {
       res.send({ message: "Welcome Learner Dashboard!" });
@@ -299,6 +300,51 @@ app.post("/speakingPhrases", async (req, res) => {
 
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
+    });
+
+    // LiveKit access token endpoint
+    // GET /livekit/token?room=roomName&identity=userUid&name=Display+Name
+    app.get("/livekit/token", async (req, res) => {
+      try {
+        const url = process.env.LIVEKIT_URL; // e.g. wss://your.livekit.cloud
+        const apiKey = process.env.LIVEKIT_API_KEY;
+        const apiSecret = process.env.LIVEKIT_API_SECRET;
+
+        if (!url || !apiKey || !apiSecret) {
+          return res.status(500).json({ message: "LiveKit not configured" });
+        }
+
+        const room = (req.query.room || "").trim();
+        const identity = (req.query.identity || "").trim();
+        const name = (req.query.name || identity || "").toString();
+
+        if (!room || !identity) {
+          return res
+            .status(400)
+            .json({ message: "Missing room or identity for token" });
+        }
+
+        const at = new AccessToken(apiKey, apiSecret, {
+          identity,
+          name,
+          ttl: 60 * 60, // 1 hour
+        });
+
+        // Add grant using plain object (compatible with SDK v2)
+        at.addGrant({
+          room,
+          roomJoin: true,
+          canPublish: true,
+          canSubscribe: true,
+          canPublishData: true,
+        });
+
+        const token = await at.toJwt();
+        res.json({ url, token });
+      } catch (err) {
+        console.error("/livekit/token error", err);
+        res.status(500).json({ message: "Failed to create token" });
+      }
     });
 
     // socket.io
@@ -868,15 +914,15 @@ app.post("/speakingPhrases", async (req, res) => {
 
         const wordsArr = Array.isArray(words)
           ? words
-            .map((w) => (typeof w === "string" ? w.trim() : ""))
-            .filter(Boolean)
-            .slice(0, 10)
+              .map((w) => (typeof w === "string" ? w.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 10)
           : [];
         const sentencesArr = Array.isArray(sentences)
           ? sentences
-            .map((s) => (typeof s === "string" ? s.trim() : ""))
-            .filter(Boolean)
-            .slice(0, 5)
+              .map((s) => (typeof s === "string" ? s.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 5)
           : [];
 
         const doc = {
@@ -979,14 +1025,12 @@ app.post("/speakingPhrases", async (req, res) => {
           );
         }
 
-        res
-          .status(201)
-          .json({
-            success: true,
-            id: result.insertedId,
-            data: doc,
-            badgesUnlocked: toAdd || [],
-          });
+        res.status(201).json({
+          success: true,
+          id: result.insertedId,
+          data: doc,
+          badgesUnlocked: toAdd || [],
+        });
       } catch (err) {
         console.error("POST /feedbacks/evaluate error:", err);
         res.status(500).json({ success: false, message: err.message });
@@ -1097,8 +1141,8 @@ app.post("/speakingPhrases", async (req, res) => {
         const learning = Array.isArray(user.learning_language)
           ? user.learning_language
           : user.learning_language
-            ? [user.learning_language]
-            : [];
+          ? [user.learning_language]
+          : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
@@ -1685,8 +1729,8 @@ app.post("/speakingPhrases", async (req, res) => {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-                ? messagesCollections
-                : sessionsCollections;
+              ? messagesCollections
+              : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1853,7 +1897,9 @@ app.post("/speakingPhrases", async (req, res) => {
 
     // addmin manage about quizzes.....
     app.delete("/quizzes/:id", async (req, res) => {
-      const result = await allquies.deleteOne({ _id: new ObjectId(req.params.id) });
+      const result = await allquies.deleteOne({
+        _id: new ObjectId(req.params.id),
+      });
       res.send(result);
     });
 
@@ -1869,7 +1915,11 @@ app.post("/speakingPhrases", async (req, res) => {
         result.createdAt = new Date();
 
         const save = await quizResult.insertOne(result);
-        res.send({ success: true, message: "Result saved", id: save.insertedId });
+        res.send({
+          success: true,
+          message: "Result saved",
+          id: save.insertedId,
+        });
       } catch (error) {
         console.error("❌ Error saving result:", error);
         res.status(500).send({ error: "Failed to save quiz result" });
@@ -1883,7 +1933,9 @@ app.post("/speakingPhrases", async (req, res) => {
         const result = await quizResult.findOne({ email });
 
         if (!result) {
-          return res.status(404).json({ success: false, message: "No result found" });
+          return res
+            .status(404)
+            .json({ success: false, message: "No result found" });
         }
 
         res.json({ success: true, data: result });
@@ -1891,7 +1943,6 @@ app.post("/speakingPhrases", async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
       }
     });
-
 
     //  Get all quiz results (optional for admin)
     app.get("/quizResults", async (req, res) => {
@@ -1902,7 +1953,6 @@ app.post("/speakingPhrases", async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
       }
     });
-
 
     // announcements
 
@@ -1929,8 +1979,8 @@ app.post("/speakingPhrases", async (req, res) => {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-          ? false
-          : v;
+        ? false
+        : v;
 
     app.get(
       "/admin/announcements",

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Room, RoomEvent, Track, createLocalTracks } from "livekit-client";
 import { RxAvatar } from "react-icons/rx";
 import { IoIosSend, IoMdPhotos } from "react-icons/io";
 import { RiInformationLine } from "react-icons/ri";
@@ -9,25 +10,6 @@ import { formatMessageTime, markConversationSeen } from "../../../lib/utils";
 import useAuth from "../../../hooks/useAuth";
 import toast from "react-hot-toast";
 import FeedbackModal from "../../../modals/FeedbackModal";
-
-const STUN_SERVERS = [
-  {
-    urls: ["stun:bn-turn1.xirsys.com"],
-  },
-  {
-    username:
-      "xxPmirUoZbALzFf7UqN3XIl3TvHunmpgFdmVa1lYVGW9F2eQxEKEUut5170vwt-RAAAAAGj-iupoYWJpYjY3Ng==",
-    credential: "3347e7ae-b2ae-11f0-bbed-0242ac140004",
-    urls: [
-      "turn:bn-turn1.xirsys.com:80?transport=udp",
-      "turn:bn-turn1.xirsys.com:3478?transport=udp",
-      "turn:bn-turn1.xirsys.com:80?transport=tcp",
-      "turn:bn-turn1.xirsys.com:3478?transport=tcp",
-      "turns:bn-turn1.xirsys.com:443?transport=tcp",
-      "turns:bn-turn1.xirsys.com:5349?transport=tcp",
-    ],
-  },
-];
 
 const CallModal = ({
   visible,
@@ -146,9 +128,14 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
   const [text, setText] = useState(""); // message input text
   const [sending, setSending] = useState(false);
 
-  // --- Call related refs & state ---
-  const pcRef = useRef(null);
-  const localStreamRef = useRef(null);
+  // --- Call related refs & state (LiveKit) ---
+  const lkRoomRef = useRef(null); // LiveKit Room instance
+  const localTracksRef = useRef([]); // array of LocalTracks
+  const remoteVideoTrackRef = useRef(null); // last remote video track for detach
+  const remoteAudioTrackRef = useRef(null); // last remote audio track for detach
+  const roomNameRef = useRef(null); // current room name
+
+  const localStreamRef = useRef(null); // only for local preview convenience
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const otherUserIdRef = useRef(null);
@@ -239,7 +226,8 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
 
     // incoming call from another user
     const incomingCallHandler = (data) => {
-      // data: { from, name, signal }
+      // data (legacy/custom): { from, name, signal }
+      // Here signal will carry LiveKit room info instead of SDP
       console.log("incomingCall", data);
 
       // If busy, decline automatically
@@ -251,7 +239,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       setIncomingCaller({
         from: data.from,
         name: data.name,
-        signal: data.signal,
+        signal: data.signal, // expected: { type: 'livekit', room: string }
       });
       otherUserIdRef.current = data.from;
       isCallerRef.current = false;
@@ -259,35 +247,11 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       setCallVisible(true);
     };
 
-    // the callee accepted and sent an answer (for caller)
-    const callAcceptedHandler = async (signal) => {
-      console.log("callAccepted -> received answer", signal);
-      try {
-        if (pcRef.current) {
-          await pcRef.current.setRemoteDescription(
-            new RTCSessionDescription(signal)
-          );
-          console.log(
-            "Remote description set (answer). pc.connectionState:",
-            pcRef.current.connectionState
-          );
-          setCallStatusSafe("in-call");
-          setCallVisible(true);
-          // try to play remote video (some browsers require a user gesture, but call was started by click)
-          try {
-            if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
-              await remoteVideoRef.current.play();
-            }
-          } catch (playErr) {
-            console.warn("Remote video play() error:", playErr);
-          }
-        } else {
-          console.warn("callAccepted but pcRef.current is null");
-        }
-      } catch (err) {
-        console.error("Error setting remote description (answer):", err);
-        cleanUpCall();
-      }
+    // the callee accepted (LiveKit flow): simply transition UI to in-call
+    const callAcceptedHandler = async () => {
+      console.log("callAccepted (LiveKit) -> start in-call UI");
+      setCallStatusSafe("in-call");
+      setCallVisible(true);
     };
 
     const callDeclinedHandler = () => {
@@ -297,13 +261,9 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       cleanUpCall();
     };
 
-    const iceCandidateHandler = async (candidate) => {
-      if (!candidate || !pcRef.current) return;
-      try {
-        await pcRef.current.addIceCandidate(candidate);
-      } catch (err) {
-        console.error("Error adding received ICE candidate:", err);
-      }
+    // Not needed in LiveKit flow; kept for compatibility (no-op)
+    const iceCandidateHandler = async () => {
+      // no-op in LiveKit flow
     };
 
     const endCallHandler = () => {
@@ -341,7 +301,155 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ------------------ CALL ACTIONS ------------------
+  // ------------------ CALL ACTIONS (LiveKit) ------------------
+  const getRoomName = () => {
+    // stable generated room for this pair
+    const ids = [user.uid, selectedUser.uid].sort();
+    return `ts_${ids[0]}_${ids[1]}`;
+  };
+
+  const connectLiveKit = async (roomName) => {
+    try {
+      // fetch token from backend
+      const displayName = user.displayName || user.email || user.uid;
+      const tokenRes = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/livekit/token?room=${encodeURIComponent(
+          roomName
+        )}&identity=${encodeURIComponent(user.uid)}&name=${encodeURIComponent(
+          displayName
+        )}`
+      );
+      if (!tokenRes.ok) throw new Error("Failed to get LiveKit token");
+      const { url, token } = await tokenRes.json();
+
+      const room = new Room();
+      lkRoomRef.current = room;
+
+      // subscribe to remote media
+      room.on(RoomEvent.TrackSubscribed, (track) => {
+        if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
+          remoteVideoTrackRef.current = track;
+          track.attach(remoteVideoRef.current);
+        }
+        if (track.kind === Track.Kind.Audio) {
+          remoteAudioTrackRef.current = track;
+          // Attach to an audio element implicitly
+          const audioEl = new Audio();
+          track.attach(audioEl);
+          audioEl.play().catch(() => undefined);
+        }
+      });
+      room.on(RoomEvent.TrackUnsubscribed, (track) => {
+        try {
+          track.detach();
+        } catch (e) {
+          console.debug("Track detach error", e);
+        }
+      });
+      room.on(RoomEvent.Disconnected, () => {
+        console.log("LiveKit room disconnected");
+      });
+
+      // connect to LiveKit first
+      await room.connect(url, token);
+
+      // then create and publish local tracks
+      const localTracks = await createLocalTracks({ audio: true, video: true });
+      localTracksRef.current = localTracks;
+      for (const t of localTracks) {
+        await room.localParticipant.publishTrack(t);
+      }
+
+      // local preview
+      const camTrack = localTracks.find((t) => t.kind === Track.Kind.Video);
+      if (camTrack && localVideoRef.current) {
+        // create a MediaStream for the <video/>
+        const ms = new MediaStream([camTrack.mediaStreamTrack]);
+        localStreamRef.current = ms;
+        localVideoRef.current.srcObject = ms;
+        try {
+          await localVideoRef.current.play();
+        } catch (e) {
+          console.debug("Local video play() error", e);
+        }
+      }
+
+      setCallStatusSafe("in-call");
+      setCallVisible(true);
+    } catch (err) {
+      console.error("LiveKit connect error", err);
+      toast.error("Unable to start call. Check camera/mic permissions.");
+      throw err;
+    }
+  };
+
+  const disconnectLiveKit = async () => {
+    try {
+      // detach remote
+      try {
+        if (remoteVideoTrackRef.current) {
+          remoteVideoTrackRef.current.detach();
+        }
+        if (remoteAudioTrackRef.current) {
+          remoteAudioTrackRef.current.detach();
+        }
+      } catch (e) {
+        console.debug("Remote detach error", e);
+      }
+
+      // stop local preview
+      if (localVideoRef.current) localVideoRef.current.srcObject = null;
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+        localStreamRef.current = null;
+      }
+
+      // unpublish and stop local tracks
+      if (lkRoomRef.current) {
+        try {
+          const room = lkRoomRef.current;
+          const pubs = room?.localParticipant?.tracks;
+          if (pubs && typeof pubs.values === "function") {
+            for (const pub of pubs.values()) {
+              try {
+                if (pub?.track) {
+                  await room.localParticipant.unpublishTrack(pub.track);
+                  try {
+                    pub.track.stop?.();
+                  } catch (e) {
+                    console.debug("Track stop after unpublish error", e);
+                  }
+                }
+              } catch (e) {
+                console.debug("Unpublish track error", e);
+              }
+            }
+          }
+        } catch (e) {
+          console.debug("Error unpublishing tracks", e);
+        }
+        try {
+          lkRoomRef.current.disconnect();
+        } catch (e) {
+          console.debug("Room disconnect error", e);
+        }
+        lkRoomRef.current = null;
+      }
+      for (const t of localTracksRef.current || []) {
+        try {
+          t.stop();
+        } catch (e) {
+          console.debug("Track stop error", e);
+        }
+      }
+      localTracksRef.current = [];
+    } catch (e) {
+      console.warn("disconnectLiveKit error", e);
+    }
+  };
+
   const initiateCall = async () => {
     if (!selectedUser) {
       toast.error("Select a user to call");
@@ -358,153 +466,20 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     setCallVisible(true);
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      localStreamRef.current = stream;
+      const roomName = getRoomName();
+      roomNameRef.current = roomName;
 
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-        try {
-          await localVideoRef.current.play();
-        } catch (e) {
-          console.warn("Local video play() error:", e);
-        }
-      }
-
-      const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
-      pcRef.current = pc;
-
-      // attach local tracks
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-      // remote track handler - robust: handle streams array empty
-      pc.ontrack = (event) => {
-        console.log("pc.ontrack event:", event);
-
-        // prefer event.streams[0] but build fallback stream if needed
-        let remoteStream = null;
-        if (event.streams && event.streams.length > 0) {
-          remoteStream = event.streams[0];
-        } else {
-          remoteStream = new MediaStream();
-          if (event.track) remoteStream.addTrack(event.track);
-        }
-
-        // debug: log tracks info
-        try {
-          console.log("Remote stream tracks:", {
-            audio: remoteStream.getAudioTracks().map((t) => ({
-              id: t.id,
-              enabled: t.enabled,
-              kind: t.kind,
-              label: t.label,
-            })),
-            video: remoteStream.getVideoTracks().map((t) => ({
-              id: t.id,
-              enabled: t.enabled,
-              kind: t.kind,
-              label: t.label,
-            })),
-          });
-        } catch (e) {
-          console.warn("Error logging remote tracks:", e);
-        }
-
-        const videoEl = remoteVideoRef.current;
-        if (!videoEl) return;
-
-        // if same object, nothing to do
-        if (videoEl.srcObject === remoteStream) return;
-
-        // attach stream
-        videoEl.onloadedmetadata = null;
-        videoEl.srcObject = remoteStream;
-
-        // try to play; if blocked, show toast and attach one-time click play fallback
-        const playPromise = videoEl.play();
-        if (playPromise && playPromise.catch) {
-          playPromise.catch((err) => {
-            if (err && err.name === "AbortError") {
-              // spurious/interrupted load — harmless, but try again later
-              console.warn("remote video play aborted:", err);
-              return;
-            }
-            console.warn("remoteVideo play() rejected:", err);
-            toast((t) => (
-              <div>
-                Click the remote video to enable audio/video
-                <button
-                  onClick={() => {
-                    try {
-                      videoEl
-                        .play()
-                        .catch((e) =>
-                          console.error("play after click failed:", e)
-                        );
-                    } catch (e) {
-                      console.error(e);
-                    }
-                    toast.dismiss(t.id);
-                  }}
-                  className="ml-2 underline"
-                >
-                  Enable
-                </button>
-              </div>
-            ));
-
-            // one-time click handler on video to start playback (useful when autoplay blocked)
-            const onUserClick = () => {
-              videoEl
-                .play()
-                .catch((e) => console.error("user-initiated play failed:", e));
-              videoEl.removeEventListener("click", onUserClick);
-            };
-            videoEl.addEventListener("click", onUserClick, { once: true });
-          });
-        }
-      };
-
-      // ICE candidates -> send to callee
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          console.log("Sending local ICE candidate:", event.candidate);
-          socketRef.current.emit("iceCandidate", {
-            to: otherUserIdRef.current,
-            candidate: event.candidate,
-          });
-        } else {
-          console.log("onicecandidate: null (gathering finished)");
-        }
-      };
-
-      // connection state logging for debug
-      pc.onconnectionstatechange = () => {
-        console.log("PC connectionState:", pc.connectionState);
-      };
-      pc.oniceconnectionstatechange = () => {
-        console.log("PC iceConnectionState:", pc.iceConnectionState);
-      };
-      pc.onicegatheringstatechange = () => {
-        console.log("PC iceGatheringState:", pc.iceGatheringState);
-      };
-
-      // create offer
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      // send offer to server to route to callee
+      // notify callee with room info via existing event
       socketRef.current.emit("callUser", {
         userToCall: otherUserIdRef.current,
-        signalData: offer,
+        signalData: { type: "livekit", room: roomName },
         from: user.uid,
         name: user.displayName || user.email || user.uid,
       });
-    } catch (err) {
-      console.error("initiateCall error", err);
-      toast.error("Unable to start call. Check camera/mic permissions.");
+
+      // join LiveKit immediately; callee will join on accept
+      await connectLiveKit(roomName);
+    } catch {
       cleanUpCall();
     }
   };
@@ -514,113 +489,17 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
       const caller = incomingCaller;
       if (!caller) return;
 
-      setCallStatusSafe("in-call");
-      setCallVisible(true);
+      const roomName =
+        caller?.signal?.room || roomNameRef.current || getRoomName();
+      roomNameRef.current = roomName;
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
+      await connectLiveKit(roomName);
+
+      // notify caller to flip UI state
+      socketRef.current.emit("acceptCall", {
+        to: caller.from,
+        signal: { accepted: true },
       });
-
-      localStreamRef.current = stream;
-
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-        try {
-          await localVideoRef.current.play();
-        } catch (e) {
-          console.warn("Local video play() error:", e);
-        }
-      }
-
-      const pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
-      pcRef.current = pc;
-
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-      pc.ontrack = (event) => {
-        console.log("pc.ontrack (callee) event:", event);
-
-        let remoteStream = null;
-        if (event.streams && event.streams.length > 0) {
-          remoteStream = event.streams[0];
-        } else {
-          remoteStream = new MediaStream();
-          if (event.track) remoteStream.addTrack(event.track);
-        }
-
-        try {
-          console.log("Callee remote stream tracks:", {
-            audio: remoteStream
-              .getAudioTracks()
-              .map((t) => ({ id: t.id, enabled: t.enabled, kind: t.kind })),
-            video: remoteStream
-              .getVideoTracks()
-              .map((t) => ({ id: t.id, enabled: t.enabled, kind: t.kind })),
-          });
-        } catch (e) {
-          console.warn("Error logging callee remote tracks:", e);
-        }
-
-        const videoEl = remoteVideoRef.current;
-        if (!videoEl) return;
-        if (videoEl.srcObject === remoteStream) return;
-        videoEl.onloadedmetadata = null;
-        videoEl.srcObject = remoteStream;
-
-        const playPromise = videoEl.play();
-        if (playPromise && playPromise.catch) {
-          playPromise.catch((err) => {
-            if (err && err.name === "AbortError") {
-              console.warn("callee remote video play aborted:", err);
-              return;
-            }
-            console.warn("callee remoteVideo play() rejected:", err);
-            toast("Click remote video to enable audio/video", {
-              duration: 4000,
-            });
-            const onUserClick = () => {
-              videoEl
-                .play()
-                .catch((e) => console.error("user play failed:", e));
-              videoEl.removeEventListener("click", onUserClick);
-            };
-            videoEl.addEventListener("click", onUserClick, { once: true });
-          });
-        }
-      };
-
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          console.log("Callee sending ICE candidate:", event.candidate);
-          socketRef.current.emit("iceCandidate", {
-            to: caller.from,
-            candidate: event.candidate,
-          });
-        } else {
-          console.log("Callee onicecandidate: null");
-        }
-      };
-
-      pc.onconnectionstatechange = () => {
-        console.log("Callee PC connectionState:", pc.connectionState);
-      };
-      pc.oniceconnectionstatechange = () => {
-        console.log("Callee PC iceConnectionState:", pc.iceConnectionState);
-      };
-      pc.onicegatheringstatechange = () => {
-        console.log("Callee PC iceGatheringState:", pc.iceGatheringState);
-      };
-
-      // set caller's offer as remote description
-      await pc.setRemoteDescription(new RTCSessionDescription(caller.signal));
-
-      // create answer and set local description
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      // send answer to caller
-      socketRef.current.emit("acceptCall", { to: caller.from, signal: answer });
     } catch (err) {
       console.error("acceptIncomingCall error", err);
       toast.error("Unable to accept call. Check camera/mic permissions.");
@@ -661,27 +540,8 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     isCallerRef.current = false;
     otherUserIdRef.current = null;
 
-    // close peer connection
-    try {
-      if (pcRef.current) {
-        pcRef.current.ontrack = null;
-        pcRef.current.onicecandidate = null;
-        pcRef.current.close();
-        pcRef.current = null;
-      }
-    } catch (err) {
-      console.warn("pc cleanup error", err);
-    }
-
-    // stop local tracks
-    try {
-      if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach((t) => t.stop());
-        localStreamRef.current = null;
-      }
-    } catch (err) {
-      console.warn("stream cleanup error", err);
-    }
+    // disconnect LiveKit & cleanup
+    disconnectLiveKit();
 
     // clear video elements
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
@@ -756,7 +616,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
           <MdArrowBackIosNew size={18} />
         </button>
         <img
-          src={selectedUser.image || selectedUser.profilePic || ""}
+          src={selectedUser.image || selectedUser.profilePic || null}
           alt=""
           className="w-8 h-8 object-cover rounded-full"
         />
@@ -829,8 +689,8 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
                 <img
                   src={
                     isMe
-                      ? user.photoURL || ""
-                      : selectedUser.image || selectedUser.profilePic || ""
+                      ? user.photoURL || null
+                      : selectedUser.image || selectedUser.profilePic || null
                   }
                   className="w-7 h-7 object-cover rounded-full"
                 />
