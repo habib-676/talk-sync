@@ -63,11 +63,7 @@ export const router = createBrowserRouter([
         path: "/profile/:userId",
         element: <UserProfile></UserProfile>,
       },
-      {
-        path:'aiAgent',
-        Component:AIChat
-
-      }
+      
     ],
   },
   {
@@ -145,6 +141,11 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
+  {
+        path:'aiAgent',
+        Component:AIChat
+
+      },
 
   {
     path: "*",
