@@ -58,7 +58,7 @@ const AdminAllQuizResults = () => {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6"
+      className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 :from-gray-900 :via-gray-800 :to-gray-900 p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.7 }}
@@ -81,7 +81,7 @@ const AdminAllQuizResults = () => {
             placeholder="Search by email, date, % or correct answers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input input-bordered w-full pl-10 bg-white dark:bg-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+            className="input input-bordered w-full pl-10 bg-white :bg-gray-800 :text-gray-200 border-gray-300 :border-gray-600"
           />
         </div>
 
@@ -102,7 +102,7 @@ const AdminAllQuizResults = () => {
       </div>
 
       {/* ✅ Results Table */}
-      <div className="overflow-x-auto rounded-2xl shadow-2xl bg-white/70 dark:bg-gray-800/60 backdrop-blur-md border border-gray-200 dark:border-gray-700">
+      <div className="overflow-x-auto rounded-2xl shadow-2xl bg-white/70 :bg-gray-800/60 backdrop-blur-md border border-gray-200 :border-gray-700">
         <table className="table w-full text-center">
           <thead className="  ">
             <tr>
@@ -123,12 +123,12 @@ const AdminAllQuizResults = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.03 }}
-                  className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200"
+                  className="hover:bg-gray-100 :hover:bg-gray-700/50 transition-all duration-200"
                 >
-                  <td className="font-semibold text-gray-600 dark:text-gray-300">
+                  <td className="font-semibold text-gray-600 :text-gray-300">
                     {index + 1}
                   </td>
-                  <td className="text-indigo-600 dark:text-indigo-400 font-medium">
+                  <td className="text-indigo-600 :text-indigo-400 font-medium">
                     {res.email}
                   </td>
                   <td>{res.totalQuestions}</td>
@@ -148,7 +148,7 @@ const AdminAllQuizResults = () => {
                   >
                     {res.percentage}%
                   </td>
-                  <td className="text-gray-500 dark:text-gray-300">
+                  <td className="text-gray-500 :text-gray-300">
                     {new Date(res.date).toLocaleDateString()} <br />
                     <span className="text-xs text-gray-400">
                       {new Date(res.date).toLocaleTimeString()}
