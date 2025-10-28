@@ -1,0 +1,172 @@
+{
+  "levels": [
+    {
+      "level": "Beginner",
+      "image": "https://i.ibb.co.com/RpgVNmLN/Podcast-audience-rafiki.png",
+      "topics": [
+        {
+          "id": 1,
+          "title": "Daily Greetings",
+          "phrases": ["Hello!", "Good morning!", "How are you?", "Nice to meet you."]
+        },
+        {
+          "id": 2,
+          "title": "Introducing Yourself",
+          "phrases": ["My name is John.", "I am from Japan.", "I am a student.", "I like music."]
+        },
+        {
+          "id": 3,
+          "title": "At the Grocery Store",
+          "phrases": ["Where can I find milk?", "How much is this?", "Do you have eggs?", "Thank you!"]
+        },
+        {
+          "id": 4,
+          "title": "Talking About Family",
+          "phrases": ["I have two brothers.", "My mother is a teacher.", "I love my family.", "We live together."]
+        },
+        {
+          "id": 5,
+          "title": "Ordering Food",
+          "phrases": ["I’d like a sandwich, please.", "Can I have some water?", "This looks delicious.", "The food is very good!"]
+        },
+        {
+          "id": 6,
+          "title": "Asking for Directions",
+          "phrases": ["Excuse me, where is the bus stop?", "Go straight and turn left.", "Is it far?", "Thank you for your help."]
+        },
+        {
+          "id": 7,
+          "title": "Talking About the Weather",
+          "phrases": ["It’s sunny today.", "It’s raining outside.", "I like cold weather.", "It’s very hot!"]
+        },
+        {
+          "id": 8,
+          "title": "At School",
+          "phrases": ["What’s your favorite subject?", "I like English.", "Our teacher is kind.", "Let’s start the lesson."]
+        },
+        {
+          "id": 9,
+          "title": "Talking About Hobbies",
+          "phrases": ["I like reading books.", "I enjoy playing football.", "My hobby is painting.", "I watch movies in my free time."]
+        },
+        {
+          "id": 10,
+          "title": "At the Park",
+          "phrases": ["Let’s go for a walk.", "The flowers are beautiful.", "Children are playing.", "It’s a nice day."]
+        }
+      ]
+    },
+    {
+      "level": "Intermediate",
+      "image": "https://i.ibb.co.com/rRdGwLkS/Podcast-audience-bro.png",
+      "topics": [
+        {
+          "id": 11,
+          "title": "Restaurant Conversation",
+          "phrases": ["Can I have the menu?", "I’d like a glass of water.", "The food tastes great!", "Could we have the bill, please?"]
+        },
+        {
+          "id": 12,
+          "title": "Making Small Talk",
+          "phrases": ["What do you do for work?", "That sounds interesting!", "I’ve been busy lately.", "How was your weekend?"]
+        },
+        {
+          "id": 13,
+          "title": "At the Airport",
+          "phrases": ["Where is the check-in counter?", "What time does the flight leave?", "Please show your passport.", "Have a safe flight!"]
+        },
+        {
+          "id": 14,
+          "title": "Shopping Conversation",
+          "phrases": ["Can I try this on?", "Do you have this in a larger size?", "It’s too expensive.", "I’ll take it."]
+        },
+        {
+          "id": 15,
+          "title": "Talking About Travel",
+          "phrases": ["I visited Paris last year.", "I love exploring new places.", "We stayed at a nice hotel.", "The view was amazing."]
+        },
+        {
+          "id": 16,
+          "title": "At the Doctor’s Office",
+          "phrases": ["I have a headache.", "How long have you been sick?", "Take this medicine twice a day.", "You should get some rest."]
+        },
+        {
+          "id": 17,
+          "title": "Talking About Technology",
+          "phrases": ["I use my phone for studying.", "Social media is popular now.", "I prefer Android over iPhone.", "The internet is very useful."]
+        },
+        {
+          "id": 18,
+          "title": "Job Discussion",
+          "phrases": ["What do you do for a living?", "I work as a designer.", "I love my job.", "I’m looking for a new opportunity."]
+        },
+        {
+          "id": 19,
+          "title": "Talking About Future Plans",
+          "phrases": ["I’m planning to study abroad.", "Next week, I’ll visit my friend.", "I want to learn a new language.", "My dream is to travel the world."]
+        },
+        {
+          "id": 20,
+          "title": "Social Media Chat",
+          "phrases": ["Did you see my new post?", "That photo looks great!", "I follow you on Instagram.", "Let’s take a selfie."]
+        }
+      ]
+    },
+    {
+      "level": "Advanced",
+      "image": "https://i.ibb.co.com/VcMDStnD/Podcast-audience-pana.png",
+      "topics": [
+        {
+          "id": 21,
+          "title": "Job Interview",
+          "phrases": ["Tell me about yourself.", "What are your strengths?", "Why should we hire you?", "Where do you see yourself in five years?"]
+        },
+        {
+          "id": 22,
+          "title": "Discussing Global Issues",
+          "phrases": ["Climate change is a major concern.", "We need to reduce pollution.", "Technology affects our daily life.", "Education should be accessible to everyone."]
+        },
+        {
+          "id": 23,
+          "title": "Public Speaking Practice",
+          "phrases": ["Good morning everyone.", "Today, I’ll talk about leadership.", "Thank you for listening.", "Any questions?"]
+        },
+        {
+          "id": 24,
+          "title": "Negotiation Skills",
+          "phrases": ["Let’s reach a fair agreement.", "Can we lower the price?", "That sounds reasonable.", "We have a deal."]
+        },
+        {
+          "id": 25,
+          "title": "Giving Presentations",
+          "phrases": ["Let’s begin with an overview.", "Here are the main points.", "In conclusion, we achieved great success.", "Thank you for your attention."]
+        },
+        {
+          "id": 26,
+          "title": "Talking About Economy",
+          "phrases": ["The inflation rate is increasing.", "Many people are investing in startups.", "The market is unstable right now.", "Economic growth depends on innovation."]
+        },
+        {
+          "id": 27,
+          "title": "Debating Opinions",
+          "phrases": ["I completely disagree with that.", "That’s an interesting perspective.", "Can you explain your point?", "Let’s agree to disagree."]
+        },
+        {
+          "id": 28,
+          "title": "Discussing Books and Movies",
+          "phrases": ["The story was very inspiring.", "The movie had great visuals.", "I prefer reading non-fiction.", "The ending was unexpected."]
+        },
+        {
+          "id": 29,
+          "title": "Leadership and Motivation",
+          "phrases": ["A good leader inspires others.", "Motivation drives success.", "Teamwork is essential.", "Never give up on your goals."]
+        },
+        {
+          "id": 30,
+          "title": "Current Events Discussion",
+          "phrases": ["The world is changing rapidly.", "Technology connects people globally.", "We should stay informed about global news.", "It’s important to think critically."]
+        }
+      ]
+    }
+  ]
+}

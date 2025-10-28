@@ -8,8 +8,12 @@ import {
   FaWhatsapp,
   FaLinkedin,
   FaTwitter,
+  FaClock,
+  FaSun,
+  FaMoon,
 } from "react-icons/fa";
 import { useParams } from "react-router";
+import { toast } from "react-hot-toast";
 
 const TutorDetails = () => {
   const { id } = useParams();
@@ -31,6 +35,7 @@ const TutorDetails = () => {
       </p>
     );
   }
+
   return (
     <div className="max-w-6xl mx-auto py-12 px-4 grid md:grid-cols-[2.1fr_0.9fr] gap-10">
       {/* LEFT SIDE — Tutor Info */}
@@ -43,12 +48,20 @@ const TutorDetails = () => {
           />
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-3xl font-extrabold text-gray-900">{tutor.name}</h2>
-              <img src={tutor.flag} alt="flag" className="w-6 h-4 rounded-sm shadow-sm" />
+              <h2 className="text-3xl font-extrabold text-gray-900">
+                {tutor.name}
+              </h2>
+              <img
+                src={tutor.flag}
+                alt="flag"
+                className="w-6 h-4 rounded-sm shadow-sm"
+              />
             </div>
             <p className="text-gray-500 text-sm mt-1">
               {tutor.type} |{" "}
-              <span className="font-semibold text-blue-600">{tutor.badge}</span>
+              <span className="font-semibold text-blue-600">
+                {tutor.badge}
+              </span>
             </p>
             <p className="text-sm text-gray-400 mt-1">
               Experience: {tutor.experience}+ Years
@@ -67,7 +80,9 @@ const TutorDetails = () => {
 
         {/* Feedback */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">Student Feedback</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            Student Feedback
+          </h2>
           <div className="flex flex-wrap gap-5 text-sm mt-3">
             <div className="flex items-center gap-1 text-yellow-500 font-medium">
               <FaStar /> {tutor.rating} ({tutor.reviews} reviews)
@@ -84,7 +99,9 @@ const TutorDetails = () => {
         {/* Speaks */}
         {tutor.speaks && (
           <div>
-            <h3 className="font-semibold mt-6 mb-2 text-gray-800 text-lg">Speaks:</h3>
+            <h3 className="font-semibold mt-6 mb-2 text-gray-800 text-lg">
+              Speaks:
+            </h3>
             <div className="flex flex-wrap gap-2">
               {tutor.speaks.map((lang, i) => (
                 <span
@@ -135,6 +152,19 @@ const TutorDetails = () => {
           ></iframe>
         </div>
 
+        {/* Unique About Video Section */}
+        <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 text-center shadow-inner">
+          <h3 className="text-lg font-semibold text-blue-700 mb-2">
+            About This Video 🎥
+          </h3>
+          <p className="text-gray-700 text-sm leading-relaxed">
+            Experience how <span className="font-semibold">{tutor.name}</span>{" "}
+            helps learners speak confidently with real-world examples, fun
+            lessons, and personalized techniques that make learning enjoyable
+            and practical.
+          </p>
+        </div>
+
         {/* Buttons */}
         <button
           onClick={() => setShowTrialModal(true)}
@@ -149,23 +179,20 @@ const TutorDetails = () => {
         >
           <FaEnvelope className="inline-block mr-2" /> Share Tutor
         </button>
-
-        <button className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold rounded-2xl shadow-md hover:scale-[1.02] transition-all duration-300">
-          <FaHeart className="inline-block mr-2" /> Save to My List
-        </button>
       </div>
 
       {/* ===== MODALS ===== */}
       {/* TRIAL MODAL */}
       {showTrialModal && (
-        <div className="fixed inset-0 bg-gradient-to-br from-black/70 via-blue-900/60 to-purple-900/60 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white/90 backdrop-blur-lg rounded-3xl w-[90%] md:w-[420px] p-8 shadow-2xl relative border border-blue-100 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-[90%] md:w-[420px] p-8 shadow-2xl relative border border-blue-100">
             <button
               onClick={() => setShowTrialModal(false)}
               className="absolute top-4 right-5 text-gray-500 hover:text-red-500 text-lg"
             >
               ✕
             </button>
+
             <h2 className="text-2xl font-bold mb-3 text-center text-blue-800">
               Book a Trial Lesson
             </h2>
@@ -173,56 +200,76 @@ const TutorDetails = () => {
               Select your preferred duration and time slot
             </p>
 
+            {/* Duration Buttons */}
             <div className="flex justify-center gap-4 mb-5">
               <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium shadow">
-                25 mins
+                <FaClock className="inline-block mr-2" /> 25 mins
               </button>
               <button className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100">
-                50 mins
+                <FaClock className="inline-block mr-2" /> 50 mins
               </button>
             </div>
 
-            <h3 className="font-semibold text-gray-800 mb-2 text-center">
-              Available Slots
-            </h3>
-            <div className="grid grid-cols-3 gap-3 text-sm text-center">
-              {[
-                "11:30 AM",
-                "12:00 PM",
-                "1:30 PM",
-                "2:30 PM",
-                "3:00 PM",
-                "7:00 PM",
-                "8:00 PM",
-                "9:00 PM",
-              ].map((time) => (
-                <button
-                  key={time}
-                  className="border border-gray-300 hover:bg-blue-50 text-gray-700 font-medium rounded-xl py-2 transition-all"
-                >
-                  {time}
-                </button>
-              ))}
+            {/* Available Slots */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-2 text-center">
+                  <FaSun className="inline-block mr-2 text-yellow-500" />
+                  Afternoon
+                </h3>
+                <div className="grid grid-cols-3 gap-3 text-sm text-center">
+                  {["12:00 PM", "1:30 PM", "2:30 PM"].map((time) => (
+                    <button
+                      key={time}
+                      className="border border-gray-300 hover:bg-blue-50 text-gray-700 font-medium rounded-xl py-2 transition-all"
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-2 text-center">
+                  <FaMoon className="inline-block mr-2 text-indigo-500" />
+                  Evening
+                </h3>
+                <div className="grid grid-cols-3 gap-3 text-sm text-center">
+                  {["7:00 PM", "8:00 PM", "9:00 PM"].map((time) => (
+                    <button
+                      key={time}
+                      className="border border-gray-300 hover:bg-blue-50 text-gray-700 font-medium rounded-xl py-2 transition-all"
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <button className="w-full mt-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium shadow hover:shadow-lg transition-all">
+            <button
+              onClick={() => {
+                toast.success("Trial lesson booked successfully!");
+                setShowTrialModal(false);
+              }}
+              className="w-full mt-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium shadow hover:shadow-lg transition-all"
+            >
               Continue
             </button>
           </div>
         </div>
       )}
 
-      {/* SHARE MODAL */}
+      {/* SHARE MODAL — unchanged */}
       {showShareModal && (
-        <div className="fixed inset-0 bg-gradient-to-br from-black/70 via-indigo-900/60 to-blue-900/60 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white/90 backdrop-blur-lg rounded-3xl w-[90%] md:w-[450px] p-8 shadow-2xl relative border border-indigo-100 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-[90%] md:w-[450px] p-8 shadow-2xl relative border border-indigo-100">
             <button
               onClick={() => setShowShareModal(false)}
               className="absolute top-4 right-5 text-gray-500 hover:text-red-500 text-lg"
             >
               ✕
             </button>
-
             <h2 className="text-2xl font-bold mb-5 text-gray-800 text-center">
               Share this Tutor
             </h2>
@@ -241,7 +288,9 @@ const TutorDetails = () => {
                       alt="flag"
                       className="w-5 h-4 rounded-sm border border-gray-300"
                     />
-                    <p className="font-semibold text-gray-800">{tutor.name}</p>
+                    <p className="font-semibold text-gray-800">
+                      {tutor.name}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1 text-sm text-yellow-500">
                     <FaStar />{" "}
@@ -257,7 +306,6 @@ const TutorDetails = () => {
               </span>
             </div>
 
-            {/* Copy Link */}
             <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-xl mb-5 border border-gray-200">
               <input
                 type="text"
@@ -281,7 +329,6 @@ const TutorDetails = () => {
               </button>
             </div>
 
-            {/* Share Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <button className="flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium py-2 rounded-xl transition-all">
                 <FaEnvelope /> Email
@@ -302,5 +349,4 @@ const TutorDetails = () => {
     </div>
   );
 };
-
 export default TutorDetails;

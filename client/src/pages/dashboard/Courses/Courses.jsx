@@ -3,6 +3,7 @@ import { BookOpen, ChevronDown, ArrowRightCircle } from "lucide-react";
 import IntroCourse from "./IntroCourse";
 import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
+import PopularLanguages from "./PopularLanguages";
 
 const Courses = () => {
   const [activeTab, setActiveTab] = useState("learn");
@@ -53,13 +54,14 @@ const Courses = () => {
     setActiveTab("courses");
   };
 
-  const handleLearnMore = (tutor) => {
-    navigate(`/dashboard/tutor/${tutor.id}`);
-  };
+  // const handleLearnMore = (tutor) => {
+  //   navigate(`/dashboard/tutor/${tutor.id}`);
+  // };
 
   return (
     <div>
       <IntroCourse />
+       <PopularLanguages></PopularLanguages>
 
       <div className="p-6 lg:p-10">
         {/* Tabs */}
@@ -239,6 +241,8 @@ const Courses = () => {
           )}
         </div>
       </div>
+
+     
     </div> 
   );
 };

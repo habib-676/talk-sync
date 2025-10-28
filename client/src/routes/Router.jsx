@@ -28,6 +28,7 @@ import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
 import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 import Courses from "../pages/dashboard/Courses/Courses";
 import TutorDetails from "../pages/dashboard/Courses/TutorDetails";
+import PracticeExercise from "../pages/ProfilePage/ScheduleSession/PracticeExercise";
 
 export const router = createBrowserRouter([
   {
@@ -57,6 +58,11 @@ export const router = createBrowserRouter([
       {
         path: "/schedule",
         Component: ScheduleSession,
+      },
+      {
+         path: "/practice/:phrase", 
+         Component: PracticeExercise,
+
       },
       {
         path: "/profile/:userId",

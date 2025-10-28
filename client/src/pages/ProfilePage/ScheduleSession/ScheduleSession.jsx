@@ -1,31 +1,22 @@
 import { useEffect, useState } from "react";
-import { FaBookOpen, FaComments, FaGlobe, FaFont } from "react-icons/fa";
+import { FaBookOpen, FaComments, FaGlobe, FaFont,FaArrowLeft } from "react-icons/fa";
 import DailyChallenge from "./DailyChallenge";
 import SpeakingModal from "./SpeakingModal";
 import LearningTips from "./LearningTips";
+import { useNavigate } from "react-router";
 
 const ScheduleSession = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [wordsData, setWordsData] = useState([]);
   const [readingData, setReadingData] = useState([]);
+  const [speakingData, setSpeakingData] = useState([]);
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // ✅ Fetch JSON data from public folder
-
-  // useEffect(() => {
-  //   fetch("/wordsData.json")
-  //     .then((res) => res.json())
-  //     .then((data) => setWordsData(data))
-  //     .catch((err) => console.error("Failed to load words JSON", err));
-
-  //   // fetch("/readingData.json")
-  //   //   .then((res) => res.json())
-  //   //   .then((data) => setReadingData(data))
-  //   //   .catch((err) => console.error("Failed to load reading JSON", err));
-  // }, []);
+// speaking flow states
+const navigate = useNavigate();
 
   // Read
   useEffect(() => {
@@ -41,6 +32,26 @@ const ScheduleSession = () => {
       .then((data) => setWordsData(data))
       .catch((err) => console.error("Failed to load words from backend", err));
   }, []);
+
+  // From public folder
+//   useEffect(() => {
+//   fetch("/speakingPhrases.json")
+//     .then(res => res.json())
+//     .then(data => setSpeakingData(data.levels));
+// }, []);
+
+
+useEffect(() => {
+  fetch(`${import.meta.env.VITE_API_URL}/speakingPhrases`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data?.levels) {
+        setSpeakingData(data.levels); // directly store levels array
+      }
+    })
+    .catch((err) => console.error("Error fetching speaking data:", err));
+}, []);
+
 
   // ✅ Reset selections when switching tabs
   const resetSelections = () => {
@@ -59,6 +70,15 @@ const ScheduleSession = () => {
 
   return (
     <div className="mt-20 min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-10 px-5 md:px-20">
+
+ {/* ✅ Go Back Button */}
+      <button
+onClick={() => navigate("/dashboard/courses")}
+   className="flex items-center gap-2 mb-8 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-all shadow-sm hover:shadow-md font-semibold"
+ >
+   <FaArrowLeft className="text-indigo-600" /> Back to Courses
+</button>
+
       {/* Header Section */}
       <section className="text-center mb-12">
         <h1 className="text-3xl md:text-4xl font-bold text-indigo-700 mb-3">
@@ -114,16 +134,76 @@ const ScheduleSession = () => {
             </p>
           </>
         )}
-        {activeTab === "speaking" && (
-          <>
+       {activeTab === "speaking" && (
+
+  <div className="col-span-full shadow-lg p-8">
+ <>
             <h2 className="text-3xl font-bold text-indigo-700">
-              Speak English with Confidence 🎤
+             Speak English Like a Pro
             </h2>
             <p className="text-gray-600 mt-2">
-              Practice real conversations, express naturally, and sound fluent!
+             Practice conversations and pronunciation to boost your fluency and confidence.
             </p>
           </>
-        )}
+
+  {!selectedLevel && (
+  <div className="grid md:grid-cols-3 gap-6">
+    {speakingData.map((level) => (
+  <div
+    key={level.level}
+    onClick={() => setSelectedLevel(level)}
+    className="cursor-pointer bg-white rounded-xl p-6 text-center hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-indigo-300"
+  >
+    <img
+      src={level.image}
+      alt={level.level}
+      className="w-full h-40 object-contain rounded-lg mb-4"
+    />
+    <h3 className="text-2xl font-bold text-indigo-700 mb-2">{level.level}</h3>
+    <p className="text-gray-600">Click to explore dialogues</p>
+  </div>
+))}
+
+
+  </div>
+)}
+    {selectedLevel && (
+      <div>
+        <button
+          onClick={() => setSelectedLevel(null)}
+          className="text-indigo-600 underline mb-5"
+        >
+          ← Back to Levels
+        </button>
+        <div className="grid md:grid-cols-3 gap-4">
+
+          {selectedLevel?.topics?.map((topic) => (
+  <div key={topic.id} className="bg-gray-50 rounded-lg p-5 shadow hover:shadow-md">
+    <h4 className="font-bold text-lg text-indigo-700 mb-3">{topic.title}</h4>
+    <div className="flex gap-2">
+
+   <button
+   onClick={() =>
+     navigate(`/practice/${encodeURIComponent(topic.title)}`, {
+       state: {
+         phrases: topic.phrases,
+         topicTitle: topic.title,
+         backPath: "/schedule", // ✅ Added this line
+       },
+     })
+   }
+   className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all shadow-md"
+>
+   <FaComments className="text-white" /> Start Practice
+ </button>  
+    </div>
+  </div>
+))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
         {activeTab === "all" && (
           <>
             <h2 className="text-3xl font-bold text-indigo-700">
@@ -136,7 +216,6 @@ const ScheduleSession = () => {
           </>
         )}
       </div>
-
       {/* Main Content */}
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* WORDS TAB */}
@@ -314,48 +393,46 @@ const ScheduleSession = () => {
             )}
 
             {/* Step 4: Single Lesson View */}
-            {selectedLesson && (
-              <div className="col-span-full bg-white rounded-xl p-8 shadow-lg text-left">
-                <button
-                  onClick={() => setSelectedLesson(null)}
-                  className="mb-5 text-lg text-indigo-600 underline"
+ {selectedLesson && (
+            <div className="col-span-full flex flex-col items-center text-center bg-white rounded-xl p-8 shadow-lg">
+              <button
+                onClick={() => setSelectedLesson(null)}
+                className="mb-5 text-lg text-indigo-600 underline"
+              >
+                ← Back to Lessons
+              </button>
+              <h3 className="text-2xl font-bold text-indigo-700 mb-3">
+                {selectedLesson.title}
+              </h3>
+              <p className="text-gray-700 mb-5">{selectedLesson.description}</p>
+              <img
+                src={selectedLesson.image}
+                alt={selectedLesson.title}
+                className="w-full max-w-2xs rounded-lg mb-6 shadow-md"
+              />
+              <div className="flex flex-col md:flex-row gap-4 justify-center">
+                <a
+                  href={selectedLesson.youtubeLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600"
                 >
-                  ← Back to Lessons
-                </button>
-                <h3 className="text-3xl font-bold text-indigo-700 mb-3">
-                  {selectedLesson.title}
-                </h3>
-                <p className="text-gray-700 mb-5">
-                  {selectedLesson.description}
-                </p>
-                <img
-                  src={selectedLesson.image}
-                  alt={selectedLesson.title}
-                  className="w-full max-w-md rounded-lg mb-6 shadow-md"
-                />
-                <div className="flex gap-4">
-                  <a
-                    href={selectedLesson.youtubeLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-indigo-500 text-white px-5 py-2 rounded-lg hover:bg-indigo-600"
-                  >
-                    🎧 Watch on YouTube
-                  </a>
-                  <a
-                    href={selectedLesson.pdfLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600"
-                  >
-                    📘 Read PDF
-                  </a>
-                </div>
+                  🎧 Watch on YouTube
+                </a>
+                <a
+                  href={selectedLesson.pdfLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:bg-purple-600"
+                >
+                  📘 Read PDF
+                </a>
               </div>
-            )}
+            </div>
+          )}
+
           </>
         )}
-
         {/* SPEAKING TAB */}
         {activeTab === "speaking" && (
           <>
@@ -373,7 +450,6 @@ const ScheduleSession = () => {
                 Book Tutor
               </button>
             </div>
-
             <div className="bg-white shadow-xl rounded-xl p-6 hover:shadow-2xl hover:-translate-y-1 transition-transform border-t-4 border-purple-400">
               <h3 className="font-bold text-xl text-indigo-700 mb-2">
                 Pro Partner Speaking Practice
@@ -389,8 +465,7 @@ const ScheduleSession = () => {
               </button>
             </div>
           </>
-        )}
-
+        )} 
         {/* ALL TAB */}
         {activeTab === "all" && (
           <div className="col-span-full text-center text-gray-600">
@@ -408,12 +483,10 @@ const ScheduleSession = () => {
       <section className="mt-20">
         <DailyChallenge />
       </section>
-
       <section className="mt-20">
         <LearningTips />
       </section>
     </div>
   );
 };
-
 export default ScheduleSession;

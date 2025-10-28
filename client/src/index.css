@@ -135,3 +135,24 @@ body {
 .maximum-w {
   max-width: 1560px;
 }
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+body {
+  top: 0px !important;
+}
+.goog-logo-link {
+  display: none !important;
+}
+.goog-te-gadget {
+  color: transparent !important;
+}
+.goog-te-gadget .goog-te-combo {
+  color: #000 !important;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  padding: 3px 6px;
+  font-size: 14px;
+}
+
