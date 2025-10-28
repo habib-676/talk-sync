@@ -1,6 +1,8 @@
 // src/pages/AIChat.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import axiosSecure from "../../hooks/useAxiosSecure";
+import TalkSyncLogo from "../../components/logo/TalkSyncLogo";
+import logo from "../../assets/logo/logo.png"
 
 /**
  * TalkSync AIChat
@@ -366,11 +368,9 @@ export default function AIChat() {
         <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm p-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">AI</span>
-              </div>
+              
               <div>
-                <h1 className="font-semibold text-gray-800">TalkSync Assistant</h1>
+                <TalkSyncLogo></TalkSyncLogo>
                 <p className="text-sm text-gray-600">
                   {speakingMode ? "Voice-enabled • Speaking Mode" : "Voice-enabled • Text Mode"}
                 </p>
@@ -491,8 +491,9 @@ export default function AIChat() {
                   className={`flex gap-4 ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {m.role === "assistant" && (
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-white text-xs font-semibold">AI</span>
+                    <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">
+                      <img src={logo} alt="" className="text-white text-xs font-semibold" />
+                      
                     </div>
                   )}
 
@@ -542,8 +543,9 @@ export default function AIChat() {
               {/* Loading bubble */}
               {loading && (
                 <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-semibold">AI</span>
+                  <div className="w-8 h-8  flex items-center justify-center flex-shrink-0">
+                    <img src={logo} alt="" className="text-white text-xs font-semibold"/>
+                    
                   </div>
                   <div className="bg-gray-50 border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3">
                     <div className="flex items-center gap-3 text-gray-600">
