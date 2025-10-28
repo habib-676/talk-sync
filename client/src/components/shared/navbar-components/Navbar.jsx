@@ -1,4 +1,3 @@
-import React from "react";
 import MobileNav from "./MobileNav";
 import AuthButtons from "./auth-buttons/AuthButtons";
 import DesktopNav from "./DesktopNav";
@@ -8,11 +7,10 @@ import useAuth from "../../../hooks/useAuth";
 
 const Navbar = () => {
   const { user } = useAuth();
-  console.log(user);
   return (
-    <nav className="fixed top-0 left-0 w-full h-16 bg-base-100 text-base-content shadow-md">
+    <nav className="fixed top-0 left-0 w-full h-16 bg-base-100 text-base-content shadow-md z-50">
       <div className="maximum-w px-4 h-full mx-auto flex items-center justify-between">
-        {/* logo ⬇ */}
+        {/* logo */}
         <div className="hidden sm:block">
           <TalkSyncLogo />
         </div>
@@ -20,13 +18,13 @@ const Navbar = () => {
           <LogoSmallDevice />
         </div>
 
-        {/* sidebar and nav-links  for small devices ⬇ */}
+        {/* small-device sidebar */}
         <MobileNav />
 
-        {/* nav-links for large devices ⬇ */}
+        {/* large-device nav links */}
         <DesktopNav user={user} />
 
-        {/* auth buttons for larger devices ⬇ */}
+        {/* auth buttons */}
         <AuthButtons />
       </div>
     </nav>

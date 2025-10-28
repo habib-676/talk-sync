@@ -28,6 +28,7 @@ import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
 import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 import Courses from "../pages/dashboard/Courses/Courses";
 import TutorDetails from "../pages/dashboard/Courses/TutorDetails";
+import PracticeExercise from "../pages/ProfilePage/ScheduleSession/PracticeExercise";
 import TakeQuiz from "../pages/quizzes/User/TakeQuiz";
 import AddQuiz from "../pages/Admin/quizzes/AddQuiz";
 import QuizList from "../pages/Admin/quizzes/QuizList";
@@ -61,6 +62,11 @@ export const router = createBrowserRouter([
       {
         path: "/schedule",
         Component: ScheduleSession,
+      },
+      {
+         path: "/practice/:phrase", 
+         Component: PracticeExercise,
+
       },
       {
         path: "/profile/:userId",
