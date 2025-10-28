@@ -65,13 +65,20 @@ async function run() {
     const messagesCollections = database.collection("messages");
     const announcementsCollection = database.collection("announcements");
     const sessionsCollections = database.collection("sessions");
+
+    // feedback collections
     const feedbackCollection = database.collection("feedbacks");
+    const evaluationsColl = database.collection("feedbackEvaluations");
 
     // Read Collection
     const booksCollections = database.collection("books");
     const wordsCollections = database.collection("words");
     const speakingCollections = database.collection("speakingPhrases");
     const tutorsCollections = database.collection("tutors");
+
+    // all Quizze.........
+    const allquies = database.collection('quizzes');
+    const quizResult = database.collection('quizResults')
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -861,15 +868,15 @@ app.post("/speakingPhrases", async (req, res) => {
 
         const wordsArr = Array.isArray(words)
           ? words
-              .map((w) => (typeof w === "string" ? w.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 10)
+            .map((w) => (typeof w === "string" ? w.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 10)
           : [];
         const sentencesArr = Array.isArray(sentences)
           ? sentences
-              .map((s) => (typeof s === "string" ? s.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 5)
+            .map((s) => (typeof s === "string" ? s.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 5)
           : [];
 
         const doc = {
@@ -908,6 +915,100 @@ app.post("/speakingPhrases", async (req, res) => {
         res.json({ success: true, data: list });
       } catch (err) {
         console.error("GET /feedbacks error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // POST /feedbacks/evaluate — store evaluation of a feedback (marks for sender)
+    app.post("/feedbacks/evaluate", async (req, res) => {
+      try {
+        const {
+          feedbackId = null,
+          senderId,
+          receiverId,
+          words = [], // [{text, correct}]
+          sentences = [], // [{text, correct}]
+          breakdown = {},
+          totalMarks = 0,
+        } = req.body || {};
+
+        if (!senderId || !receiverId) {
+          return res.status(400).json({
+            success: false,
+            message: "senderId and receiverId are required",
+          });
+        }
+
+        const doc = {
+          feedbackId,
+          senderId,
+          receiverId,
+          words: Array.isArray(words) ? words : [],
+          sentences: Array.isArray(sentences) ? sentences : [],
+          breakdown:
+            typeof breakdown === "object" && breakdown ? breakdown : {},
+          totalMarks: Number.isFinite(totalMarks) ? Number(totalMarks) : 0,
+          createdAt: new Date().toISOString(),
+        };
+
+        const result = await evaluationsColl.insertOne(doc);
+
+        // Increment sender's points and evaluation/session count
+        const inc = Number.isFinite(totalMarks) ? Number(totalMarks) : 0;
+        await usersCollections.updateOne(
+          { uid: senderId },
+          { $inc: { points: inc, evaluationsCount: 1 } }
+        );
+
+        // Badge thresholds based on number of evaluations (considered completed sessions)
+        const updatedUser = await usersCollections.findOne(
+          { uid: senderId },
+          { projection: { evaluationsCount: 1, badges: 1 } }
+        );
+
+        const count = updatedUser?.evaluationsCount || 0;
+        const toAdd = [];
+        if (count >= 5) toAdd.push("bronze");
+        if (count >= 20) toAdd.push("silver");
+        if (count >= 50) toAdd.push("gold");
+
+        if (toAdd.length) {
+          await usersCollections.updateOne(
+            { uid: senderId },
+            { $addToSet: { badges: { $each: toAdd } } }
+          );
+        }
+
+        res
+          .status(201)
+          .json({
+            success: true,
+            id: result.insertedId,
+            data: doc,
+            badgesUnlocked: toAdd || [],
+          });
+      } catch (err) {
+        console.error("POST /feedbacks/evaluate error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // GET /feedbacks/evaluations — list evaluations (filter by feedbackId and/or pair)
+    app.get("/feedbacks/evaluations", async (req, res) => {
+      try {
+        const { feedbackId, senderId, receiverId } = req.query || {};
+        const q = {};
+        if (feedbackId) q.feedbackId = feedbackId;
+        if (senderId) q.senderId = senderId;
+        if (receiverId) q.receiverId = receiverId;
+
+        const list = await evaluationsColl
+          .find(q)
+          .sort({ createdAt: -1 })
+          .toArray();
+        res.json({ success: true, data: list });
+      } catch (err) {
+        console.error("GET /feedbacks/evaluations error:", err);
         res.status(500).json({ success: false, message: err.message });
       }
     });
@@ -996,8 +1097,8 @@ app.post("/speakingPhrases", async (req, res) => {
         const learning = Array.isArray(user.learning_language)
           ? user.learning_language
           : user.learning_language
-          ? [user.learning_language]
-          : [];
+            ? [user.learning_language]
+            : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
@@ -1584,8 +1685,8 @@ app.post("/speakingPhrases", async (req, res) => {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-              ? messagesCollections
-              : sessionsCollections;
+                ? messagesCollections
+                : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1736,6 +1837,73 @@ app.post("/speakingPhrases", async (req, res) => {
       }
     );
 
+    // all quizzes realedted here ....
+
+    // addmin add the quizzes
+    app.post("/admin/quizzes", async (req, res) => {
+      const result = await allquies.insertOne(req.body);
+      res.send(result);
+    });
+
+    // get the all quizzes for user ....
+    app.get("/quizzes", async (req, res) => {
+      const result = await allquies.find().toArray();
+      res.send(result);
+    });
+
+    // addmin manage about quizzes.....
+    app.delete("/quizzes/:id", async (req, res) => {
+      const result = await allquies.deleteOne({ _id: new ObjectId(req.params.id) });
+      res.send(result);
+    });
+
+    //  POST quiz results......
+    app.post("/quizResults", async (req, res) => {
+      try {
+        const result = req.body;
+
+        if (!result.email || !result.totalQuestions) {
+          return res.status(400).send({ error: "Missing required fields" });
+        }
+
+        result.createdAt = new Date();
+
+        const save = await quizResult.insertOne(result);
+        res.send({ success: true, message: "Result saved", id: save.insertedId });
+      } catch (error) {
+        console.error("❌ Error saving result:", error);
+        res.status(500).send({ error: "Failed to save quiz result" });
+      }
+    });
+
+    //  Get quiz result by email for user......
+    app.get("/quizResults/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const result = await quizResult.findOne({ email });
+
+        if (!result) {
+          return res.status(404).json({ success: false, message: "No result found" });
+        }
+
+        res.json({ success: true, data: result });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+
+    //  Get all quiz results (optional for admin)
+    app.get("/quizResults", async (req, res) => {
+      try {
+        const results = await quizResult.find().toArray();
+        res.json({ success: true, data: results });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+
     // announcements
 
     try {
@@ -1761,8 +1929,8 @@ app.post("/speakingPhrases", async (req, res) => {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-        ? false
-        : v;
+          ? false
+          : v;
 
     app.get(
       "/admin/announcements",

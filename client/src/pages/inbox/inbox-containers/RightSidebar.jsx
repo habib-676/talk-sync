@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
+import { AiFillStar } from "react-icons/ai";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import useAuth from "../../../hooks/useAuth";
 import axios from "axios";
+import EvaluationModal from "../../../modals/EvaluationModal";
 
 const RightSidebar = ({ selectedUser }) => {
   const { onlineUsers, user } = useAuth();
   const isOnline = selectedUser && onlineUsers?.includes(selectedUser.uid);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [evalOpen, setEvalOpen] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
 
   // simple relative time helper
   const timeAgo = (iso) => {
@@ -33,11 +38,27 @@ const RightSidebar = ({ selectedUser }) => {
           `${import.meta.env.VITE_API_URL}/feedbacks`,
           { params: { to: user.uid, from: selectedUser.uid } }
         );
-        if (data?.success) {
-          setFeedbacks(Array.isArray(data.data) ? data.data : []);
-        } else {
-          setFeedbacks([]);
+        let list = data?.success && Array.isArray(data.data) ? data.data : [];
+
+        // Fetch evaluations for this pair and filter out already evaluated ones
+        try {
+          const evRes = await axios.get(
+            `${import.meta.env.VITE_API_URL}/feedbacks/evaluations`,
+            { params: { senderId: selectedUser.uid, receiverId: user.uid } }
+          );
+          const evals = evRes?.data?.data || [];
+          const evaluatedIds = new Set(
+            evals.map((e) => String(e.feedbackId || ""))
+          );
+          list = list.filter(
+            (fb) => !evaluatedIds.has(String(fb._id || fb.id))
+          );
+        } catch (e) {
+          // If evaluation API fails, show raw list (non-blocking)
+          console.warn("Eval fetch failed", e?.message);
         }
+
+        setFeedbacks(list);
       } catch (err) {
         console.error("Fetch feedbacks error:", err);
         setFeedbacks([]);
@@ -45,6 +66,22 @@ const RightSidebar = ({ selectedUser }) => {
     };
     fetchFeedbacks();
   }, [user?.uid, selectedUser?.uid]);
+
+  // simple motion variants for list items
+  const listVariants = {
+    hidden: { opacity: 0, y: 8 },
+    show: (i = 1) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.04,
+        type: "spring",
+        stiffness: 220,
+        damping: 20,
+      },
+    }),
+    exit: { opacity: 0, y: 6 },
+  };
   return (
     selectedUser && (
       <div
@@ -93,48 +130,110 @@ const RightSidebar = ({ selectedUser }) => {
             {feedbacks.length === 0 ? (
               <p className="text-xs text-secondary/60">No feedback yet.</p>
             ) : (
-              <div className="flex flex-col gap-3">
-                {feedbacks.map((fb, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-lg border border-base-200 bg-base-50"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-secondary/70">
-                        {timeAgo(fb.createdAt)}
-                      </span>
-                      <span className="text-xs">Rating: {fb.rating}/5</span>
-                    </div>
-                    {fb.words?.length ? (
-                      <div className="mb-2 flex flex-wrap gap-1">
-                        {fb.words.map((w, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary border border-primary/20"
-                          >
-                            {w}
+              <AnimatePresence initial={false}>
+                <div className="flex flex-col gap-3">
+                  {feedbacks.map((fb, idx) => (
+                    <Motion.button
+                      key={idx}
+                      type="button"
+                      custom={idx}
+                      variants={listVariants}
+                      initial="hidden"
+                      animate="show"
+                      exit="exit"
+                      whileHover={{ y: -2, scale: 1.01 }}
+                      whileTap={{ scale: 0.995 }}
+                      onClick={() => {
+                        setSelectedFeedback(fb);
+                        setEvalOpen(true);
+                      }}
+                      className="group relative text-left p-3 rounded-xl border border-base-200 bg-base-50/80 backdrop-blur-sm shadow-sm transition-all hover:bg-base-100/80 hover:shadow-md ring-1 ring-transparent hover:ring-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] text-secondary/70 inline-flex items-center gap-1">
+                          {timeAgo(fb.createdAt)}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <AiFillStar
+                              key={i}
+                              className={`${
+                                i < (Number(fb.rating) || 0)
+                                  ? "text-amber-400"
+                                  : "text-base-300"
+                              } h-3.5 w-3.5`}
+                            />
+                          ))}
+                          <span className="ml-1 text-secondary/80">
+                            {fb.rating}/5
                           </span>
-                        ))}
+                        </span>
                       </div>
-                    ) : null}
-                    {fb.sentences?.length ? (
-                      <ul className="list-disc list-inside text-xs text-secondary">
-                        {fb.sentences.map((s, i) => (
-                          <li key={i}>{s}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    {fb.notes ? (
-                      <p className="mt-2 text-xs italic text-secondary/80">
-                        {fb.notes}
-                      </p>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+
+                      {fb.words?.length ? (
+                        <div className="mb-2 flex flex-wrap gap-1.5">
+                          {fb.words.map((w, i) => (
+                            <span
+                              key={i}
+                              className="px-2 py-0.5 text-[11px] rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:bg-primary/15 transition-colors"
+                            >
+                              {w}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      {fb.sentences?.length ? (
+                        <div>
+                          <p className="text-xs font-bold text-primary">
+                            Sentences
+                          </p>
+                          <ul className="list-disc list-inside text-xs text-black space-y-1">
+                            {fb.sentences.map((s, i) => (
+                              <li key={i} className="line-clamp-2">
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      {fb.notes ? (
+                        <div>
+                          <p className="text-xs mt-2 font-bold text-primary">
+                            Notes
+                          </p>
+                          <p className=" text-xs italic text-secondary/80 line-clamp-2">
+                            {fb.notes}
+                          </p>
+                        </div>
+                      ) : null}
+
+                      {/* subtle gradient sheen on hover */}
+                      <span className="pointer-events-none absolute inset-x-0 -top-16 h-16 translate-y-0 opacity-0 bg-gradient-to-b from-primary/10 to-transparent transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-16" />
+                    </Motion.button>
+                  ))}
+                </div>
+              </AnimatePresence>
             )}
           </div>
         </div>
+        {/* Evaluation modal */}
+        <EvaluationModal
+          visible={evalOpen}
+          onClose={() => setEvalOpen(false)}
+          feedback={selectedFeedback}
+          onEvaluated={(payload) => {
+            const fid =
+              payload?.feedbackId ||
+              selectedFeedback?._id ||
+              selectedFeedback?.id;
+            setFeedbacks((prev) =>
+              prev.filter((f) => String(f._id || f.id) !== String(fid))
+            );
+            setEvalOpen(false);
+          }}
+        />
       </div>
     )
   );

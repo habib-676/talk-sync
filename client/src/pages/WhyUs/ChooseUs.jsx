@@ -64,7 +64,7 @@ const features = [
 
 const WhyChooseTalkSync = () => {
   return (
-    <section className="relative overflow-hidden py-24 px-4 sm:px-6 lg:px-8 bg-white">
+    <section className="relative overflow-hidden py-24 px-4 sm:px-6 lg:px-8">
       {/* Background Gradient Blobs */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-indigo-400/30 rounded-full blur-3xl" />
@@ -80,7 +80,7 @@ const WhyChooseTalkSync = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
             Why Choose{" "}
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               TalkSync
@@ -101,12 +101,12 @@ const WhyChooseTalkSync = () => {
       </div>
 
       {/* Bottom Wave Divider */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 -mb-1 text-gray-100 bg-white">
+      <div className="absolute bottom-0 left-0 right-0 h-16 -mb-1 text-gray-100">
         <svg
           viewBox="0 0 1440 48"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full bg-white"
+          className="w-full h-full"
           preserveAspectRatio="none"
         >
           <path

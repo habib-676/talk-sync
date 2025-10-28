@@ -34,7 +34,7 @@ export default function CommunityStories() {
       <div className="grid lg:grid-cols-4 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-3">
-       <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10">
+       <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">
   Language Stories from the{" "}
   <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
     Community

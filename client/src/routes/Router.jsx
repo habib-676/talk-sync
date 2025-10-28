@@ -29,6 +29,10 @@ import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 import Courses from "../pages/dashboard/Courses/Courses";
 import TutorDetails from "../pages/dashboard/Courses/TutorDetails";
 import PracticeExercise from "../pages/ProfilePage/ScheduleSession/PracticeExercise";
+import TakeQuiz from "../pages/quizzes/User/TakeQuiz";
+import AddQuiz from "../pages/Admin/quizzes/AddQuiz";
+import QuizList from "../pages/Admin/quizzes/QuizList";
+import AdminAllQuizResults from "../pages/Admin/quizzes/AdminAllQuizResults";
 
 export const router = createBrowserRouter([
   {
@@ -94,6 +98,7 @@ export const router = createBrowserRouter([
       { path: "/dashboard/sessions", element: <SessionsPage /> },
       { path: "/dashboard/badges", element: <BadgesPage /> },
       { path: "/dashboard/inbox", element: <Inbox /> },
+      {path:"/dashboard/quizzes", element :<TakeQuiz></TakeQuiz>},
       {
         path: "admin",
         element: <AdminHome></AdminHome>,
@@ -110,6 +115,19 @@ export const router = createBrowserRouter([
         path: "admin/announcements",
         element: <AdminAnnouncements></AdminAnnouncements>,
       },
+      {
+        path:"admin/quizzes",
+      element:<AddQuiz></AddQuiz>
+    },
+      {
+        path:"admin/manage",
+         element:<QuizList></QuizList>
+        },
+        {
+        path:"admin/showquizzeuser",
+         element:<AdminAllQuizResults></AdminAllQuizResults>
+        },
+
       { path: "/dashboard/courses", element: <Courses></Courses> },
       {
         path: "/dashboard/tutor/:id",
