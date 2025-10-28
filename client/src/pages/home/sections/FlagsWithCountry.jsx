@@ -249,10 +249,10 @@ const FlagsWithCountry = () => {
         variants={headerVariants}
       >
         <motion.h2
-          className="text-4xl font-bold text-gray-900 mb-4"
+          className="text-3xl font-bold text-gray-900 mb-4"
           variants={headerVariants}
         >
-          Find Your Language Partner 🤝
+          FIND YOUR LANGUAGE PARTNER 🤝
         </motion.h2>
         <motion.p
           className="text-gray-600 text-lg max-w-2xl mx-auto mb-8"
