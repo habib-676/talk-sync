@@ -13,11 +13,23 @@ import {
 } from "react-icons/tb";
 
 const ratingMeta = {
-  1: { label: "Terrible", Icon: TbMoodCry, colors: "from-red-400 to-orange-400" },
+  1: {
+    label: "Terrible",
+    Icon: TbMoodCry,
+    colors: "from-red-400 to-orange-400",
+  },
   2: { label: "Bad", Icon: TbMoodSad, colors: "from-orange-400 to-amber-400" },
-  3: { label: "Okay", Icon: TbMoodNeutral, colors: "from-amber-400 to-yellow-300" },
+  3: {
+    label: "Okay",
+    Icon: TbMoodNeutral,
+    colors: "from-amber-400 to-yellow-300",
+  },
   4: { label: "Good", Icon: TbMoodSmile, colors: "from-lime-400 to-green-400" },
-  5: { label: "Great", Icon: TbMoodHappy, colors: "from-green-400 to-emerald-400" },
+  5: {
+    label: "Great",
+    Icon: TbMoodHappy,
+    colors: "from-green-400 to-emerald-400",
+  },
 };
 
 const RatingInput = ({ value, onChange }) => {
@@ -307,7 +319,9 @@ const FeedbackModal = ({
                     <div className="text-[#0d141c] text-2xl md:text-3xl font-bold">
                       Thank you for your feedback 🎉
                     </div>
-                    <div className="text-sm mt-1 text-slate-600">Saved successfully</div>
+                    <div className="text-sm mt-1 text-slate-600">
+                      Saved successfully
+                    </div>
                   </MotionDiv>
                 </MotionDiv>
               )}
