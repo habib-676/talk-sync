@@ -828,15 +828,15 @@ async function run() {
 
         const wordsArr = Array.isArray(words)
           ? words
-              .map((w) => (typeof w === "string" ? w.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 10)
+            .map((w) => (typeof w === "string" ? w.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 10)
           : [];
         const sentencesArr = Array.isArray(sentences)
           ? sentences
-              .map((s) => (typeof s === "string" ? s.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 5)
+            .map((s) => (typeof s === "string" ? s.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 5)
           : [];
 
         const doc = {
@@ -1057,8 +1057,8 @@ async function run() {
         const learning = Array.isArray(user.learning_language)
           ? user.learning_language
           : user.learning_language
-          ? [user.learning_language]
-          : [];
+            ? [user.learning_language]
+            : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
@@ -1329,6 +1329,63 @@ async function run() {
         res.json({ success: true, message: "Session accepted" });
       } catch (err) {
         console.error("POST /sessions/:id/accept error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // at top of your server file (once)
+    const BADGES = [
+      { id: "bronze-10", name: "Bronze Learner", desc: "Complete 5 sessions", threshold: 5, color: "bg-yellow-500" },
+      { id: "silver-25", name: "Silver Speaker", desc: "Complete 15 sessions", threshold: 15, color: "bg-slate-400" },
+      { id: "gold-50", name: "Gold Communicator", desc: "Complete 40 sessions", threshold: 40, color: "bg-amber-600" },
+      // add more badges here
+    ];
+
+    // GET /badges -> returns definition list
+    app.get("/badges", async (req, res) => {
+      try {
+        res.json({ success: true, badges: BADGES });
+      } catch (err) {
+        console.error("GET /badges error", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // GET /badges/user?email=... -> compute user badges & progress
+    app.get("/badges/user", async (req, res) => {
+      try {
+        const email = (req.query.email || "").toLowerCase().trim();
+        if (!email) return res.status(400).json({ success: false, message: "email query required" });
+
+        // find user
+        const user = await usersCollections.findOne({ email }, { projection: { badges: 1 } });
+
+        // compute sessions completed count for this user (status 'completed' or 'finished' - adapt to your statuses)
+        const completeStatuses = ["completed", "finished", "ended"];
+        const sessionsDone = await sessionsCollections.countDocuments({
+          $and: [
+            { $or: [{ fromEmail: email }, { toEmail: email }] },
+            { status: { $in: completeStatuses } }
+          ]
+        });
+
+        // compute earned badges by threshold
+        const earned = BADGES.filter(b => (b.threshold || 0) > 0 && sessionsDone >= b.threshold).map(b => b.id);
+
+        // also merge any badges stored in user doc (if present)
+        const storedBadges = Array.isArray(user?.badges) ? user.badges.map(String) : [];
+        const mergedEarned = Array.from(new Set([...earned, ...storedBadges]));
+
+        res.json({
+          success: true,
+          userBadges: {
+            email,
+            sessionsDone,
+            earned: mergedEarned
+          }
+        });
+      } catch (err) {
+        console.error("GET /badges/user error", err);
         res.status(500).json({ success: false, message: err.message });
       }
     });
@@ -1645,8 +1702,8 @@ async function run() {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-              ? messagesCollections
-              : sessionsCollections;
+                ? messagesCollections
+                : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1822,8 +1879,8 @@ async function run() {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-        ? false
-        : v;
+          ? false
+          : v;
 
     app.get(
       "/admin/announcements",
