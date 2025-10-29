@@ -167,7 +167,9 @@ export const router = createBrowserRouter([
   },
   {
         path:'aiAgent',
-        Component:AIChat
+        element: <PrivateRoute>
+          <AIChat></AIChat>
+        </PrivateRoute>
 
       },
 
