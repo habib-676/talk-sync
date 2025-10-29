@@ -30,6 +30,7 @@ const CallProvider = ({ children }) => {
   const [callState, setCallState] = useState(initialState);
   const [incomingCaller, setIncomingCaller] = useState(null); // { from, name, signal }
   const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [feedbackCtx, setFeedbackCtx] = useState(null); // { fromUser, toUser }
 
   // Refs
   const isCallerRef = useRef(false);
@@ -253,6 +254,16 @@ const CallProvider = ({ children }) => {
 
     const endCallHandler = () => {
       toast.error("Call ended");
+      // snapshot users for feedback before cleanup
+      const toUserSnap = otherUserInfoRef.current
+        ? { ...otherUserInfoRef.current }
+        : incomingCaller
+        ? { uid: incomingCaller.from, name: incomingCaller.name }
+        : null;
+      setFeedbackCtx({
+        fromUser: { uid: user?.uid, name: user?.displayName || user?.email },
+        toUser: toUserSnap,
+      });
       setFeedbackVisible(true);
       cleanUpCall();
     };
@@ -268,7 +279,7 @@ const CallProvider = ({ children }) => {
       socket.off("callDeclined", callDeclinedHandler);
       socket.off("endCall", endCallHandler);
     };
-  }, [socketRef, user, connectLiveKit, cleanUpCall]);
+  }, [socketRef, user, connectLiveKit, cleanUpCall, incomingCaller]);
 
   // Cleanup on unmount
   useEffect(
@@ -361,9 +372,19 @@ const CallProvider = ({ children }) => {
       ? otherUserIdRef.current
       : incomingCaller?.from;
     if (to) socketRef.current.emit("endCall", { to });
+    // snapshot users for feedback before cleanup
+    const toUserSnap = otherUserInfoRef.current
+      ? { ...otherUserInfoRef.current }
+      : incomingCaller
+      ? { uid: incomingCaller.from, name: incomingCaller.name }
+      : null;
+    setFeedbackCtx({
+      fromUser: { uid: user?.uid, name: user?.displayName || user?.email },
+      toUser: toUserSnap,
+    });
     setFeedbackVisible(true);
     cleanUpCall();
-  }, [incomingCaller, socketRef, cleanUpCall]);
+  }, [incomingCaller, socketRef, cleanUpCall, user]);
 
   const contextValue = useMemo(
     () => ({
@@ -415,8 +436,18 @@ const CallProvider = ({ children }) => {
         visible={feedbackVisible}
         onClose={() => setFeedbackVisible(false)}
         onSubmitted={() => setFeedbackVisible(false)}
-        fromUser={{ uid: user?.uid, name: user?.displayName || user?.email }}
-        toUser={{ uid: otherUserInfoRef.current?.uid, name: calleeName }}
+        fromUser={
+          feedbackCtx?.fromUser || {
+            uid: user?.uid,
+            name: user?.displayName || user?.email,
+          }
+        }
+        toUser={
+          feedbackCtx?.toUser || {
+            uid: otherUserInfoRef.current?.uid,
+            name: calleeName,
+          }
+        }
       />
     </CallContext.Provider>
   );

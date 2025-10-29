@@ -2,13 +2,22 @@ import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
+import { createPortal } from "react-dom";
+// Modern mood icons (Tabler via react-icons)
+import {
+  TbMoodCry,
+  TbMoodSad,
+  TbMoodNeutral,
+  TbMoodSmile,
+  TbMoodHappy,
+} from "react-icons/tb";
 
 const ratingMeta = {
-  1: { label: "Terrible", emoji: "😢", colors: "from-red-400 to-orange-400" },
-  2: { label: "Bad", emoji: "🙁", colors: "from-orange-400 to-amber-400" },
-  3: { label: "Medium", emoji: "😐", colors: "from-amber-400 to-yellow-300" },
-  4: { label: "Good", emoji: "🙂", colors: "from-lime-400 to-green-400" },
-  5: { label: "Great", emoji: "🥰", colors: "from-green-400 to-emerald-400" },
+  1: { label: "Terrible", Icon: TbMoodCry, colors: "from-red-400 to-orange-400" },
+  2: { label: "Bad", Icon: TbMoodSad, colors: "from-orange-400 to-amber-400" },
+  3: { label: "Okay", Icon: TbMoodNeutral, colors: "from-amber-400 to-yellow-300" },
+  4: { label: "Good", Icon: TbMoodSmile, colors: "from-lime-400 to-green-400" },
+  5: { label: "Great", Icon: TbMoodHappy, colors: "from-green-400 to-emerald-400" },
 };
 
 const RatingInput = ({ value, onChange }) => {
@@ -17,11 +26,12 @@ const RatingInput = ({ value, onChange }) => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* emoji row */}
+      {/* modern icon row */}
       <div className="relative flex items-center justify-center gap-3 md:gap-4">
         {opts.map((n) => {
           const meta = ratingMeta[n];
           const isActive = n === value;
+          const Icon = meta.Icon;
           return (
             <motion.button
               key={n}
@@ -29,7 +39,7 @@ const RatingInput = ({ value, onChange }) => {
               onClick={() => onChange(n)}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.98 }}
-              className={`relative isolate grid place-items-center rounded-full transition-all duration-200 ${
+              className={`relative isolate grid place-items-center rounded-2xl transition-all duration-200 ${
                 isActive ? "" : "grayscale opacity-70"
               }`}
               aria-label={meta.label}
@@ -38,17 +48,15 @@ const RatingInput = ({ value, onChange }) => {
               {/* glow ring for active */}
               {isActive && (
                 <span
-                  className={`absolute -inset-2 rounded-full bg-gradient-to-tr ${meta.colors} opacity-70 blur-md`}
+                  className={`absolute -inset-2 rounded-2xl bg-gradient-to-tr ${meta.colors} opacity-80 blur-md`}
                   aria-hidden
                 />
               )}
-              <span
-                className={`${
-                  isActive ? "text-5xl md:text-6xl" : "text-3xl md:text-4xl"
-                } relative z-[1]`}
-              >
-                {meta.emoji}
-              </span>
+              <Icon
+                className="relative z-[1]"
+                size={isActive ? 64 : 40}
+                strokeWidth={1.5}
+              />
             </motion.button>
           );
         })}
@@ -60,11 +68,10 @@ const RatingInput = ({ value, onChange }) => {
         initial={{ y: 8, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="mt-3 px-3 py-1 rounded-full bg-base-300/70 text-xs text-secondary shadow-sm relative"
+        className="mt-3 px-3 py-1 rounded-full bg-[#e7edf4] text-xs text-[#0d141c] shadow-sm relative"
       >
         {current.label}
-        {/* caret */}
-        <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-6 border-l-transparent border-r-6 border-r-transparent border-b-6 border-b-base-300/70" />
+        <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-6 border-l-transparent border-r-6 border-r-transparent border-b-6 border-b-[#e7edf4]" />
       </motion.div>
     </div>
   );
@@ -95,9 +102,9 @@ const ChipsInput = ({ label, placeholder, max = 10, values, setValues }) => {
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">
+      <label className="block text-[#0d141c] text-sm font-medium mb-1">
         {label}
-        <span className="ml-2 text-[11px] text-secondary/70">
+        <span className="ml-2 text-[11px] text-slate-600">
           {values.length}/{max}
         </span>
       </label>
@@ -125,13 +132,13 @@ const ChipsInput = ({ label, placeholder, max = 10, values, setValues }) => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
-          className="flex-1 input input-bordered input-sm"
+          className="flex-1 input input-bordered input-sm bg-white border-[#cedbe8]"
         />
         <button type="button" className="btn btn-sm" onClick={add}>
           Add
         </button>
       </div>
-      <p className="mt-1 text-xs text-secondary/60">
+      <p className="mt-1 text-xs text-slate-600">
         Press Enter to add. Max {max}.
       </p>
     </div>
@@ -157,9 +164,9 @@ const SentencesInput = ({ values, setValues, max = 3 }) => {
   };
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">
+      <label className="block text-[#0d141c] text-sm font-medium mb-1">
         Sentences
-        <span className="ml-2 text-[11px] text-secondary/70">
+        <span className="ml-2 text-[11px] text-slate-600">
           {values.length}/{max}
         </span>
       </label>
@@ -171,7 +178,7 @@ const SentencesInput = ({ values, setValues, max = 3 }) => {
               onChange={(e) => update(i, e.target.value)}
               rows={2}
               placeholder="Write a helpful sentence..."
-              className="textarea textarea-bordered textarea-sm w-full"
+              className="textarea textarea-bordered textarea-sm w-full bg-white border-[#cedbe8]"
             />
             <button
               type="button"
@@ -186,7 +193,7 @@ const SentencesInput = ({ values, setValues, max = 3 }) => {
         <button type="button" onClick={addField} className="btn btn-sm">
           Add sentence
         </button>
-        <p className="text-xs text-secondary/60">
+        <p className="text-xs text-slate-600">
           Keep them short and specific. Max {max}.
         </p>
       </div>
@@ -208,22 +215,22 @@ const FeedbackModal = ({
   const [sentences, setSentences] = useState([]);
   const [notes, setNotes] = useState("");
   const [showThanks, setShowThanks] = useState(false);
+
   const MotionDiv = motion.div;
 
-  const canSubmit = useMemo(() => {
-    return (
+  const canSubmit = useMemo(
+    () =>
       !submitting &&
       fromUser?.uid &&
       toUser?.uid &&
       Number.isFinite(rating) &&
       rating >= 1 &&
-      rating <= 5
-    );
-  }, [fromUser?.uid, toUser?.uid, rating, submitting]);
+      rating <= 5,
+    [fromUser?.uid, toUser?.uid, rating, submitting]
+  );
 
   useEffect(() => {
     if (!visible) {
-      // reset form when closed
       setSubmitting(false);
       setRating(5);
       setWords([]);
@@ -238,86 +245,81 @@ const FeedbackModal = ({
     setSubmitting(true);
     try {
       const payload = {
-        from: fromUser.uid,
-        to: toUser.uid,
+        from: fromUser?.uid,
+        to: toUser?.uid,
+        sessionId: sessionId || undefined,
         rating,
         words,
-        sentences: sentences.filter((s) => s && s.trim()).slice(0, 3),
-        notes,
+        sentences: sentences.map((s) => s.trim()).filter(Boolean),
+        notes: notes.trim(),
       };
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/feedbacks`,
-        { ...payload, sessionId }
-      );
-      if (!data?.success)
+
+      const { data } = await axios.post("/feedbacks", payload);
+      if (!data?.success && !data?.id) {
         throw new Error(data?.message || "Failed to submit feedback");
+      }
+
       setShowThanks(true);
-      onSubmitted && onSubmitted(data.data || payload);
-      // auto close after a short celebration
+      onSubmitted && onSubmitted(data?.data || payload);
       setTimeout(() => {
         onClose && onClose();
-        setShowThanks(false);
+        setSubmitting(false);
       }, 1200);
     } catch (err) {
       console.error("Feedback submit error:", err);
-      toast.error(err.message || "Failed to submit feedback");
-    } finally {
+      toast.error(err?.message || "Failed to submit feedback");
       setSubmitting(false);
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {visible && (
         <MotionDiv
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4"
         >
           <MotionDiv
-            initial={{ y: 24, scale: 0.98, opacity: 0 }}
-            animate={{ y: 0, scale: 1, opacity: 1 }}
-            exit={{ y: 12, scale: 0.98, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 260,
-              damping: 22,
-              mass: 0.6,
-            }}
-            className="w-full max-w-2xl bg-base-100 rounded-xl p-4 border border-base-300 shadow-xl relative overflow-hidden"
+            initial={{ y: 20, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 10, opacity: 0, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="relative w-full max-w-3xl bg-slate-50 rounded-xl p-4 border border-[#e7edf4] shadow-xl"
           >
-            {/* success burst */}
+            {/* success overlay */}
             <AnimatePresence>
               {showThanks && (
                 <MotionDiv
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex items-center justify-center bg-base-100/95 backdrop-blur-sm z-10"
+                  className="absolute inset-0 flex items-center justify-center bg-slate-50/95 backdrop-blur-sm z-10"
                 >
                   <MotionDiv
-                    initial={{ scale: 0.8 }}
+                    initial={{ scale: 0.9 }}
                     animate={{ scale: 1 }}
-                    exit={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    exit={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 22 }}
                     className="text-center"
                   >
-                    <div className="text-2xl md:text-3xl">
+                    <div className="text-[#0d141c] text-2xl md:text-3xl font-bold">
                       Thank you for your feedback 🎉
                     </div>
-                    <div className="text-sm mt-1 text-secondary/70">
-                      Saved successfully
-                    </div>
+                    <div className="text-sm mt-1 text-slate-600">Saved successfully</div>
                   </MotionDiv>
                 </MotionDiv>
               )}
             </AnimatePresence>
 
-            <div className="flex items-center justify-between mb-2">
+            {/* header */}
+            <div className="flex items-center justify-between mb-2 px-1">
               <div>
-                <h3 className="text-lg font-bold">Share feedback</h3>
-                <p className="text-xs text-secondary/70">
+                <h3 className="text-[#0d141c] text-xl font-bold leading-tight tracking-[-0.015em]">
+                  Share feedback
+                </h3>
+                <p className="text-[#0d141c] text-sm mt-1">
                   For {toUser?.name || toUser?.email || toUser?.uid}
                 </p>
               </div>
@@ -330,21 +332,24 @@ const FeedbackModal = ({
               </button>
             </div>
 
+            {/* body */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-[#0d141c] text-sm font-medium mb-2">
                     How was the session?
                   </label>
                   <RatingInput value={rating} onChange={setRating} />
                 </div>
-                <ChipsInput
-                  label="Words to practice"
-                  placeholder="Type a word and press Enter"
-                  max={10}
-                  values={words}
-                  setValues={setWords}
-                />
+                <div className="px-1">
+                  <ChipsInput
+                    label="Words to practice"
+                    placeholder="Type a word and press Enter"
+                    max={10}
+                    values={words}
+                    setValues={setWords}
+                  />
+                </div>
               </div>
               <div className="space-y-3">
                 <SentencesInput
@@ -353,31 +358,34 @@ const FeedbackModal = ({
                   max={3}
                 />
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-[#0d141c] text-sm font-medium mb-1">
                     Notes (optional)
                   </label>
                   <textarea
                     rows={3}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="textarea textarea-bordered w-full"
+                    className="textarea textarea-bordered w-full bg-white border-[#cedbe8]"
                     placeholder="Any extra suggestions..."
                   />
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-end gap-2">
+            {/* footer */}
+            <div className="mt-4 flex items-center justify-end gap-2 px-1">
               <button
-                className="btn btn-ghost"
+                className="flex items-center justify-center rounded-xl h-10 px-4 bg-[#e7edf4] text-[#0d141c] text-sm font-bold tracking-[0.015em]"
                 onClick={onClose}
                 disabled={submitting}
               >
                 Skip
               </button>
               <button
-                className={`btn btn-primary ${
-                  submitting ? "btn-disabled" : ""
+                className={`flex items-center justify-center rounded-xl h-10 px-4 text-sm font-bold tracking-[0.015em] text-white ${
+                  submitting
+                    ? "bg-[#0d80f2]/70 cursor-not-allowed"
+                    : "bg-[#0d80f2]"
                 }`}
                 onClick={submit}
                 disabled={!canSubmit}
@@ -388,7 +396,8 @@ const FeedbackModal = ({
           </MotionDiv>
         </MotionDiv>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
