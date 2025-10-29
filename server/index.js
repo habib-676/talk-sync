@@ -12,6 +12,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const { queryAgent } = require("./agent/queryGemini");
 const speakingGemini = require("./routes/speaking");
+const { AccessToken, RoomGrant } = require("livekit-server-sdk");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -68,13 +69,32 @@ async function run() {
     const usersCollections = database.collection("users");
     const messagesCollections = database.collection("messages");
     const announcementsCollection = database.collection("announcements");
+    const notificationsColl = database.collection("notifications");
     const sessionsCollections = database.collection("sessions");
+
+    // feedback collections
     const feedbackCollection = database.collection("feedbacks");
+    const evaluationsColl = database.collection("feedbackEvaluations");
 
     // Read Collection
     const booksCollections = database.collection("books");
     const wordsCollections = database.collection("words");
+    const speakingCollections = database.collection("speakingPhrases");
     const tutorsCollections = database.collection("tutors");
+
+    // all Quizze.........
+    const allquies = database.collection("quizzes");
+    const quizResult = database.collection("quizResults");
+
+    // notifications indexes
+    try {
+      await notificationsColl.createIndex({ recipientUid: 1, createdAt: -1 });
+      await notificationsColl.createIndex({ audience: 1, createdAt: -1 });
+      await notificationsColl.createIndex({ type: 1, createdAt: -1 });
+      console.log("✅ Notifications indexes ensured");
+    } catch (e) {
+      console.warn("⚠️ Failed to create notifications indexes", e?.message);
+    }
 
     // jwt related APIs ----->
     app.post("/jwt", async (req, res) => {
@@ -188,7 +208,6 @@ async function run() {
       try {
         const newWord = req.body; // expects a JSON object like your dummy data
         const result = await wordsCollections.insertOne(newWord);
-
         res.status(201).json({
           message: "Word document added successfully",
           id: result.insertedId,
@@ -248,6 +267,42 @@ async function run() {
       }
     });
 
+    // ✅ Get all speaking levels
+    app.get("/speakingPhrases", async (req, res) => {
+      try {
+        const result = await speakingCollections.findOne({});
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching speaking phrases:", error);
+        res.status(500).send({ message: "Failed to fetch speaking phrases" });
+      }
+    });
+    // ✅ GET SINGLE PHRASE BY ID
+    app.get("/speakingPhrases/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await speakingCollections.findOne(query);
+        if (!result) {
+          return res.status(404).send({ message: "Phrase not found" });
+        }
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching single phrase:", error);
+        res.status(500).send({ message: "Failed to fetch phrase" });
+      }
+    });
+    // ✅ POST NEW PHRASES DATA
+    app.post("/speakingPhrases", async (req, res) => {
+      try {
+        const newData = req.body;
+        const result = await speakingCollections.insertOne(newData);
+        res.send(result);
+      } catch (error) {
+        console.error("Error adding new phrase:", error);
+        res.status(500).send({ message: "Failed to add phrase" });
+      }
+    });
     //  Learner dashboard route
     app.get("/dashboard/learner", verifyToken, async (req, res) => {
       res.send({ message: "Welcome Learner Dashboard!" });
@@ -260,6 +315,51 @@ async function run() {
 
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
+    });
+
+    // LiveKit access token endpoint
+    // GET /livekit/token?room=roomName&identity=userUid&name=Display+Name
+    app.get("/livekit/token", async (req, res) => {
+      try {
+        const url = process.env.LIVEKIT_URL; // e.g. wss://your.livekit.cloud
+        const apiKey = process.env.LIVEKIT_API_KEY;
+        const apiSecret = process.env.LIVEKIT_API_SECRET;
+
+        if (!url || !apiKey || !apiSecret) {
+          return res.status(500).json({ message: "LiveKit not configured" });
+        }
+
+        const room = (req.query.room || "").trim();
+        const identity = (req.query.identity || "").trim();
+        const name = (req.query.name || identity || "").toString();
+
+        if (!room || !identity) {
+          return res
+            .status(400)
+            .json({ message: "Missing room or identity for token" });
+        }
+
+        const at = new AccessToken(apiKey, apiSecret, {
+          identity,
+          name,
+          ttl: 60 * 60, // 1 hour
+        });
+
+        // Add grant using plain object (compatible with SDK v2)
+        at.addGrant({
+          room,
+          roomJoin: true,
+          canPublish: true,
+          canSubscribe: true,
+          canPublishData: true,
+        });
+
+        const token = await at.toJwt();
+        res.json({ url, token });
+      } catch (err) {
+        console.error("/livekit/token error", err);
+        res.status(500).json({ message: "Failed to create token" });
+      }
     });
 
     // socket.io
@@ -331,6 +431,12 @@ async function run() {
     // receiver socket id
     const getReceiverSocketId = (userId) => {
       return userSocketMap[userId];
+    };
+
+    // helper: push notification to a specific uid if online
+    const pushNotificationTo = (uid, notif) => {
+      const sid = userSocketMap[uid];
+      if (sid) io.to(sid).emit("notification:new", notif);
     };
 
     // User related APIs
@@ -651,6 +757,38 @@ async function run() {
           );
         }
 
+        // notification to target user (new follower)
+        try {
+          const target = await usersCollections.findOne({
+            _id: new ObjectId(targetUserId),
+          });
+          const current = await usersCollections.findOne({
+            _id: new ObjectId(currentUserId),
+          });
+          const recipientUid = target?.uid;
+          const actorUid = current?.uid;
+          if (recipientUid) {
+            const notif = {
+              type: "follow",
+              recipientUid,
+              actorUid: actorUid || null,
+              title: "New follower",
+              body: `${
+                current?.name || current?.email || "Someone"
+              } started following you`,
+              link: actorUid ? `/profile/${actorUid}` : "/profile",
+              meta: { followerId: currentUserId },
+              readAt: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            const ins = await notificationsColl.insertOne(notif);
+            pushNotificationTo(recipientUid, { ...notif, _id: ins.insertedId });
+          }
+        } catch (e) {
+          console.warn("follow notification failed:", e?.message);
+        }
+
         res.json({
           success: true,
           message: "Followed successfully",
@@ -761,6 +899,29 @@ async function run() {
         const receiverSocketId = getReceiverSocketId(messageData?.receiverId);
         if (receiverSocketId) {
           io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
+
+        // notification for receiver (expects senderId/receiverId are UIDs)
+        if (messageData?.receiverId) {
+          const notif = {
+            type: "message",
+            recipientUid: messageData.receiverId,
+            actorUid: messageData?.senderId || null,
+            title: "New message",
+            body: (messageData?.text || "").slice(0, 120),
+            link: messageData?.senderId
+              ? `/inbox?with=${messageData.senderId}`
+              : "/inbox",
+            meta: { senderId: messageData?.senderId || null },
+            readAt: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          const ins = await notificationsColl.insertOne(notif);
+          pushNotificationTo(messageData.receiverId, {
+            ...notif,
+            _id: ins.insertedId,
+          });
         }
 
         res.status(200).send(newMessage);
@@ -876,6 +1037,98 @@ async function run() {
         res.json({ success: true, data: list });
       } catch (err) {
         console.error("GET /feedbacks error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // POST /feedbacks/evaluate — store evaluation of a feedback (marks for sender)
+    app.post("/feedbacks/evaluate", async (req, res) => {
+      try {
+        const {
+          feedbackId = null,
+          senderId,
+          receiverId,
+          words = [], // [{text, correct}]
+          sentences = [], // [{text, correct}]
+          breakdown = {},
+          totalMarks = 0,
+        } = req.body || {};
+
+        if (!senderId || !receiverId) {
+          return res.status(400).json({
+            success: false,
+            message: "senderId and receiverId are required",
+          });
+        }
+
+        const doc = {
+          feedbackId,
+          senderId,
+          receiverId,
+          words: Array.isArray(words) ? words : [],
+          sentences: Array.isArray(sentences) ? sentences : [],
+          breakdown:
+            typeof breakdown === "object" && breakdown ? breakdown : {},
+          totalMarks: Number.isFinite(totalMarks) ? Number(totalMarks) : 0,
+          createdAt: new Date().toISOString(),
+        };
+
+        const result = await evaluationsColl.insertOne(doc);
+
+        // Increment sender's points and evaluation/session count
+        const inc = Number.isFinite(totalMarks) ? Number(totalMarks) : 0;
+        await usersCollections.updateOne(
+          { uid: senderId },
+          { $inc: { points: inc, evaluationsCount: 1 } }
+        );
+
+        // Badge thresholds based on number of evaluations (considered completed sessions)
+        const updatedUser = await usersCollections.findOne(
+          { uid: senderId },
+          { projection: { evaluationsCount: 1, badges: 1 } }
+        );
+
+        const count = updatedUser?.evaluationsCount || 0;
+        const toAdd = [];
+        if (count >= 5) toAdd.push("bronze");
+        if (count >= 20) toAdd.push("silver");
+        if (count >= 50) toAdd.push("gold");
+
+        if (toAdd.length) {
+          await usersCollections.updateOne(
+            { uid: senderId },
+            { $addToSet: { badges: { $each: toAdd } } }
+          );
+        }
+
+        res.status(201).json({
+          success: true,
+          id: result.insertedId,
+          data: doc,
+          badgesUnlocked: toAdd || [],
+        });
+      } catch (err) {
+        console.error("POST /feedbacks/evaluate error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // GET /feedbacks/evaluations — list evaluations (filter by feedbackId and/or pair)
+    app.get("/feedbacks/evaluations", async (req, res) => {
+      try {
+        const { feedbackId, senderId, receiverId } = req.query || {};
+        const q = {};
+        if (feedbackId) q.feedbackId = feedbackId;
+        if (senderId) q.senderId = senderId;
+        if (receiverId) q.receiverId = receiverId;
+
+        const list = await evaluationsColl
+          .find(q)
+          .sort({ createdAt: -1 })
+          .toArray();
+        res.json({ success: true, data: list });
+      } catch (err) {
+        console.error("GET /feedbacks/evaluations error:", err);
         res.status(500).json({ success: false, message: err.message });
       }
     });
@@ -1704,6 +1957,79 @@ async function run() {
       }
     );
 
+    // all quizzes realedted here ....
+
+    // addmin add the quizzes
+    app.post("/admin/quizzes", async (req, res) => {
+      const result = await allquies.insertOne(req.body);
+      res.send(result);
+    });
+
+    // get the all quizzes for user ....
+    app.get("/quizzes", async (req, res) => {
+      const result = await allquies.find().toArray();
+      res.send(result);
+    });
+
+    // addmin manage about quizzes.....
+    app.delete("/quizzes/:id", async (req, res) => {
+      const result = await allquies.deleteOne({
+        _id: new ObjectId(req.params.id),
+      });
+      res.send(result);
+    });
+
+    //  POST quiz results......
+    app.post("/quizResults", async (req, res) => {
+      try {
+        const result = req.body;
+
+        if (!result.email || !result.totalQuestions) {
+          return res.status(400).send({ error: "Missing required fields" });
+        }
+
+        result.createdAt = new Date();
+
+        const save = await quizResult.insertOne(result);
+        res.send({
+          success: true,
+          message: "Result saved",
+          id: save.insertedId,
+        });
+      } catch (error) {
+        console.error("❌ Error saving result:", error);
+        res.status(500).send({ error: "Failed to save quiz result" });
+      }
+    });
+
+    //  Get quiz result by email for user......
+    app.get("/quizResults/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const result = await quizResult.findOne({ email });
+
+        if (!result) {
+          return res
+            .status(404)
+            .json({ success: false, message: "No result found" });
+        }
+
+        res.json({ success: true, data: result });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    //  Get all quiz results (optional for admin)
+    app.get("/quizResults", async (req, res) => {
+      try {
+        const results = await quizResult.find().toArray();
+        res.json({ success: true, data: results });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
     // announcements
 
     try {
@@ -1907,6 +2233,35 @@ async function run() {
               .json({ success: false, message: "Announcement not found" });
           }
 
+          // on publish, create and broadcast a notification
+          if (action === "publish") {
+            try {
+              const ann = await announcementsCollection.findOne({
+                _id: new ObjectId(id),
+              });
+              const notif = {
+                type: "announcement",
+                recipientUid: null,
+                audience: "all",
+                actorUid: req.user?.uid || null,
+                title: "Announcement published",
+                body: ann?.title || "New announcement",
+                link: "/announcements",
+                meta: { announcementId: id },
+                readBy: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              const insN = await notificationsColl.insertOne(notif);
+              io.emit("notification:new", { ...notif, _id: insN.insertedId });
+            } catch (e) {
+              console.warn(
+                "broadcast announcement notification failed:",
+                e?.message
+              );
+            }
+          }
+
           res.json({ success: true, message: "Action applied" });
         } catch (err) {
           console.error("POST /admin/announcements/:id/action error:", err);
@@ -2000,6 +2355,173 @@ async function run() {
     });
 
 
+    // ------------ Notifications APIs ------------
+    // POST /notifications (optional utility)
+    app.post("/notifications", verifyToken, async (req, res) => {
+      try {
+        const payload = req.body || {};
+        const now = new Date().toISOString();
+        const doc = {
+          type: payload.type,
+          recipientUid: payload.recipientUid ?? null,
+          audience: payload.audience ?? null,
+          actorUid: payload.actorUid ?? null,
+          title: payload.title ?? "",
+          body: payload.body ?? "",
+          link: payload.link ?? "/",
+          meta: payload.meta ?? {},
+          readAt: payload.recipientUid ? null : undefined,
+          readBy: payload.audience === "all" ? [] : undefined,
+          createdAt: now,
+          updatedAt: now,
+        };
+        const ins = await notificationsColl.insertOne(doc);
+        res.status(201).json({ success: true, id: ins.insertedId, data: doc });
+      } catch (e) {
+        console.error("POST /notifications error:", e);
+        res.status(500).json({ success: false, message: e.message });
+      }
+    });
+
+    // GET /notifications?uid=&page=&limit=
+    app.get("/notifications", verifyToken, async (req, res) => {
+      try {
+        const uid = (req.query.uid || "").trim();
+        const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+        const limit = Math.min(
+          Math.max(parseInt(req.query.limit || "20", 10), 1),
+          50
+        );
+        if (!uid)
+          return res
+            .status(400)
+            .json({ success: false, message: "uid required" });
+
+        const [userSpecific, broadcast] = await Promise.all([
+          notificationsColl
+            .find({ recipientUid: uid })
+            .sort({ createdAt: -1 })
+            .limit(limit * 3)
+            .toArray(),
+          notificationsColl
+            .find({
+              audience: "all",
+              $or: [{ readBy: { $exists: false } }, { readBy: { $ne: uid } }],
+            })
+            .sort({ createdAt: -1 })
+            .limit(limit * 3)
+            .toArray(),
+        ]);
+
+        const merged = [...userSpecific, ...broadcast].sort((a, b) =>
+          (b.createdAt || "").localeCompare(a.createdAt || "")
+        );
+
+        const start = (page - 1) * limit;
+        const data = merged.slice(start, start + limit);
+        res.json({ success: true, data });
+      } catch (e) {
+        console.error("GET /notifications error:", e);
+        res.status(500).json({ success: false, message: e.message });
+      }
+    });
+
+    // GET /notifications/unread-count?uid=
+    app.get("/notifications/unread-count", verifyToken, async (req, res) => {
+      try {
+        const uid = (req.query.uid || "").trim();
+        if (!uid)
+          return res
+            .status(400)
+            .json({ success: false, message: "uid required" });
+
+        const [userUnread, broadcastUnread] = await Promise.all([
+          notificationsColl.countDocuments({ recipientUid: uid, readAt: null }),
+          notificationsColl.countDocuments({
+            audience: "all",
+            $or: [{ readBy: { $exists: false } }, { readBy: { $ne: uid } }],
+          }),
+        ]);
+
+        res.json({ success: true, count: userUnread + broadcastUnread });
+      } catch (e) {
+        console.error("GET /notifications/unread-count error:", e);
+        res.status(500).json({ success: false, message: e.message });
+      }
+    });
+
+    // POST /notifications/:id/read
+    app.post("/notifications/:id/read", verifyToken, async (req, res) => {
+      try {
+        const { id } = req.params;
+        const uid =
+          req.body?.uid ||
+          req.query?.uid ||
+          req.decoded?.uid ||
+          req.decoded?.email;
+        if (!uid)
+          return res
+            .status(400)
+            .json({ success: false, message: "uid required" });
+
+        const doc = await notificationsColl.findOne({
+          _id: new ObjectId(id),
+        });
+        if (!doc)
+          return res.status(404).json({ success: false, message: "Not found" });
+
+        const now = new Date().toISOString();
+        if (doc.audience === "all") {
+          await notificationsColl.updateOne(
+            { _id: doc._id },
+            { $addToSet: { readBy: uid }, $set: { updatedAt: now } }
+          );
+        } else if (doc.recipientUid === uid) {
+          await notificationsColl.updateOne(
+            { _id: doc._id },
+            { $set: { readAt: now, updatedAt: now } }
+          );
+        } else {
+          return res.status(403).json({ success: false, message: "Forbidden" });
+        }
+
+        res.json({ success: true });
+      } catch (e) {
+        console.error("POST /notifications/:id/read error:", e);
+        res.status(500).json({ success: false, message: e.message });
+      }
+    });
+
+    // POST /notifications/read-all  { uid }
+    app.post("/notifications/read-all", verifyToken, async (req, res) => {
+      try {
+        const uid = req.body?.uid || req.decoded?.uid || req.decoded?.email;
+        if (!uid)
+          return res
+            .status(400)
+            .json({ success: false, message: "uid required" });
+
+        const now = new Date().toISOString();
+        await Promise.all([
+          notificationsColl.updateMany(
+            { recipientUid: uid, readAt: null },
+            { $set: { readAt: now, updatedAt: now } }
+          ),
+          notificationsColl.updateMany(
+            {
+              audience: "all",
+              $or: [{ readBy: { $exists: false } }, { readBy: { $ne: uid } }],
+            },
+            { $addToSet: { readBy: uid } }
+          ),
+        ]);
+
+        res.json({ success: true });
+      } catch (e) {
+        console.error("POST /notifications/read-all error:", e);
+        res.status(500).json({ success: false, message: e.message });
+      }
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");

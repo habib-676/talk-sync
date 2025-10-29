@@ -53,7 +53,7 @@ export default function BadgesPreview({
       <div className="maximum-w mx-auto px-4 sm:px-6 lg:px-8">
         {/* header */}
         <header className="mb-8 md:mb-12 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold text-gray-900 leading-tight">
             Badges & Gamification — Level up as you speak
           </h1>
           <p className="mt-3 text-gray-600 max-w-2xl mx-auto text-base sm:text-lg">

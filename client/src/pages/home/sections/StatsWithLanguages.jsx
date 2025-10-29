@@ -128,10 +128,10 @@ export default function LanguageExchangeStats() {
         variants={headerVariants}
       >
         <motion.h2
-          className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6"
+          className="text-3xl font-bold  mb-6"
           variants={headerVariants}
         >
-          Connect & Exchange Languages 🌐
+          CONNECT & EXCHANGE LANGUAGES 🌐
         </motion.h2>
         <motion.p
           className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"

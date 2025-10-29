@@ -39,7 +39,7 @@ const Home = () => {
       <section>
         <ChooseUs></ChooseUs>
       </section>
-      <section>
+      <section className="bg-gray-100">
         <Faq />
       </section>
     </div>

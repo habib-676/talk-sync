@@ -12,7 +12,11 @@ import {
   BookOpen,
   Settings,
   Star,
+  Trophy,
+  FilePlus2,
+  ClipboardList,
 } from "lucide-react";
+// import { FaQuestionCircle } from "react-icons/fa";
 
 export const SidebarItem = ({ to, icon, label }) => {
   const location = useLocation();
@@ -24,10 +28,9 @@ export const SidebarItem = ({ to, icon, label }) => {
     <NavLink
       to={to}
       className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-base font-medium
-        ${
-          isActive
-            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105"
-            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+        ${isActive
+          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105"
+          : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         }`}
     >
       {icon}
@@ -59,11 +62,22 @@ export const AdminSidebarLinks = () => {
         icon={<Megaphone size={20} />}
         label="Announcements"
       />
-      {/* <SidebarItem
-        to="/dashboard/admin/settings"
-        icon={<Settings size={20} />}
-        label="Settings"
-      /> */}
+      <SidebarItem
+        to="/dashboard/admin/quizzes"
+        icon={<FilePlus2 size={20} />}
+        label="Add Quizzes"
+      />
+      <SidebarItem
+        to="/dashboard/admin/manage"
+        icon={<ClipboardList size={20} />}
+        label="Manage Quizzes"
+      />
+
+      <SidebarItem
+        to="/dashboard/admin/showquizzeuser"
+        icon={<Users size={20} />}
+        label="Show Quizz Results"
+      />
     </>
   );
 };
@@ -119,6 +133,16 @@ export const LearnerSidebarLinks = () => {
         icon={<Settings size={20} />}
         label="Settings"
       /> */}
+
+
+
+      <SidebarItem
+        to="/dashboard/quizzes"
+        icon={<Trophy size={20} />}
+        label="Participate in quizzes"
+      />
+
+
     </>
   );
 };
