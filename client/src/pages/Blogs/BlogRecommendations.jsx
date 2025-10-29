@@ -1,96 +1,115 @@
 import { Link } from "react-router";
-import { FcRight } from "react-icons/fc";
+import { motion } from "framer-motion";
+import { FaBookOpen, FaClock, FaUser } from "react-icons/fa";
+
 export default function BlogRecommendations() {
   const recommendations = [
     {
       id: 1,
-      title: "Breaking the Fear: First Time Speaking with a Native",
+      title: "How to Build Daily Language Habits That Stick",
       description:
-        "Speaking with a native speaker for the very first time can feel overwhelming, but you’re not alone. This blog shares real learner stories, practical tips, and confidence-boosting exercises to help you break through anxiety. By the end, you’ll see that mistakes are part of learning and a key step toward fluency.",
-      readingTime: "5 min read",
+        "Learn powerful methods to turn language learning into a daily habit you actually enjoy. We cover habit stacking, motivation triggers, and mindset shifts.",
+      readingTime: "6 min read",
       author: "Talksync Team",
-      image: "https://i.ibb.co.com/5W5Mdfnt/undraw-conference-speaker-kl0d.png",
+      image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=900&q=80",
     },
     {
       id: 2,
-      title: "5 Cultural Mistakes Learners Often Make",
+      title: "The Art of Listening: Becoming Fluent Through Conversation",
       description:
-        "Learn common cultural misunderstandings and how to avoid them while practicing.",
-      readingTime: "6 min read",
+        "Fluency isn’t only about speaking—it’s about understanding. Discover proven strategies to sharpen your listening and decode meaning faster.",
+      readingTime: "5 min read",
       author: "Maria Gomez",
-      image: "https://i.ibb.co.com/rKMNpkrT/undraw-online-community-3o0l.png",
+      image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&q=80",
     },
     {
       id: 3,
-      title: "Why Badges Keep You Motivated in Talksync",
+      title: "Motivation vs Consistency: What Actually Drives Progress",
       description:
-        "Gamification isn’t just a buzzword—it’s a proven way to keep learners motivated. In this blog, we explore how badges in Talksync celebrate your milestones, encourage consistency, and transform small wins into lasting progress. You’ll discover the psychology behind why these little rewards push learners to keep going.",
-      readingTime: "4 min read",
-      author: "Talksync Research",
-      image: "https://i.ibb.co.com/5hRnJWd3/undraw-creative-flow-t3kz.png",
+        "Find out why consistency beats motivation every time, and how to stay on track even on low-energy days. Simple tips for long-term success.",
+      readingTime: "7 min read",
+      author: "David Kim",
+      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80",
     },
     {
       id: 4,
-      title: "Language Exchange vs Traditional Classes",
+      title: "Top 5 Apps to Boost Your Speaking Confidence",
       description:
-        "Should you choose a classroom or a peer-to-peer exchange? This post compares the strengths and limitations of both methods, from structured lessons to real-life conversations. By weighing flexibility, cost, and learning style, you’ll be able to decide which approach fits your fluency goals best.",
-      readingTime: "7 min read",
-      author: "David Kim",
-      image: "https://i.ibb.co.com/bnG4PXM/undraw-youtube-tutorial-xgp1.png",
+        "From Talksync to pronunciation trainers—these apps can transform your learning experience and help you speak confidently anywhere.",
+      readingTime: "4 min read",
+      author: "Talksync Research",
+      image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=900&q=80",
     },
     {
       id: 5,
-      title: "How to Make Online Sessions Engaging",
+      title: "Cultural Intelligence: The Secret to Real Communication",
       description:
-        "Virtual lessons can easily feel dull if they lack energy and structure. This article introduces creative ways to make online sessions interactive, including language games, roleplay scenarios, and fun prompts. Whether you’re a tutor or a learner, these strategies will help keep conversations lively and effective.",
-      readingTime: "5 min read",
-      author: "Talksync Tutors",
-      image: "https://i.ibb.co.com/67vmWjSB/undraw-online-learning-tgmv.png",
+        "Speaking fluently isn’t enough—understanding culture builds connection. Learn how to avoid missteps and communicate naturally across borders.",
+      readingTime: "8 min read",
+      author: "Community Spotlight",
+      image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=900&q=80",
     },
     {
       id: 6,
-      title: "Success Story: From Beginner to Fluent in One Year",
+      title: "Success Story: How Small Wins Create Big Progress",
       description:
-        "Fluency in just twelve months sounds impossible—but this inspiring learner’s journey proves otherwise. Starting with only basic greetings, they committed to daily practice, overcame self-doubt, and built confidence step by step. This story shows that with dedication and the right tools, fast progress is within reach.",
-      readingTime: "8 min read",
-      author: "Community Spotlight",
-      image: "https://i.ibb.co.com/60Lh6ngW/undraw-winners-fre4.png",
+        "One learner’s inspiring story on how celebrating tiny achievements turned fear into confidence and built unstoppable momentum.",
+      readingTime: "6 min read",
+      author: "Talksync Tutors",
+      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900&q=80",
     },
   ];
 
   return (
-    <section className="my-10 px-6 lg:px-20">
-      <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10">
-  <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
-    Handpicked 
-  </span>{" "}
-  Reads for You
-</h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recommendations.map((item) => (
-          <Link
-            to={`/blogs/${item.id}`}
-            key={item.id}
-            className="block bg-white shadow-md rounded-xl overflow-hidden hover:shadow-lg transition"
-          >
-            {/* Blog Image */}
-            <img
-              src={item.image}
-              alt={item.title}
-              className="w-full h-100 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-accent mb-2">
-                {item.title}
-              </h3>
-              <p className="text-gray-600 text-sm mb-3">{item.description}</p>
-             <p className="flex items-center gap-1 text-xs text-indigo-500 font-medium">
-  {item.readingTime}
-  <FcRight className="text-sm" />
-</p>
+    <section className="my-14 px-6 lg:px-20">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-12 tracking-tight">
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
+          Handpicked
+        </span>{" "}
+        Reads for You
+      </h2>
 
-            </div>
-          </Link>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {recommendations.map((item, index) => (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.1 }}
+            viewport={{ once: true }}
+          >
+            <Link
+              to={`/blogs/${item.id}`}
+              className="group block bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden border border-gray-100 hover:-translate-y-1 transition-all duration-300"
+            >
+              <div className="overflow-hidden relative">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              </div>
+
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-indigo-600 transition-colors duration-300">
+                  {item.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                  {item.description}
+                </p>
+
+                <div className="flex items-center justify-between text-xs text-indigo-500 font-medium">
+                  <p className="flex items-center gap-1">
+                    <FaClock /> {item.readingTime}
+                  </p>
+                  <p className="flex items-center gap-1 text-gray-500">
+                    <FaUser /> {item.author}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </section>

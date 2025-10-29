@@ -74,9 +74,9 @@ export default function SuccessStoriesSection() {
   return (
     <section className="bg-gray-50 py-16">
       <div className="max-w-[1280px] mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10">
+        <h2 className="text-3xl md:text-4xl mt-5 font-bold text-center mb-10">Learners’
   <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
-    Learners’ Journeys
+     Journeys
   </span>
 </h2>
         {/* 4-columns on md+, 2 on sm, 1 on xs */}
