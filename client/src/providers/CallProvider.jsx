@@ -49,6 +49,10 @@ const CallProvider = ({ children }) => {
   const localStreamRef = useRef(null);
   const roomNameRef = useRef(null);
 
+  // media states
+  const [micOn, setMicOn] = useState(true);
+  const [camOn, setCamOn] = useState(true);
+
   const setCallStatusSafe = (s) => {
     callStatusRef.current = s;
     setCallState((prev) => ({ ...prev, status: s }));
@@ -206,6 +210,8 @@ const CallProvider = ({ children }) => {
     isCallerRef.current = false;
     otherUserIdRef.current = null;
     otherUserInfoRef.current = null;
+    setMicOn(true);
+    setCamOn(true);
 
     disconnectLiveKit();
 
@@ -386,6 +392,33 @@ const CallProvider = ({ children }) => {
     cleanUpCall();
   }, [incomingCaller, socketRef, cleanUpCall, user]);
 
+  // mic/cam toggles
+  const toggleMic = useCallback(async () => {
+    setMicOn((prev) => {
+      const next = !prev;
+      try {
+        const room = lkRoomRef.current;
+        if (room) room.localParticipant.setMicrophoneEnabled(next);
+      } catch (e) {
+        console.debug("setMicrophoneEnabled error", e);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleCam = useCallback(async () => {
+    setCamOn((prev) => {
+      const next = !prev;
+      try {
+        const room = lkRoomRef.current;
+        if (room) room.localParticipant.setCameraEnabled(next);
+      } catch (e) {
+        console.debug("setCameraEnabled error", e);
+      }
+      return next;
+    });
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       // state
@@ -429,6 +462,10 @@ const CallProvider = ({ children }) => {
         onDecline={decline}
         onEnd={end}
         onCancel={cancel}
+        micOn={micOn}
+        camOn={camOn}
+        onToggleMic={toggleMic}
+        onToggleCam={toggleCam}
         localVideoRef={localVideoRef}
         remoteVideoRef={remoteVideoRef}
       />

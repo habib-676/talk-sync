@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   MdMic,
   MdMicOff,
@@ -21,16 +21,16 @@ const VideoCallModal = ({
   onDecline,
   onEnd,
   onCancel,
+  micOn = true,
+  camOn = true,
+  onToggleMic,
+  onToggleCam,
   localVideoRef,
   remoteVideoRef,
 }) => {
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
-
   useEffect(() => {
     if (!visible) {
-      setMicOn(true);
-      setCamOn(true);
+      // reset handled by provider; keep here in case of standalone usage
     }
   }, [visible]);
 
@@ -146,7 +146,7 @@ const VideoCallModal = ({
           {/* Center controls */}
           <div className="flex items-center gap-3 sm:gap-4">
             <button
-              onClick={() => setMicOn((v) => !v)}
+              onClick={onToggleMic}
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center"
               title={micOn ? "Mute" : "Unmute"}
             >
@@ -157,7 +157,7 @@ const VideoCallModal = ({
               )}
             </button>
             <button
-              onClick={() => setCamOn((v) => !v)}
+              onClick={onToggleCam}
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center"
               title={camOn ? "Turn camera off" : "Turn camera on"}
             >
