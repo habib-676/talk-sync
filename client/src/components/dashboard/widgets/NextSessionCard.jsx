@@ -46,24 +46,6 @@ export default function NextSessionCard({ nextSession, onDetails, onJoin, showFe
             {timeISO && expired && <div className="mt-3 text-xs text-amber-600">Starting now or in progress</div>}
           </div>
         </div>
-
-        <div className="flex flex-col items-end gap-2">
-          {joinUrl ? (
-            joinUrl.startsWith("/") ? (
-              <Link to={joinUrl} className="px-3 py-2 rounded-full bg-indigo-600 text-white text-sm">Join</Link>
-            ) : (
-              <a href={joinUrl} target="_blank" rel="noreferrer" className="px-3 py-2 rounded-full bg-indigo-600 text-white text-sm">Join</a>
-            )
-          ) : (
-            <button onClick={() => onJoin && onJoin(nextSession)} className="px-3 py-2 rounded-full border text-sm">Join</button>
-          )}
-
-          <button onClick={() => onDetails && onDetails(nextSession)} className="px-3 py-2 rounded-full border text-sm">Details</button>
-
-          {showFeedbackLink && sessionId && (nextSession.status === "accepted" || nextSession.status === "completed") && (
-            <Link to={`/dashboard/feedback/${encodeURIComponent(sessionId)}`} className="text-xs text-indigo-600 mt-1 hover:underline">Give feedback</Link>
-          )}
-        </div>
       </div>
     </div>
   );
