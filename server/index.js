@@ -7,12 +7,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
-
 const http = require("http");
 const { Server } = require("socket.io");
 const { queryAgent } = require("./agent/queryGemini");
 const speakingGemini = require("./routes/speaking");
-const { AccessToken, RoomGrant } = require("livekit-server-sdk");
+const { AccessToken } = require("livekit-server-sdk");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -279,6 +278,57 @@ async function run() {
 
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
+    });
+
+    // LiveKit token endpoint
+    // Issues a short-lived access token for a specific room and identity
+    // Usage: GET /livekit/token?room=<roomName>&identity=<userId>&name=<displayName>
+    app.get("/livekit/token", async (req, res) => {
+      try {
+        const LK_URL = process.env.LIVEKIT_URL;
+        const LK_KEY = process.env.LIVEKIT_API_KEY;
+        const LK_SECRET = process.env.LIVEKIT_API_SECRET;
+
+        if (!LK_URL || !LK_KEY || !LK_SECRET) {
+          return res.status(500).json({
+            success: false,
+            message: "LiveKit is not configured on the server",
+          });
+        }
+
+        const room = (req.query.room || "").toString().trim();
+        const identity = (req.query.identity || "").toString().trim();
+        const name = (req.query.name || identity).toString().trim();
+
+        if (!room || !identity) {
+          return res.status(400).json({
+            success: false,
+            message: "room and identity are required",
+          });
+        }
+
+        // Create an access token that allows joining/publishing/subscribing in a specific room
+        const at = new AccessToken(LK_KEY, LK_SECRET, {
+          identity,
+          name,
+        });
+        // Grant permissions (scoped to room)
+        at.addGrant({
+          room,
+          roomJoin: true,
+          canPublish: true,
+          canSubscribe: true,
+          canPublishData: true,
+        });
+
+        const token = await at.toJwt();
+        return res.json({ success: true, url: LK_URL, token });
+      } catch (e) {
+        console.error("/livekit/token error", e);
+        return res
+          .status(500)
+          .json({ success: false, message: e?.message || "Token error" });
+      }
     });
 
     // socket.io
@@ -894,15 +944,15 @@ async function run() {
 
         const wordsArr = Array.isArray(words)
           ? words
-            .map((w) => (typeof w === "string" ? w.trim() : ""))
-            .filter(Boolean)
-            .slice(0, 10)
+              .map((w) => (typeof w === "string" ? w.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 10)
           : [];
         const sentencesArr = Array.isArray(sentences)
           ? sentences
-            .map((s) => (typeof s === "string" ? s.trim() : ""))
-            .filter(Boolean)
-            .slice(0, 5)
+              .map((s) => (typeof s === "string" ? s.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 5)
           : [];
 
         const doc = {
@@ -1005,14 +1055,12 @@ async function run() {
           );
         }
 
-        res
-          .status(201)
-          .json({
-            success: true,
-            id: result.insertedId,
-            data: doc,
-            badgesUnlocked: toAdd || [],
-          });
+        res.status(201).json({
+          success: true,
+          id: result.insertedId,
+          data: doc,
+          badgesUnlocked: toAdd || [],
+        });
       } catch (err) {
         console.error("POST /feedbacks/evaluate error:", err);
         res.status(500).json({ success: false, message: err.message });
@@ -1087,10 +1135,19 @@ async function run() {
     app.get("/dashboard/overview", async (req, res) => {
       try {
         const email = (req.query.email || "").toLowerCase().trim();
-        if (!email) return res.status(400).json({ success: false, message: "email is required" });
+        if (!email)
+          return res
+            .status(400)
+            .json({ success: false, message: "email is required" });
 
-        const user = await usersCollections.findOne({ email }, { projection: { password: 0 } });
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+        const user = await usersCollections.findOne(
+          { email },
+          { projection: { password: 0 } }
+        );
+        if (!user)
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found" });
 
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -1099,8 +1156,13 @@ async function run() {
         const sessionsThisWeek = await sessionsCollections.countDocuments({
           $and: [
             { $or: [{ fromEmail: email }, { toEmail: email }] },
-            { createdAt: { $gte: weekAgo.toISOString(), $lte: now.toISOString() } }
-          ]
+            {
+              createdAt: {
+                $gte: weekAgo.toISOString(),
+                $lte: now.toISOString(),
+              },
+            },
+          ],
         });
 
         // sessionsDone used for badges/points
@@ -1108,8 +1170,8 @@ async function run() {
         const sessionsDone = await sessionsCollections.countDocuments({
           $and: [
             { $or: [{ fromEmail: email }, { toEmail: email }] },
-            { status: { $in: completeStatuses } }
-          ]
+            { status: { $in: completeStatuses } },
+          ],
         });
 
         // nextSession: prefer user.nextSession (if valid and in future), otherwise query sessions collection
@@ -1128,49 +1190,83 @@ async function run() {
             $and: [
               { $or: [{ fromEmail: email }, { toEmail: email }] },
               { status: "accepted" },
-              { $or: [{ scheduledAt: { $gte: now.toISOString() } }, { startTime: { $gte: now.toISOString() } }] }
-            ]
+              {
+                $or: [
+                  { scheduledAt: { $gte: now.toISOString() } },
+                  { startTime: { $gte: now.toISOString() } },
+                ],
+              },
+            ],
           };
-          const s = await sessionsCollections.find(q).sort({ scheduledAt: 1, startTime: 1, createdAt: 1 }).limit(1).toArray();
+          const s = await sessionsCollections
+            .find(q)
+            .sort({ scheduledAt: 1, startTime: 1, createdAt: 1 })
+            .limit(1)
+            .toArray();
           if (s && s.length) {
             const doc = s[0];
-            const partnerEmail = (doc.fromEmail || "").toLowerCase() === email ? doc.toEmail : doc.fromEmail;
+            const partnerEmail =
+              (doc.fromEmail || "").toLowerCase() === email
+                ? doc.toEmail
+                : doc.fromEmail;
             nextSession = {
               sessionId: doc._id.toString(),
               scheduledAt: doc.scheduledAt || doc.startTime || null,
               startTime: doc.startTime || doc.scheduledAt || null,
               partner: partnerEmail,
-              partnerName: doc.fromEmail?.toLowerCase() === partnerEmail ? doc.fromName : doc.toName,
+              partnerName:
+                doc.fromEmail?.toLowerCase() === partnerEmail
+                  ? doc.fromName
+                  : doc.toName,
               title: doc.title || "Practice session",
               joinUrl: doc.joinUrl || null,
               status: doc.status || null,
-              durationMinutes: doc.durationMinutes || null
+              durationMinutes: doc.durationMinutes || null,
             };
           }
         }
 
         // suggested partners logic (as before)
-        const learning = Array.isArray(user.learning_language) ? user.learning_language : user.learning_language ? [user.learning_language] : [];
+        const learning = Array.isArray(user.learning_language)
+          ? user.learning_language
+          : user.learning_language
+          ? [user.learning_language]
+          : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
-        const suggestedPartners = await usersCollections.find(partnerQuery, {
-          projection: { name: 1, email: 1, native_language: 1, image: 1, learning_language: 1 }
-        }).limit(6).toArray();
+        const suggestedPartners = await usersCollections
+          .find(partnerQuery, {
+            projection: {
+              name: 1,
+              email: 1,
+              native_language: 1,
+              image: 1,
+              learning_language: 1,
+            },
+          })
+          .limit(6)
+          .toArray();
 
         const learners = await usersCollections.countDocuments();
-        const countryAgg = await usersCollections.aggregate([
-          { $match: { user_country: { $exists: true, $ne: "" } } },
-          { $group: { _id: "$user_country" } },
-          { $count: "distinctCountries" }
-        ]).toArray();
-        const countriesCount = (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
-        const langAgg = await usersCollections.aggregate([
-          { $match: { native_language: { $exists: true, $ne: "" } } },
-          { $group: { _id: "$native_language" } },
-          { $count: "distinctLanguages" }
-        ]).toArray();
-        const languagesCount = (langAgg[0] && langAgg[0].distinctLanguages) || 0;
+        const countryAgg = await usersCollections
+          .aggregate([
+            { $match: { user_country: { $exists: true, $ne: "" } } },
+            { $group: { _id: "$user_country" } },
+            { $count: "distinctCountries" },
+          ])
+          .toArray();
+        const countriesCount =
+          (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
+        const langAgg = await usersCollections
+          .aggregate([
+            { $match: { native_language: { $exists: true, $ne: "" } } },
+            { $group: { _id: "$native_language" } },
+            { $count: "distinctLanguages" },
+          ])
+          .toArray();
+        const languagesCount =
+          (langAgg[0] && langAgg[0].distinctLanguages) || 0;
 
         const summary = {
           nextSession,
@@ -1181,7 +1277,7 @@ async function run() {
           suggestedPartners,
           learners: learners || 0,
           countries: countriesCount,
-          languages: languagesCount
+          languages: languagesCount,
         };
 
         res.json({ success: true, summary });
@@ -1367,18 +1463,32 @@ async function run() {
         const { id } = req.params;
         const { actionByEmail } = req.body;
         if (!actionByEmail)
-          return res.status(400).json({ success: false, message: "actionByEmail required" });
+          return res
+            .status(400)
+            .json({ success: false, message: "actionByEmail required" });
 
         if (!ObjectId.isValid(id))
-          return res.status(400).json({ success: false, message: "Invalid session id" });
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid session id" });
 
         // fetch session
-        const session = await sessionsCollections.findOne({ _id: new ObjectId(id) });
-        if (!session) return res.status(404).json({ success: false, message: "Session not found" });
+        const session = await sessionsCollections.findOne({
+          _id: new ObjectId(id),
+        });
+        if (!session)
+          return res
+            .status(404)
+            .json({ success: false, message: "Session not found" });
 
         // only the receiver can accept
-        if ((session.toEmail || "").toLowerCase() !== (actionByEmail || "").toLowerCase()) {
-          return res.status(403).json({ success: false, message: "Only receiver can accept" });
+        if (
+          (session.toEmail || "").toLowerCase() !==
+          (actionByEmail || "").toLowerCase()
+        ) {
+          return res
+            .status(403)
+            .json({ success: false, message: "Only receiver can accept" });
         }
 
         const now = new Date().toISOString();
@@ -1399,21 +1509,37 @@ async function run() {
           title: session.title || "Practice session",
           joinUrl: session.joinUrl || null,
           durationMinutes: session.durationMinutes || null,
-          status: "accepted"
+          status: "accepted",
         };
 
         // update 'nextSession' for both users: for requester set partner=toUser, for receiver set partner=fromUser
         // requester
         await usersCollections.updateOne(
           { email: session.fromEmail.toLowerCase() },
-          { $set: { nextSession: { ...nextSessionObj, partnerEmail: session.toEmail, partnerName: session.toName || "" } } },
+          {
+            $set: {
+              nextSession: {
+                ...nextSessionObj,
+                partnerEmail: session.toEmail,
+                partnerName: session.toName || "",
+              },
+            },
+          },
           { upsert: false }
         );
 
         // receiver
         await usersCollections.updateOne(
           { email: session.toEmail.toLowerCase() },
-          { $set: { nextSession: { ...nextSessionObj, partnerEmail: session.fromEmail, partnerName: session.fromName || "" } } },
+          {
+            $set: {
+              nextSession: {
+                ...nextSessionObj,
+                partnerEmail: session.fromEmail,
+                partnerName: session.fromName || "",
+              },
+            },
+          },
           { upsert: false }
         );
 
@@ -1433,12 +1559,29 @@ async function run() {
       }
     });
 
-
     // at top of your server file (once)
     const BADGES = [
-      { id: "bronze-10", name: "Bronze Learner", desc: "Complete 5 sessions", threshold: 5, color: "bg-yellow-500" },
-      { id: "silver-25", name: "Silver Speaker", desc: "Complete 15 sessions", threshold: 15, color: "bg-slate-400" },
-      { id: "gold-50", name: "Gold Communicator", desc: "Complete 40 sessions", threshold: 40, color: "bg-amber-600" },
+      {
+        id: "bronze-10",
+        name: "Bronze Learner",
+        desc: "Complete 5 sessions",
+        threshold: 5,
+        color: "bg-yellow-500",
+      },
+      {
+        id: "silver-25",
+        name: "Silver Speaker",
+        desc: "Complete 15 sessions",
+        threshold: 15,
+        color: "bg-slate-400",
+      },
+      {
+        id: "gold-50",
+        name: "Gold Communicator",
+        desc: "Complete 40 sessions",
+        threshold: 40,
+        color: "bg-amber-600",
+      },
       // add more badges here
     ];
 
@@ -1456,25 +1599,35 @@ async function run() {
     app.get("/badges/user", async (req, res) => {
       try {
         const email = (req.query.email || "").toLowerCase().trim();
-        if (!email) return res.status(400).json({ success: false, message: "email query required" });
+        if (!email)
+          return res
+            .status(400)
+            .json({ success: false, message: "email query required" });
 
         // find user
-        const user = await usersCollections.findOne({ email }, { projection: { badges: 1 } });
+        const user = await usersCollections.findOne(
+          { email },
+          { projection: { badges: 1 } }
+        );
 
         // compute sessions completed count for this user (status 'completed' or 'finished' - adapt to your statuses)
         const completeStatuses = ["completed", "finished", "ended"];
         const sessionsDone = await sessionsCollections.countDocuments({
           $and: [
             { $or: [{ fromEmail: email }, { toEmail: email }] },
-            { status: { $in: completeStatuses } }
-          ]
+            { status: { $in: completeStatuses } },
+          ],
         });
 
         // compute earned badges by threshold
-        const earned = BADGES.filter(b => (b.threshold || 0) > 0 && sessionsDone >= b.threshold).map(b => b.id);
+        const earned = BADGES.filter(
+          (b) => (b.threshold || 0) > 0 && sessionsDone >= b.threshold
+        ).map((b) => b.id);
 
         // also merge any badges stored in user doc (if present)
-        const storedBadges = Array.isArray(user?.badges) ? user.badges.map(String) : [];
+        const storedBadges = Array.isArray(user?.badges)
+          ? user.badges.map(String)
+          : [];
         const mergedEarned = Array.from(new Set([...earned, ...storedBadges]));
 
         res.json({
@@ -1482,8 +1635,8 @@ async function run() {
           userBadges: {
             email,
             sessionsDone,
-            earned: mergedEarned
-          }
+            earned: mergedEarned,
+          },
         });
       } catch (err) {
         console.error("GET /badges/user error", err);
@@ -1803,8 +1956,8 @@ async function run() {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-                ? messagesCollections
-                : sessionsCollections;
+              ? messagesCollections
+              : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1980,8 +2133,8 @@ async function run() {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-          ? false
-          : v;
+        ? false
+        : v;
 
     app.get(
       "/admin/announcements",
@@ -2218,30 +2371,32 @@ async function run() {
     );
 
     // AI agent
-// AI Agent Route - This should be placed BEFORE other routes
+    // AI Agent Route - This should be placed BEFORE other routes
     app.post("/agent/chat", async (req, res) => {
       try {
         const { question } = req.body || {};
         if (!question) {
-          return res.status(400).json({ success: false, message: "question required" });
+          return res
+            .status(400)
+            .json({ success: false, message: "question required" });
         }
 
         if (!process.env.GEMINI_API_KEY) {
-          return res.status(500).json({ 
-            success: false, 
-            message: "GEMINI_API_KEY missing" 
+          return res.status(500).json({
+            success: false,
+            message: "GEMINI_API_KEY missing",
           });
         }
 
         console.log("AI Agent question:", question);
         const answer = await queryAgent(question);
-        
+
         res.json({ success: true, answer });
       } catch (err) {
         console.error("AI Agent Error:", err);
-        res.status(500).json({ 
-          success: false, 
-          message: err?.message || "Agent failed" 
+        res.status(500).json({
+          success: false,
+          message: err?.message || "Agent failed",
         });
       }
     });
@@ -2252,33 +2407,34 @@ async function run() {
         if (!process.env.GEMINI_API_KEY) {
           return res.json({ success: false, message: "No API key configured" });
         }
-        
+
         const { GoogleGenerativeAI } = require("@google/generative-ai");
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        
+
         // Test with a simple model
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        
-        const result = await model.generateContent("Say 'Hello from TalkSync AI' in one sentence.");
+
+        const result = await model.generateContent(
+          "Say 'Hello from TalkSync AI' in one sentence."
+        );
         const response = result.response;
         const text = response.text();
-        
-        res.json({ 
-          success: true, 
+
+        res.json({
+          success: true,
           message: "Gemini API is working!",
           response: text,
-          model: "gemini-pro"
+          model: "gemini-pro",
         });
       } catch (err) {
         console.error("Gemini API test failed:", err);
-        res.status(500).json({ 
-          success: false, 
+        res.status(500).json({
+          success: false,
           error: err.message,
-          details: "Check your API key and model name"
+          details: "Check your API key and model name",
         });
       }
     });
-
 
     // ------------ Notifications APIs ------------
     // POST /notifications (optional utility)
@@ -2450,66 +2606,72 @@ async function run() {
 
     // all quizz related here........
     app.post("/admin/quizzes", async (req, res) => {
-  const result = await allquies.insertOne(req.body);
-  res.send(result);
-});
+      const result = await allquies.insertOne(req.body);
+      res.send(result);
+    });
 
-app.get("/quizzes", async (req, res) => {
-  const result = await allquies.find().toArray();
-  res.send(result);
-});
+    app.get("/quizzes", async (req, res) => {
+      const result = await allquies.find().toArray();
+      res.send(result);
+    });
 
+    app.delete("/quizzes/:id", async (req, res) => {
+      const result = await allquies.deleteOne({
+        _id: new ObjectId(req.params.id),
+      });
+      res.send(result);
+    });
 
-app.delete("/quizzes/:id", async (req, res) => {
-  const result = await allquies.deleteOne({ _id: new ObjectId(req.params.id) });
-  res.send(result);
-});
+    // 📝 POST quiz results
+    app.post("/quizResults", async (req, res) => {
+      try {
+        const result = req.body;
 
-// 📝 POST quiz results
-app.post("/quizResults", async (req, res) => {
-  try {
-    const result = req.body;
+        if (!result.email || !result.totalQuestions) {
+          return res.status(400).send({ error: "Missing required fields" });
+        }
 
-    if (!result.email || !result.totalQuestions) {
-      return res.status(400).send({ error: "Missing required fields" });
-    }
+        result.createdAt = new Date();
 
-    result.createdAt = new Date();
+        const save = await quizResult.insertOne(result);
+        res.send({
+          success: true,
+          message: "Result saved",
+          id: save.insertedId,
+        });
+      } catch (error) {
+        console.error("❌ Error saving result:", error);
+        res.status(500).send({ error: "Failed to save quiz result" });
+      }
+    });
 
-    const save = await quizResult.insertOne(result);
-    res.send({ success: true, message: "Result saved", id: save.insertedId });
-  } catch (error) {
-    console.error("❌ Error saving result:", error);
-    res.status(500).send({ error: "Failed to save quiz result" });
-  }
-});
+    // ✅ Get quiz result by email
+    app.get("/quizResults/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const result = await quizResult.findOne({ email });
 
-// ✅ Get quiz result by email
-app.get("/quizResults/:email", async (req, res) => {
-  try {
-    const email = req.params.email;
-    const result = await quizResult.findOne({ email });
+        if (!result) {
+          return res
+            .status(404)
+            .json({ success: false, message: "No result found" });
+        }
 
-    if (!result) {
-      return res.status(404).json({ success: false, message: "No result found" });
-    }
+        res.json({ success: true, data: result });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
 
-    res.json({ success: true, data: result });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-
-// ✅ Get all quiz results (optional for admin)
-app.get("/quizResults", async (req, res) => {
-  try {
-    const results = await quizResult.find().toArray();
-    res.json({ success: true, data: results });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+    // ✅ Get all quiz results (optional for admin)
+    app.get("/quizResults", async (req, res) => {
+      try {
+        const results = await quizResult.find().toArray();
+        res.json({ success: true, data: results });
+      } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");
