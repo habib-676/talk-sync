@@ -103,8 +103,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          secure: false, //in local ? false : true
+          sameSite: "lax", //local ? lax : none
         })
         .send({ success: true });
     });
@@ -436,21 +436,6 @@ async function run() {
     };
 
     // User related APIs
-
-    app.get("/user-role", verifyToken, async (req, res) => {
-      try {
-        const email = req.decoded?.email;
-        if (!email) return res.status(401).send({ message: "Unauthorized" });
-
-        const user = await usersCollections.findOne({ email });
-        if (!user) return res.status(404).send({ message: "User not found" });
-
-        res.send({ role: user.role || "learner" });
-      } catch (e) {
-        console.error("Error getting user role:", e);
-        res.status(500).send({ message: "Server error during role retrieval" });
-      }
-    });
 
     app.get("/user-role", verifyToken, async (req, res) => {
       try {
