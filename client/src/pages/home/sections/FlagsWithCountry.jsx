@@ -265,7 +265,7 @@ const FlagsWithCountry = () => {
           className="flex justify-center gap-4 mt-6 flex-wrap"
           variants={containerVariants}
         >
-          <Link to={"/follow"}>
+          <Link to={"/dashboard/follow"}>
             <motion.button
               className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-semibold hover:shadow-xl transition-all duration-300 flex items-center gap-2"
               variants={buttonVariants}
@@ -287,7 +287,7 @@ const FlagsWithCountry = () => {
             <motion.span variants={iconVariants} whileHover="hover">
               <FaVideo className="text-sm" />
             </motion.span>
-            Start Video Exchange
+            <Link to={"/dashboard/inbox"}> Start Video Exchange</Link>
           </motion.button>
         </motion.div>
       </motion.div>
@@ -439,7 +439,7 @@ const FlagsWithCountry = () => {
                     >
                       <FaExchangeAlt className="text-xs" />
                     </motion.span>
-                    Connect & Exchange
+                    <Link to={"/dashboard/follow"}> Connect & Exchange</Link>
                   </motion.button>
                 </Link>
               </motion.div>

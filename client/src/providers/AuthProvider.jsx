@@ -15,9 +15,10 @@ import {
 import { auth } from "../firebase-config/firebase.config";
 import { useRef } from "react";
 import { io } from "socket.io-client";
+import axiosSecure from "../hooks/useAxiosSecure";
 
 const googleProvider = new GoogleAuthProvider();
-const SOCKET_URL = `${import.meta.env.VITE_API_URL}`; // backend URL
+const SOCKET_URL = `${import.meta.env.VITE_API_URL}`;
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -29,7 +30,7 @@ const AuthProvider = ({ children }) => {
 
   // -------- SOCKET HANDLERS --------
   const connectSocket = (uid) => {
-    if (socketRef.current?.connected) return; // already connected
+    if (socketRef.current?.connected) return;
 
     socketRef.current = io(SOCKET_URL, {
       transports: ["polling", "websocket"],
@@ -153,14 +154,19 @@ const AuthProvider = ({ children }) => {
 
   // observe auth state change
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
-      console.log("Auth state changed, current user:", currentUser);
 
-      // socket logic
       if (currentUser) {
-        connectSocket(currentUser.uid); // auto-connect if user is already logged in
+        connectSocket(currentUser.uid);
+
+        try {
+          await axiosSecure.post("/jwt", { email: currentUser.email });
+          console.log("✅ JWT cookie refreshed successfully");
+        } catch (err) {
+          console.error("JWT refresh failed:", err);
+        }
       } else {
         disconnectSocket();
       }
