@@ -237,7 +237,7 @@ const FlagsWithCountry = () => {
 
   return (
     <motion.div
-      className="bg-secondary/5 py-10"
+      className="bg-primary/5 py-10"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}

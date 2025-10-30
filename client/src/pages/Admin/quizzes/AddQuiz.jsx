@@ -17,6 +17,7 @@ const AddQuiz = () => {
   const [success, setSuccess] = useState(false);
 
   const onSubmit = async (data) => {
+    // console.log (data)
     try {
       setLoading(true);
       await axios.post(`${import.meta.env.VITE_API_URL}/admin/quizzes`, data);
