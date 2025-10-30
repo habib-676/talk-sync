@@ -121,7 +121,7 @@ export function HeroBanner() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative h-[600px] flex items-center justify-center"
+            className="relative h-[600px] md:flex items-center justify-center hidden"
           >
             {/* Globe with connections in the center */}
             <GlobeWithConnections />
