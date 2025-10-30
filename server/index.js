@@ -1451,9 +1451,9 @@ async function run() {
 
     // at top of your server file (once)
     const BADGES = [
-      { id: "bronze-10", name: "Bronze Learner", desc: "Complete 5 sessions", threshold: 5, color: "bg-yellow-500" },
-      { id: "silver-25", name: "Silver Speaker", desc: "Complete 15 sessions", threshold: 15, color: "bg-slate-400" },
-      { id: "gold-50", name: "Gold Communicator", desc: "Complete 40 sessions", threshold: 40, color: "bg-amber-600" },
+      { id: "bronze-10", name: "Learner", desc: "Complete 5 sessions", threshold: 5, color: "bg-yellow-500" },
+      { id: "silver-25", name: "Speaker", desc: "Complete 15 sessions", threshold: 15, color: "bg-slate-400" },
+      { id: "gold-50", name: "Communicator", desc: "Complete 40 sessions", threshold: 40, color: "bg-amber-600" },
       // add more badges here
     ];
 
