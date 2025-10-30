@@ -1021,100 +1021,110 @@ async function run() {
     app.get("/dashboard/overview", async (req, res) => {
       try {
         const email = (req.query.email || "").toLowerCase().trim();
-        if (!email)
-          return res
-            .status(400)
-            .json({ success: false, message: "email is required" });
+        if (!email) return res.status(400).json({ success: false, message: "email is required" });
 
-        const user = await usersCollections.findOne(
-          { email },
-          { projection: { password: 0 } }
-        );
-        if (!user)
-          return res
-            .status(404)
-            .json({ success: false, message: "User not found" });
+        const user = await usersCollections.findOne({ email }, { projection: { password: 0 } });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-        const recent = Array.isArray(user.recent) ? user.recent : [];
-        const sessionsThisWeek = recent.filter((s) => {
-          if (!s.createdAt) return false;
-          const d = new Date(s.createdAt);
-          return d >= weekAgo && d <= now;
-        }).length;
+        // sessions this week (created in last 7 days involving user)
+        const sessionsThisWeek = await sessionsCollections.countDocuments({
+          $and: [
+            { $or: [{ fromEmail: email }, { toEmail: email }] },
+            { createdAt: { $gte: weekAgo.toISOString(), $lte: now.toISOString() } }
+          ]
+        });
 
-        let nextSession = user.nextSession || null;
-        if (!nextSession) {
-          const future = recent.filter(
-            (s) => s.startTime && new Date(s.startTime) > now
-          );
-          future.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-          nextSession = future.length ? future[0] : null;
+        // sessionsDone used for badges/points
+        const completeStatuses = ["completed", "finished", "ended"];
+        const sessionsDone = await sessionsCollections.countDocuments({
+          $and: [
+            { $or: [{ fromEmail: email }, { toEmail: email }] },
+            { status: { $in: completeStatuses } }
+          ]
+        });
+
+        // nextSession: prefer user.nextSession (if valid and in future), otherwise query sessions collection
+        let nextSession = null;
+        const userNext = user.nextSession;
+        if (userNext && (userNext.scheduledAt || userNext.startTime)) {
+          const iso = userNext.scheduledAt || userNext.startTime;
+          if (new Date(iso) > now) {
+            nextSession = userNext;
+          }
         }
 
-        const learning = Array.isArray(user.learning_language)
-          ? user.learning_language
-          : user.learning_language
-            ? [user.learning_language]
-            : [];
+        if (!nextSession) {
+          // find the nearest accepted/future session in sessions collection
+          const q = {
+            $and: [
+              { $or: [{ fromEmail: email }, { toEmail: email }] },
+              { status: "accepted" },
+              { $or: [{ scheduledAt: { $gte: now.toISOString() } }, { startTime: { $gte: now.toISOString() } }] }
+            ]
+          };
+          const s = await sessionsCollections.find(q).sort({ scheduledAt: 1, startTime: 1, createdAt: 1 }).limit(1).toArray();
+          if (s && s.length) {
+            const doc = s[0];
+            const partnerEmail = (doc.fromEmail || "").toLowerCase() === email ? doc.toEmail : doc.fromEmail;
+            nextSession = {
+              sessionId: doc._id.toString(),
+              scheduledAt: doc.scheduledAt || doc.startTime || null,
+              startTime: doc.startTime || doc.scheduledAt || null,
+              partner: partnerEmail,
+              partnerName: doc.fromEmail?.toLowerCase() === partnerEmail ? doc.fromName : doc.toName,
+              title: doc.title || "Practice session",
+              joinUrl: doc.joinUrl || null,
+              status: doc.status || null,
+              durationMinutes: doc.durationMinutes || null
+            };
+          }
+        }
+
+        // suggested partners logic (as before)
+        const learning = Array.isArray(user.learning_language) ? user.learning_language : user.learning_language ? [user.learning_language] : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
-        const suggestedPartners = await usersCollections
-          .find(partnerQuery, {
-            projection: {
-              name: 1,
-              email: 1,
-              native_language: 1,
-              image: 1,
-              learning_language: 1,
-            },
-          })
-          .limit(6)
-          .toArray();
+        const suggestedPartners = await usersCollections.find(partnerQuery, {
+          projection: { name: 1, email: 1, native_language: 1, image: 1, learning_language: 1 }
+        }).limit(6).toArray();
 
         const learners = await usersCollections.countDocuments();
-
-        // ====== REPLACED distinct() with aggregation to be API strict compatible ======
-        const countryAgg = await usersCollections
-          .aggregate([
-            { $match: { user_country: { $exists: true, $ne: "" } } },
-            { $group: { _id: "$user_country" } },
-            { $count: "distinctCountries" },
-          ])
-          .toArray();
-        const countriesCount =
-          (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
-
-        const langAgg = await usersCollections
-          .aggregate([
-            { $match: { native_language: { $exists: true, $ne: "" } } },
-            { $group: { _id: "$native_language" } },
-            { $count: "distinctLanguages" },
-          ])
-          .toArray();
-        const languagesCount =
-          (langAgg[0] && langAgg[0].distinctLanguages) || 0;
+        const countryAgg = await usersCollections.aggregate([
+          { $match: { user_country: { $exists: true, $ne: "" } } },
+          { $group: { _id: "$user_country" } },
+          { $count: "distinctCountries" }
+        ]).toArray();
+        const countriesCount = (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
+        const langAgg = await usersCollections.aggregate([
+          { $match: { native_language: { $exists: true, $ne: "" } } },
+          { $group: { _id: "$native_language" } },
+          { $count: "distinctLanguages" }
+        ]).toArray();
+        const languagesCount = (langAgg[0] && langAgg[0].distinctLanguages) || 0;
 
         const summary = {
           nextSession,
-          sessionsThisWeek,
+          sessionsThisWeek: sessionsThisWeek || 0,
+          sessionsDone: sessionsDone || 0,
           points: user.points ?? 0,
           badges: user.badges ?? [],
           suggestedPartners,
           learners: learners || 0,
           countries: countriesCount,
-          languages: languagesCount,
+          languages: languagesCount
         };
 
         res.json({ success: true, summary });
-      } catch (error) {
-        console.error("GET /dashboard/summary error:", error);
-        res.status(500).json({ success: false, message: error.message });
+      } catch (err) {
+        console.error("GET /dashboard/overview error:", err);
+        res.status(500).json({ success: false, message: err.message });
       }
     });
+
     // inside run() after you define usersCollections, messagesCollections
 
     /**
