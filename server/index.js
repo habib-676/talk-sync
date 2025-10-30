@@ -79,7 +79,6 @@ async function run() {
     // Read Collection
     const booksCollections = database.collection("books");
     const wordsCollections = database.collection("words");
-    const speakingCollections = database.collection("speakingPhrases");
     const tutorsCollections = database.collection("tutors");
 
     // all Quizze.........
@@ -208,6 +207,7 @@ async function run() {
       try {
         const newWord = req.body; // expects a JSON object like your dummy data
         const result = await wordsCollections.insertOne(newWord);
+
         res.status(201).json({
           message: "Word document added successfully",
           id: result.insertedId,
@@ -267,42 +267,6 @@ async function run() {
       }
     });
 
-    // ✅ Get all speaking levels
-    app.get("/speakingPhrases", async (req, res) => {
-      try {
-        const result = await speakingCollections.findOne({});
-        res.send(result);
-      } catch (error) {
-        console.error("Error fetching speaking phrases:", error);
-        res.status(500).send({ message: "Failed to fetch speaking phrases" });
-      }
-    });
-    // ✅ GET SINGLE PHRASE BY ID
-    app.get("/speakingPhrases/:id", async (req, res) => {
-      try {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await speakingCollections.findOne(query);
-        if (!result) {
-          return res.status(404).send({ message: "Phrase not found" });
-        }
-        res.send(result);
-      } catch (error) {
-        console.error("Error fetching single phrase:", error);
-        res.status(500).send({ message: "Failed to fetch phrase" });
-      }
-    });
-    // ✅ POST NEW PHRASES DATA
-    app.post("/speakingPhrases", async (req, res) => {
-      try {
-        const newData = req.body;
-        const result = await speakingCollections.insertOne(newData);
-        res.send(result);
-      } catch (error) {
-        console.error("Error adding new phrase:", error);
-        res.status(500).send({ message: "Failed to add phrase" });
-      }
-    });
     //  Learner dashboard route
     app.get("/dashboard/learner", verifyToken, async (req, res) => {
       res.send({ message: "Welcome Learner Dashboard!" });
@@ -315,51 +279,6 @@ async function run() {
 
     app.get("/", (req, res) => {
       res.send("Welcome to TalkSync server");
-    });
-
-    // LiveKit access token endpoint
-    // GET /livekit/token?room=roomName&identity=userUid&name=Display+Name
-    app.get("/livekit/token", async (req, res) => {
-      try {
-        const url = process.env.LIVEKIT_URL; // e.g. wss://your.livekit.cloud
-        const apiKey = process.env.LIVEKIT_API_KEY;
-        const apiSecret = process.env.LIVEKIT_API_SECRET;
-
-        if (!url || !apiKey || !apiSecret) {
-          return res.status(500).json({ message: "LiveKit not configured" });
-        }
-
-        const room = (req.query.room || "").trim();
-        const identity = (req.query.identity || "").trim();
-        const name = (req.query.name || identity || "").toString();
-
-        if (!room || !identity) {
-          return res
-            .status(400)
-            .json({ message: "Missing room or identity for token" });
-        }
-
-        const at = new AccessToken(apiKey, apiSecret, {
-          identity,
-          name,
-          ttl: 60 * 60, // 1 hour
-        });
-
-        // Add grant using plain object (compatible with SDK v2)
-        at.addGrant({
-          room,
-          roomJoin: true,
-          canPublish: true,
-          canSubscribe: true,
-          canPublishData: true,
-        });
-
-        const token = await at.toJwt();
-        res.json({ url, token });
-      } catch (err) {
-        console.error("/livekit/token error", err);
-        res.status(500).json({ message: "Failed to create token" });
-      }
     });
 
     // socket.io
@@ -990,15 +909,15 @@ async function run() {
 
         const wordsArr = Array.isArray(words)
           ? words
-              .map((w) => (typeof w === "string" ? w.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 10)
+            .map((w) => (typeof w === "string" ? w.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 10)
           : [];
         const sentencesArr = Array.isArray(sentences)
           ? sentences
-              .map((s) => (typeof s === "string" ? s.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 5)
+            .map((s) => (typeof s === "string" ? s.trim() : ""))
+            .filter(Boolean)
+            .slice(0, 5)
           : [];
 
         const doc = {
@@ -1101,12 +1020,14 @@ async function run() {
           );
         }
 
-        res.status(201).json({
-          success: true,
-          id: result.insertedId,
-          data: doc,
-          badgesUnlocked: toAdd || [],
-        });
+        res
+          .status(201)
+          .json({
+            success: true,
+            id: result.insertedId,
+            data: doc,
+            badgesUnlocked: toAdd || [],
+          });
       } catch (err) {
         console.error("POST /feedbacks/evaluate error:", err);
         res.status(500).json({ success: false, message: err.message });
@@ -1181,100 +1102,110 @@ async function run() {
     app.get("/dashboard/overview", async (req, res) => {
       try {
         const email = (req.query.email || "").toLowerCase().trim();
-        if (!email)
-          return res
-            .status(400)
-            .json({ success: false, message: "email is required" });
+        if (!email) return res.status(400).json({ success: false, message: "email is required" });
 
-        const user = await usersCollections.findOne(
-          { email },
-          { projection: { password: 0 } }
-        );
-        if (!user)
-          return res
-            .status(404)
-            .json({ success: false, message: "User not found" });
+        const user = await usersCollections.findOne({ email }, { projection: { password: 0 } });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-        const recent = Array.isArray(user.recent) ? user.recent : [];
-        const sessionsThisWeek = recent.filter((s) => {
-          if (!s.createdAt) return false;
-          const d = new Date(s.createdAt);
-          return d >= weekAgo && d <= now;
-        }).length;
+        // sessions this week (created in last 7 days involving user)
+        const sessionsThisWeek = await sessionsCollections.countDocuments({
+          $and: [
+            { $or: [{ fromEmail: email }, { toEmail: email }] },
+            { createdAt: { $gte: weekAgo.toISOString(), $lte: now.toISOString() } }
+          ]
+        });
 
-        let nextSession = user.nextSession || null;
-        if (!nextSession) {
-          const future = recent.filter(
-            (s) => s.startTime && new Date(s.startTime) > now
-          );
-          future.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-          nextSession = future.length ? future[0] : null;
+        // sessionsDone used for badges/points
+        const completeStatuses = ["completed", "finished", "ended"];
+        const sessionsDone = await sessionsCollections.countDocuments({
+          $and: [
+            { $or: [{ fromEmail: email }, { toEmail: email }] },
+            { status: { $in: completeStatuses } }
+          ]
+        });
+
+        // nextSession: prefer user.nextSession (if valid and in future), otherwise query sessions collection
+        let nextSession = null;
+        const userNext = user.nextSession;
+        if (userNext && (userNext.scheduledAt || userNext.startTime)) {
+          const iso = userNext.scheduledAt || userNext.startTime;
+          if (new Date(iso) > now) {
+            nextSession = userNext;
+          }
         }
 
-        const learning = Array.isArray(user.learning_language)
-          ? user.learning_language
-          : user.learning_language
-          ? [user.learning_language]
-          : [];
+        if (!nextSession) {
+          // find the nearest accepted/future session in sessions collection
+          const q = {
+            $and: [
+              { $or: [{ fromEmail: email }, { toEmail: email }] },
+              { status: "accepted" },
+              { $or: [{ scheduledAt: { $gte: now.toISOString() } }, { startTime: { $gte: now.toISOString() } }] }
+            ]
+          };
+          const s = await sessionsCollections.find(q).sort({ scheduledAt: 1, startTime: 1, createdAt: 1 }).limit(1).toArray();
+          if (s && s.length) {
+            const doc = s[0];
+            const partnerEmail = (doc.fromEmail || "").toLowerCase() === email ? doc.toEmail : doc.fromEmail;
+            nextSession = {
+              sessionId: doc._id.toString(),
+              scheduledAt: doc.scheduledAt || doc.startTime || null,
+              startTime: doc.startTime || doc.scheduledAt || null,
+              partner: partnerEmail,
+              partnerName: doc.fromEmail?.toLowerCase() === partnerEmail ? doc.fromName : doc.toName,
+              title: doc.title || "Practice session",
+              joinUrl: doc.joinUrl || null,
+              status: doc.status || null,
+              durationMinutes: doc.durationMinutes || null
+            };
+          }
+        }
+
+        // suggested partners logic (as before)
+        const learning = Array.isArray(user.learning_language) ? user.learning_language : user.learning_language ? [user.learning_language] : [];
         const partnerQuery = { email: { $ne: email } };
         if (learning.length) partnerQuery.native_language = { $in: learning };
 
-        const suggestedPartners = await usersCollections
-          .find(partnerQuery, {
-            projection: {
-              name: 1,
-              email: 1,
-              native_language: 1,
-              image: 1,
-              learning_language: 1,
-            },
-          })
-          .limit(6)
-          .toArray();
+        const suggestedPartners = await usersCollections.find(partnerQuery, {
+          projection: { name: 1, email: 1, native_language: 1, image: 1, learning_language: 1 }
+        }).limit(6).toArray();
 
         const learners = await usersCollections.countDocuments();
-
-        // ====== REPLACED distinct() with aggregation to be API strict compatible ======
-        const countryAgg = await usersCollections
-          .aggregate([
-            { $match: { user_country: { $exists: true, $ne: "" } } },
-            { $group: { _id: "$user_country" } },
-            { $count: "distinctCountries" },
-          ])
-          .toArray();
-        const countriesCount =
-          (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
-
-        const langAgg = await usersCollections
-          .aggregate([
-            { $match: { native_language: { $exists: true, $ne: "" } } },
-            { $group: { _id: "$native_language" } },
-            { $count: "distinctLanguages" },
-          ])
-          .toArray();
-        const languagesCount =
-          (langAgg[0] && langAgg[0].distinctLanguages) || 0;
+        const countryAgg = await usersCollections.aggregate([
+          { $match: { user_country: { $exists: true, $ne: "" } } },
+          { $group: { _id: "$user_country" } },
+          { $count: "distinctCountries" }
+        ]).toArray();
+        const countriesCount = (countryAgg[0] && countryAgg[0].distinctCountries) || 0;
+        const langAgg = await usersCollections.aggregate([
+          { $match: { native_language: { $exists: true, $ne: "" } } },
+          { $group: { _id: "$native_language" } },
+          { $count: "distinctLanguages" }
+        ]).toArray();
+        const languagesCount = (langAgg[0] && langAgg[0].distinctLanguages) || 0;
 
         const summary = {
           nextSession,
-          sessionsThisWeek,
+          sessionsThisWeek: sessionsThisWeek || 0,
+          sessionsDone: sessionsDone || 0,
           points: user.points ?? 0,
           badges: user.badges ?? [],
           suggestedPartners,
           learners: learners || 0,
           countries: countriesCount,
-          languages: languagesCount,
+          languages: languagesCount
         };
 
         res.json({ success: true, summary });
-      } catch (error) {
-        console.error("GET /dashboard/summary error:", error);
-        res.status(500).json({ success: false, message: error.message });
+      } catch (err) {
+        console.error("GET /dashboard/overview error:", err);
+        res.status(500).json({ success: false, message: err.message });
       }
     });
+
     // inside run() after you define usersCollections, messagesCollections
 
     /**
@@ -1444,40 +1375,64 @@ async function run() {
      * POST /sessions/:id/accept
      * Accept a session request. Body: { actionByEmail } // must be receiver
      */
+    // require ObjectId earlier: const { ObjectId } = require('mongodb');
+
     app.post("/sessions/:id/accept", async (req, res) => {
       try {
         const { id } = req.params;
         const { actionByEmail } = req.body;
         if (!actionByEmail)
-          return res
-            .status(400)
-            .json({ success: false, message: "actionByEmail required" });
+          return res.status(400).json({ success: false, message: "actionByEmail required" });
 
-        const session = await sessionsCollections.findOne({
-          _id: new ObjectId(id),
-        });
-        if (!session)
-          return res
-            .status(404)
-            .json({ success: false, message: "Session not found" });
+        if (!ObjectId.isValid(id))
+          return res.status(400).json({ success: false, message: "Invalid session id" });
 
-        // only the receiver (toEmail) can accept
-        if (session.toEmail.toLowerCase() !== actionByEmail.toLowerCase()) {
-          return res
-            .status(403)
-            .json({ success: false, message: "Only receiver can accept" });
+        // fetch session
+        const session = await sessionsCollections.findOne({ _id: new ObjectId(id) });
+        if (!session) return res.status(404).json({ success: false, message: "Session not found" });
+
+        // only the receiver can accept
+        if ((session.toEmail || "").toLowerCase() !== (actionByEmail || "").toLowerCase()) {
+          return res.status(403).json({ success: false, message: "Only receiver can accept" });
         }
 
-        const update = {
-          $set: {
-            status: "accepted",
-            updatedAt: new Date().toISOString(),
-          },
+        const now = new Date().toISOString();
+
+        // update session status
+        await sessionsCollections.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { status: "accepted", updatedAt: now } }
+        );
+
+        // Build nextSession shape (normalize fields)
+        const nextSessionObj = {
+          sessionId: id,
+          scheduledAt: session.scheduledAt || session.startTime || null,
+          startTime: session.startTime || session.scheduledAt || null,
+          partnerEmail: session.toEmail,
+          partnerName: session.toName || "",
+          title: session.title || "Practice session",
+          joinUrl: session.joinUrl || null,
+          durationMinutes: session.durationMinutes || null,
+          status: "accepted"
         };
 
-        await sessionsCollections.updateOne({ _id: new ObjectId(id) }, update);
+        // update 'nextSession' for both users: for requester set partner=toUser, for receiver set partner=fromUser
+        // requester
+        await usersCollections.updateOne(
+          { email: session.fromEmail.toLowerCase() },
+          { $set: { nextSession: { ...nextSessionObj, partnerEmail: session.toEmail, partnerName: session.toName || "" } } },
+          { upsert: false }
+        );
 
-        // notify the requester
+        // receiver
+        await usersCollections.updateOne(
+          { email: session.toEmail.toLowerCase() },
+          { $set: { nextSession: { ...nextSessionObj, partnerEmail: session.fromEmail, partnerName: session.fromName || "" } } },
+          { upsert: false }
+        );
+
+        // notify the requester via socket
         const requesterSocketId = userSocketMap[session.fromUserId];
         if (requesterSocketId) {
           io.to(requesterSocketId).emit("sessionAccepted", {
@@ -1489,6 +1444,64 @@ async function run() {
         res.json({ success: true, message: "Session accepted" });
       } catch (err) {
         console.error("POST /sessions/:id/accept error:", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+
+    // at top of your server file (once)
+    const BADGES = [
+      { id: "bronze-10", name: "Bronze Learner", desc: "Complete 5 sessions", threshold: 5, color: "bg-yellow-500" },
+      { id: "silver-25", name: "Silver Speaker", desc: "Complete 15 sessions", threshold: 15, color: "bg-slate-400" },
+      { id: "gold-50", name: "Gold Communicator", desc: "Complete 40 sessions", threshold: 40, color: "bg-amber-600" },
+      // add more badges here
+    ];
+
+    // GET /badges -> returns definition list
+    app.get("/badges", async (req, res) => {
+      try {
+        res.json({ success: true, badges: BADGES });
+      } catch (err) {
+        console.error("GET /badges error", err);
+        res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    // GET /badges/user?email=... -> compute user badges & progress
+    app.get("/badges/user", async (req, res) => {
+      try {
+        const email = (req.query.email || "").toLowerCase().trim();
+        if (!email) return res.status(400).json({ success: false, message: "email query required" });
+
+        // find user
+        const user = await usersCollections.findOne({ email }, { projection: { badges: 1 } });
+
+        // compute sessions completed count for this user (status 'completed' or 'finished' - adapt to your statuses)
+        const completeStatuses = ["completed", "finished", "ended"];
+        const sessionsDone = await sessionsCollections.countDocuments({
+          $and: [
+            { $or: [{ fromEmail: email }, { toEmail: email }] },
+            { status: { $in: completeStatuses } }
+          ]
+        });
+
+        // compute earned badges by threshold
+        const earned = BADGES.filter(b => (b.threshold || 0) > 0 && sessionsDone >= b.threshold).map(b => b.id);
+
+        // also merge any badges stored in user doc (if present)
+        const storedBadges = Array.isArray(user?.badges) ? user.badges.map(String) : [];
+        const mergedEarned = Array.from(new Set([...earned, ...storedBadges]));
+
+        res.json({
+          success: true,
+          userBadges: {
+            email,
+            sessionsDone,
+            earned: mergedEarned
+          }
+        });
+      } catch (err) {
+        console.error("GET /badges/user error", err);
         res.status(500).json({ success: false, message: err.message });
       }
     });
@@ -1805,8 +1818,8 @@ async function run() {
             metric === "users"
               ? usersCollections
               : metric === "messages"
-              ? messagesCollections
-              : sessionsCollections;
+                ? messagesCollections
+                : sessionsCollections;
 
           const raw = await coll.aggregate(pipeline).toArray();
 
@@ -1957,79 +1970,6 @@ async function run() {
       }
     );
 
-    // all quizzes realedted here ....
-
-    // addmin add the quizzes
-    app.post("/admin/quizzes", async (req, res) => {
-      const result = await allquies.insertOne(req.body);
-      res.send(result);
-    });
-
-    // get the all quizzes for user ....
-    app.get("/quizzes", async (req, res) => {
-      const result = await allquies.find().toArray();
-      res.send(result);
-    });
-
-    // addmin manage about quizzes.....
-    app.delete("/quizzes/:id", async (req, res) => {
-      const result = await allquies.deleteOne({
-        _id: new ObjectId(req.params.id),
-      });
-      res.send(result);
-    });
-
-    //  POST quiz results......
-    app.post("/quizResults", async (req, res) => {
-      try {
-        const result = req.body;
-
-        if (!result.email || !result.totalQuestions) {
-          return res.status(400).send({ error: "Missing required fields" });
-        }
-
-        result.createdAt = new Date();
-
-        const save = await quizResult.insertOne(result);
-        res.send({
-          success: true,
-          message: "Result saved",
-          id: save.insertedId,
-        });
-      } catch (error) {
-        console.error("❌ Error saving result:", error);
-        res.status(500).send({ error: "Failed to save quiz result" });
-      }
-    });
-
-    //  Get quiz result by email for user......
-    app.get("/quizResults/:email", async (req, res) => {
-      try {
-        const email = req.params.email;
-        const result = await quizResult.findOne({ email });
-
-        if (!result) {
-          return res
-            .status(404)
-            .json({ success: false, message: "No result found" });
-        }
-
-        res.json({ success: true, data: result });
-      } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-      }
-    });
-
-    //  Get all quiz results (optional for admin)
-    app.get("/quizResults", async (req, res) => {
-      try {
-        const results = await quizResult.find().toArray();
-        res.json({ success: true, data: results });
-      } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-      }
-    });
-
     // announcements
 
     try {
@@ -2055,8 +1995,8 @@ async function run() {
       v === true || v === "true"
         ? true
         : v === false || v === "false"
-        ? false
-        : v;
+          ? false
+          : v;
 
     app.get(
       "/admin/announcements",
