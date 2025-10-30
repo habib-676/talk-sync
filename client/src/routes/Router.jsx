@@ -28,6 +28,7 @@ import AdminAnnouncements from "../pages/Admin/AdminAnnouncements";
 import OverviewSwitcher from "../pages/dashboard/OverviewSwitcher";
 import Courses from "../pages/dashboard/Courses/Courses";
 import TutorDetails from "../pages/dashboard/Courses/TutorDetails";
+import AIChat from "../pages/AIAgent/AIChat";
 import PracticeExercise from "../pages/ProfilePage/ScheduleSession/PracticeExercise";
 import TakeQuiz from "../pages/quizzes/User/TakeQuiz";
 import AddQuiz from "../pages/Admin/quizzes/AddQuiz";
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
         path: "/profile/:userId",
         element: <UserProfile></UserProfile>,
       },
+      
     ],
   },
   {
@@ -163,6 +165,13 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
+  {
+        path:'aiAgent',
+        element: <PrivateRoute>
+          <AIChat></AIChat>
+        </PrivateRoute>
+
+      },
 
   {
     path: "*",
