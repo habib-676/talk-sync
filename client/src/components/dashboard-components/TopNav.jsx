@@ -1,15 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
-import {
-  Menu,
-  Bell,
-  Sun,
-  User as UserIcon,
-  Settings,
-  LogOut,
-} from "lucide-react";
+import { Menu, Sun, User as UserIcon, Settings, LogOut } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import toast from "react-hot-toast";
+import NotificationBell from "../shared/navbar-components/NotificationBell";
 
 const TopNav = ({ setSidebarOpen, user }) => {
   const { logOut } = useAuth();
@@ -68,15 +62,8 @@ const TopNav = ({ setSidebarOpen, user }) => {
           />
           {/* <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white"></span> */}
         </button>
-        {/* Notification Icon */}
-        <button
-          className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors relative"
-          title="Notifications"
-        >
-          <Bell size={20} />
-          <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse"></span>{" "}
-          {/* Pulsing notification dot */}
-        </button>
+        {/* Notifications */}
+        <NotificationBell />
         {/* User Profile Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
