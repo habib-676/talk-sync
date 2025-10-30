@@ -1,5 +1,4 @@
-// server/routes/speaking.js
-// Express Router for Speaking Coach + Assessment using Google Gemini
+
 
 const express = require("express");
 const router = express.Router();
