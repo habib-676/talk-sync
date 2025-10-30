@@ -8,6 +8,7 @@ import Hero from "./sections/Hero";
 import HowItWorks from "./sections/HowItWorks";
 import Reviews from "./sections/Reviews";
 import StatsWithLanguages from "./sections/StatsWithLanguages";
+import FloatingAIButton from "../../components/shared/FloatingAIButton";
 
 const Home = () => {
   return (
@@ -42,6 +43,8 @@ const Home = () => {
       <section className="bg-gray-100">
         <Faq />
       </section>
+      {/* Floating AI button (fixed bottom-right) */}
+      <FloatingAIButton />
     </div>
   );
 };
