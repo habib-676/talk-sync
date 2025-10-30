@@ -1,4 +1,3 @@
-// src/components/dashboard/widgets/SuggestedPartners.jsx
 import React from "react";
 import { Link } from "react-router";
 
@@ -8,7 +7,7 @@ export default function SuggestedPartners({ partners = [], myLearningLanguages =
   }
 
   return (
-    <div className="space-y-3">
+    <div className="">
       {partners.map((p) => {
         const id = p._id || p.email;
 
