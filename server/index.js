@@ -1284,40 +1284,64 @@ async function run() {
      * POST /sessions/:id/accept
      * Accept a session request. Body: { actionByEmail } // must be receiver
      */
+    // require ObjectId earlier: const { ObjectId } = require('mongodb');
+
     app.post("/sessions/:id/accept", async (req, res) => {
       try {
         const { id } = req.params;
         const { actionByEmail } = req.body;
         if (!actionByEmail)
-          return res
-            .status(400)
-            .json({ success: false, message: "actionByEmail required" });
+          return res.status(400).json({ success: false, message: "actionByEmail required" });
 
-        const session = await sessionsCollections.findOne({
-          _id: new ObjectId(id),
-        });
-        if (!session)
-          return res
-            .status(404)
-            .json({ success: false, message: "Session not found" });
+        if (!ObjectId.isValid(id))
+          return res.status(400).json({ success: false, message: "Invalid session id" });
 
-        // only the receiver (toEmail) can accept
-        if (session.toEmail.toLowerCase() !== actionByEmail.toLowerCase()) {
-          return res
-            .status(403)
-            .json({ success: false, message: "Only receiver can accept" });
+        // fetch session
+        const session = await sessionsCollections.findOne({ _id: new ObjectId(id) });
+        if (!session) return res.status(404).json({ success: false, message: "Session not found" });
+
+        // only the receiver can accept
+        if ((session.toEmail || "").toLowerCase() !== (actionByEmail || "").toLowerCase()) {
+          return res.status(403).json({ success: false, message: "Only receiver can accept" });
         }
 
-        const update = {
-          $set: {
-            status: "accepted",
-            updatedAt: new Date().toISOString(),
-          },
+        const now = new Date().toISOString();
+
+        // update session status
+        await sessionsCollections.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { status: "accepted", updatedAt: now } }
+        );
+
+        // Build nextSession shape (normalize fields)
+        const nextSessionObj = {
+          sessionId: id,
+          scheduledAt: session.scheduledAt || session.startTime || null,
+          startTime: session.startTime || session.scheduledAt || null,
+          partnerEmail: session.toEmail,
+          partnerName: session.toName || "",
+          title: session.title || "Practice session",
+          joinUrl: session.joinUrl || null,
+          durationMinutes: session.durationMinutes || null,
+          status: "accepted"
         };
 
-        await sessionsCollections.updateOne({ _id: new ObjectId(id) }, update);
+        // update 'nextSession' for both users: for requester set partner=toUser, for receiver set partner=fromUser
+        // requester
+        await usersCollections.updateOne(
+          { email: session.fromEmail.toLowerCase() },
+          { $set: { nextSession: { ...nextSessionObj, partnerEmail: session.toEmail, partnerName: session.toName || "" } } },
+          { upsert: false }
+        );
 
-        // notify the requester
+        // receiver
+        await usersCollections.updateOne(
+          { email: session.toEmail.toLowerCase() },
+          { $set: { nextSession: { ...nextSessionObj, partnerEmail: session.fromEmail, partnerName: session.fromName || "" } } },
+          { upsert: false }
+        );
+
+        // notify the requester via socket
         const requesterSocketId = userSocketMap[session.fromUserId];
         if (requesterSocketId) {
           io.to(requesterSocketId).emit("sessionAccepted", {
@@ -1332,6 +1356,7 @@ async function run() {
         res.status(500).json({ success: false, message: err.message });
       }
     });
+
 
     // at top of your server file (once)
     const BADGES = [
