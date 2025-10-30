@@ -124,6 +124,11 @@ export const LearnerSidebarLinks = () => {
         label="Live Sessions"
       />
       <SidebarItem
+        to="/dashboard/quizzes"
+        icon={<Trophy size={20} />}
+        label="Quizzes"
+      />
+      <SidebarItem
         to="/dashboard/badges"
         icon={<Star size={20} />}
         label="Badges & Rewards"
@@ -133,14 +138,6 @@ export const LearnerSidebarLinks = () => {
         icon={<Settings size={20} />}
         label="Settings"
       /> */}
-
-
-
-      <SidebarItem
-        to="/dashboard/quizzes"
-        icon={<Trophy size={20} />}
-        label="Participate in quizzes"
-      />
 
 
     </>

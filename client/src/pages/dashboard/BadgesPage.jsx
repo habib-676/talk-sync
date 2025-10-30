@@ -117,9 +117,9 @@ export default function BadgesPage() {
                       {isEarned ? "Earned" : "Locked"}
                     </div>
                   </div>
-                  <div className="text-sm text-slate-500 mt-1">{b.desc}</div>
+                  <div className="text-sm text-slate-500 mt-1 mb-2">{b.desc}</div>
 
-                  <div className="mt-3 flex items-center gap-3">
+                  <div className="mt-2 flex items-center gap-3">
                     <div className="text-xs text-slate-500">{sessionsDone}/{b.threshold} sessions</div>
                     <div className="flex-1">
                       <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
