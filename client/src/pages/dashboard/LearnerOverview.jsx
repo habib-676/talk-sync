@@ -1,4 +1,3 @@
-// src/pages/dashboard/Overview.jsx
 import React, { useEffect, useCallback, useRef, useState } from "react";
 import NextSessionCard from "../../components/dashboard/widgets/NextSessionCard";
 import ProgressDonut from "../../components/dashboard/widgets/ProgressDonut";
@@ -18,7 +17,7 @@ function useInViewport(ref, options = { threshold: 0.12 }) {
     const obs = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), options);
     obs.observe(el);
     return () => obs.disconnect();
-  }, [ref, options.threshold]);
+  }, [ref, options]);
   return inView;
 }
 
@@ -163,7 +162,7 @@ export default function Overview() {
               <div className="flex gap-4">
                 {summary.suggestedPartners?.length ? (
                   summary.suggestedPartners.map((p) => (
-                    <motion.div key={p.email} whileHover={{ scale: 1.03 }} className="min-w-[200px] p-3 rounded-xl bg-white/95 shadow-sm">
+                    <motion.div key={p.email} whileHover={{ scale: 1.03 }} className=" p-3 rounded-xl bg-white/95 shadow-sm">
                       <SuggestedPartners partners={[p]} />
                     </motion.div>
                   ))
