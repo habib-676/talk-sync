@@ -2463,6 +2463,69 @@ async function run() {
       }
     });
 
+    // all quizz related here........
+    app.post("/admin/quizzes", async (req, res) => {
+  const result = await allquies.insertOne(req.body);
+  res.send(result);
+});
+
+app.get("/quizzes", async (req, res) => {
+  const result = await allquies.find().toArray();
+  res.send(result);
+});
+
+
+app.delete("/quizzes/:id", async (req, res) => {
+  const result = await allquies.deleteOne({ _id: new ObjectId(req.params.id) });
+  res.send(result);
+});
+
+// 📝 POST quiz results
+app.post("/quizResults", async (req, res) => {
+  try {
+    const result = req.body;
+
+    if (!result.email || !result.totalQuestions) {
+      return res.status(400).send({ error: "Missing required fields" });
+    }
+
+    result.createdAt = new Date();
+
+    const save = await quizResult.insertOne(result);
+    res.send({ success: true, message: "Result saved", id: save.insertedId });
+  } catch (error) {
+    console.error("❌ Error saving result:", error);
+    res.status(500).send({ error: "Failed to save quiz result" });
+  }
+});
+
+// ✅ Get quiz result by email
+app.get("/quizResults/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+    const result = await quizResult.findOne({ email });
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: "No result found" });
+    }
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+// ✅ Get all quiz results (optional for admin)
+app.get("/quizResults", async (req, res) => {
+  try {
+    const results = await quizResult.find().toArray();
+    res.json({ success: true, data: results });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
     await client.db("admin").command({ ping: 1 });
     console.log("✅ Connected to MongoDB successfully!");
   } catch (error) {
