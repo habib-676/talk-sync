@@ -1,262 +1,225 @@
-
-
-import React, { useEffect, useState, useCallback } from "react";
+// src/pages/dashboard/Overview.jsx
+import React, { useEffect, useCallback, useRef, useState } from "react";
 import NextSessionCard from "../../components/dashboard/widgets/NextSessionCard";
 import ProgressDonut from "../../components/dashboard/widgets/ProgressDonut";
 import SuggestedPartners from "../../components/dashboard/widgets/SuggestedPartners";
 import useAuth from "../../hooks/useAuth";
-import { RefreshCw, Clock, Users, Star } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import { motion, useAnimation } from "framer-motion";
 
-const BACKEND =
-  import.meta.env.VITE_API_URL ||
-  import.meta.env.VITE_BACKEND_URL ||
-  "http://localhost:5000";
+const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-function StatCard({ label, value, icon, colorFrom, colorTo }) {
+/* useInViewport - simple intersection observer */
+function useInViewport(ref, options = { threshold: 0.12 }) {
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), options);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [ref, options.threshold]);
+  return inView;
+}
+
+/* AnimatedCard: pastel background, subtle 3D + entrance animation */
+function AnimatedCard({ children, bg = "bg-white/90", className = "", delay = 0 }) {
+  const ref = useRef(null);
+  const inView = useInViewport(ref);
+  const controls = useAnimation();
+
+  useEffect(() => {
+    if (inView) {
+      controls.start({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.6, delay, ease: [0.2, 0.9, 0.2, 1] },
+      });
+    } else {
+      controls.start({ opacity: 0, y: 16, scale: 0.995, transition: { duration: 0.5 } });
+    }
+  }, [inView, controls, delay]);
+
   return (
-    <div
-      className="rounded-2xl p-4 shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 duration-200"
-      style={{
-        background: `linear-gradient(135deg, ${colorFrom}, ${colorTo})`,
-        color: "#1f2937",
-      }}
+    <motion.div
+      ref={ref}
+      animate={controls}
+      initial={{ opacity: 0, y: 16, scale: 0.995 }}
+      whileHover={{ scale: 1.02, translateY: -4 }}
+      style={{ perspective: 1000, transformStyle: "preserve-3d" }}
+      className={`rounded-2xl p-4 shadow-lg ${bg} ${className}`}
     >
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-xs text-gray-600">{label}</div>
-          <div className="text-2xl font-bold">{value}</div>
-        </div>
-        <div className="bg-white/40 p-2 rounded-lg text-gray-700">{icon}</div>
-      </div>
-    </div>
+      {children}
+    </motion.div>
   );
 }
 
-export default function LearnerOverview() {
+export default function Overview() {
   const { user: authUser } = useAuth();
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [expandedNext, setExpandedNext] = useState(true);
+  const [err, setErr] = useState(null);
 
-  const email = (authUser?.email || localStorage.getItem("demoEmail") || "")
-    .toLowerCase()
-    .trim();
+  const email = (authUser?.email || "").toLowerCase().trim();
 
-  const fetchSummary = useCallback(async (signal) => {
+  const fetchSummary = useCallback(async () => {
     if (!email) {
-      setError("No email available. Sign in or set demoEmail in localStorage.");
+      setErr("Sign in to view your dashboard");
       setLoading(false);
       return;
     }
+    setLoading(true);
+    setErr(null);
     try {
-      setLoading(true);
-      setError(null);
-      const url = `${BACKEND.replace(
-        /\/$/,
-        ""
-      )}/dashboard/overview?email=${encodeURIComponent(email)}`;
-      const res = await fetch(url, { signal });
+      const res = await fetch(`${BACKEND}/dashboard/overview?email=${encodeURIComponent(email)}`);
       const json = await res.json();
-      if (!json.success) throw new Error(json.message || "Failed to fetch summary");
-      setSummary(json.summary);
-    } catch (err) {
-      if (err.name !== "AbortError") {
-        console.error("Overview fetch error:", err);
-        setError(err.message || "Failed to load dashboard");
-      }
+      if (!json.success) throw new Error(json.message || "Failed");
+      setSummary(json.summary || {});
+    } catch (e) {
+      console.error("Overview fetch error", e);
+      setErr(e.message || "Failed to fetch overview");
     } finally {
       setLoading(false);
     }
   }, [email]);
 
   useEffect(() => {
-    const ac = new AbortController();
-    fetchSummary(ac.signal);
-    return () => ac.abort();
+    fetchSummary();
   }, [fetchSummary]);
 
-  const handleRefresh = () => {
-    const ac = new AbortController();
-    fetchSummary(ac.signal);
-  };
+  if (loading) return <div className="p-6">Loading overview...</div>;
+  if (err) return <div className="p-6 text-red-600">{err}</div>;
 
   return (
-    <div className="space-y-6 p-6 bg-gradient-to-br from-indigo-50 via-pink-50 to-emerald-50 min-h-screen">
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Overview</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Your progress, sessions, and learning community at a glance
-          </p>
+          <h1 className="text-3xl font-semibold text-slate-800">Overview</h1>
+          <p className="text-sm text-slate-500 mt-1">A concise snapshot of your progress and next steps.</p>
         </div>
 
         <button
-          onClick={handleRefresh}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-pink-400 text-white shadow hover:scale-105 transition"
+          onClick={fetchSummary}
+          className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/70 hover:shadow-md transition mt-2 sm:mt-0"
+          aria-label="Refresh overview"
         >
           <RefreshCw size={16} /> Refresh
         </button>
       </div>
 
-      {/* Loading / Error */}
-      {loading && (
-        <div className="bg-white p-6 rounded-2xl shadow animate-pulse">
-          <div className="h-5 bg-gray-200 rounded w-1/3 mb-4" />
-          <div className="h-24 bg-gray-100 rounded" />
-        </div>
-      )}
-      {error && (
-        <div className="bg-red-50 text-red-700 p-6 rounded-2xl shadow">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {/* Summary */}
-      {!loading && !error && summary && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Section */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Next Session */}
-            <div className="bg-gradient-to-r from-indigo-100 to-pink-100 rounded-2xl p-6 shadow-lg transition">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-lg bg-white shadow text-indigo-600">
-                    <Clock />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-indigo-600">
-                      Next Session
-                    </div>
-                    <div className="text-lg font-bold text-slate-800">
-                      {summary.nextSession
-                        ? new Date(
-                            summary.nextSession.startTime ||
-                              summary.nextSession.scheduledAt
-                          ).toLocaleString()
-                        : "No upcoming session"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setExpandedNext((s) => !s)}
-                    className="px-3 py-1 text-sm bg-white/70 rounded-full shadow hover:bg-white transition"
-                  >
-                    {expandedNext ? "Collapse" : "Expand"}
-                  </button>
-                  <a
-                    href="/dashboard/sessions"
-                    className="px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-pink-400 text-white shadow hover:scale-105 transition"
-                  >
-                    Book Session
-                  </a>
-                </div>
+      {/* Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left main column */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Next Session */}
+          <AnimatedCard bg="bg-indigo-50/30 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-slate-800 font-semibold text-lg sm:text-xl">
+                {summary.nextSession?.title || "Next session — keep consistent for better progress."}
               </div>
-
-              {expandedNext && (
-                <div className="mt-4">
-                  <NextSessionCard nextSession={summary.nextSession} />
-                </div>
-              )}
+              <a
+                href="/dashboard/sessions"
+                className="px-4 py-2 rounded-full bg-indigo-600 text-white shadow-sm hover:brightness-95 transition"
+              >
+                Go to Sessions
+              </a>
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatCard
-                label="Sessions this week"
-                value={summary.sessionsThisWeek ?? 0}
-                icon={<Clock />}
-                colorFrom="#E0EAFF"
-                colorTo="#F8F4FF"
-              />
-              <StatCard
-                label="Active learners"
-                value={summary.learners?.toLocaleString() || 0}
-                icon={<Users />}
-                colorFrom="#E6F7F3"
-                colorTo="#FFF8E7"
-              />
-              <StatCard
-                label="Badges earned"
-                value={(summary.badges || []).length}
-                icon={<Star />}
-                colorFrom="#FFF1DA"
-                colorTo="#FDECEF"
-              />
+            <div className="mt-4">
+              <motion.div
+                initial={{ y: 0 }}
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="rounded-xl p-3 bg-white/90 shadow-lg mt-4"
+              >
+                <NextSessionCard nextSession={summary.nextSession} />
+              </motion.div>
+            </div>
+          </AnimatedCard>
+
+          {/* Small stats row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <AnimatedCard bg="bg-rose-50/40" className="h-full" delay={0.06}>
+              <StatInner label="Sessions this week" value={summary.sessionsThisWeek ?? 0} hint="Completed / active sessions" icon="🗓" />
+            </AnimatedCard>
+            <AnimatedCard bg="bg-amber-50/40" className="h-full" delay={0.08}>
+              <StatInner label="Active learners" value={(summary.learners ?? 0).toLocaleString()} hint="Community size" icon="👥" />
+            </AnimatedCard>
+            <AnimatedCard bg="bg-emerald-50/40" className="h-full" delay={0.1}>
+              <StatInner label="Badges earned" value={(summary.badges || []).length ?? 0} hint="Recognitions you've got" icon="🏅" />
+            </AnimatedCard>
+          </div>
+
+          {/* Suggested partners */}
+          <AnimatedCard bg="bg-white/90" className="p-4" delay={0.12}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-slate-800">Suggested partners</h3>
+              <div className="text-sm text-slate-500">Matches based on languages</div>
             </div>
 
-            {/* Community Section */}
-            <div className="bg-white rounded-2xl p-6 shadow">
-              <h3 className="text-lg font-semibold text-indigo-600 mb-3">
-                Community
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-indigo-600">
-                    {summary.learners.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-gray-500">Learners</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-pink-500">
-                    {summary.countries}
-                  </div>
-                  <div className="text-xs text-gray-500">Countries</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-emerald-500">
-                    {summary.languages}
-                  </div>
-                  <div className="text-xs text-gray-500">Languages</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Suggested Partners */}
-            <div className="bg-white rounded-2xl p-6 shadow">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-indigo-600">
-                  Suggested Partners
-                </h3>
-              </div>
-              <div className="flex gap-4 overflow-x-auto py-2 scrollbar-thin">
+            <div className="mt-4 overflow-x-auto py-1">
+              <div className="flex gap-4">
                 {summary.suggestedPartners?.length ? (
                   summary.suggestedPartners.map((p) => (
-                    <div
-                      key={p.email}
-                      className="min-w-[200px] bg-gradient-to-br from-indigo-50 to-pink-50 rounded-xl p-4 shadow hover:scale-105 transition"
-                    >
+                    <motion.div key={p.email} whileHover={{ scale: 1.03 }} className="min-w-[200px] p-3 rounded-xl bg-white/95 shadow-sm">
                       <SuggestedPartners partners={[p]} />
-                    </div>
+                    </motion.div>
                   ))
                 ) : (
-                  <div className="text-sm text-gray-500">
-                    No suggestions right now.
-                  </div>
+                  <div className="text-sm text-slate-500">No suggestions</div>
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Right Section */}
-          <aside className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow text-center">
-              <h3 className="text-lg font-semibold text-indigo-600">
-                Progress
-              </h3>
-              <div className="mt-4 flex items-center justify-center">
-                <ProgressDonut points={summary.points} />
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                Keep learning and practicing to unlock more badges!
-              </p>
-            </div>
-          </aside>
+          </AnimatedCard>
         </div>
-      )}
+
+        {/* Right column */}
+        <aside className="space-y-6 mt-6 lg:mt-0">
+          <AnimatedCard bg="bg-sky-50/40 text-center" className="p-4" delay={0.14}>
+            <h3 className="text-sm font-medium text-slate-700">Progress</h3>
+            <div className="mt-4">
+              <ProgressDonut points={summary.points ?? 0} />
+            </div>
+            <div className="mt-3 text-xs text-slate-500">Points come from completed sessions and peer-reviewed feedback.</div>
+          </AnimatedCard>
+
+          <AnimatedCard bg="bg-white/90 p-4" delay={0.16}>
+            <h4 className="text-sm font-medium text-slate-700">Quick stats</h4>
+            <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-slate-600">
+              <QuickStat label="Countries" value={summary.countries ?? 0} color="bg-violet-50/50" />
+              <QuickStat label="Languages" value={summary.languages ?? 0} color="bg-lime-50/50" />
+              <QuickStat label="Points" value={summary.points ?? 0} color="bg-cyan-50/50" />
+              <QuickStat label="Badges" value={(summary.badges || []).length ?? 0} color="bg-amber-50/50" />
+            </div>
+          </AnimatedCard>
+        </aside>
+      </div>
     </div>
   );
 }
+
+/* small subcomponents */
+function StatInner({ label, value = 0, hint, icon }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <div className="text-xs text-slate-500">{label}</div>
+        <div className="mt-2 text-2xl font-semibold text-slate-800">{value ?? "—"}</div>
+        {hint && <div className="text-xs text-slate-400 mt-1">{hint}</div>}
+      </div>
+      <div className="text-3xl ml-2">{icon}</div>
+    </div>
+  );
+}
+
+function QuickStat({ label, value, color = "bg-slate-50/50" }) {
+  return (
+    <div className={`${color} p-3 rounded flex flex-col items-start`}>
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="font-semibold text-slate-800 mt-1">{value ?? "—"}</div>
+    </div>
+  );
+}
+

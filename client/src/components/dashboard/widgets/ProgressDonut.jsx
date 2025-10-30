@@ -1,16 +1,49 @@
 // src/components/dashboard/widgets/ProgressDonut.jsx
 import React from "react";
+import { motion, useAnimation } from "framer-motion";
+import { useEffect } from "react";
 
-export default function ProgressDonut({ points = 0 }) {
-  const pct = Math.min(100, Math.round((points / 200) * 100));
-  const style = { background: `conic-gradient(#7C3AED ${pct * 3.6}deg, rgba(0,0,0,0.06) ${pct * 3.6}deg)` };
+export default function ProgressDonut({ sessionsCompleted = 0, totalSessions = 40, size = 112 }) {
+  const radius = (size - 12) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const stroke = 10;
+
+  // Clamp progress percentage
+  const pct = Math.min(100, Math.round((sessionsCompleted / totalSessions) * 100));
+  const dash = (pct / 100) * circumference;
+
+  const controls = useAnimation();
+
+  useEffect(() => {
+    controls.start({ dashoffset: circumference - dash });
+  }, [dash, circumference, controls]);
 
   return (
     <div className="flex flex-col items-center">
-      <div className="w-28 h-28 rounded-full grid place-items-center" style={style}>
-        <div className="w-16 h-16 rounded-full bg-white grid place-items-center font-semibold">{pct}%</div>
-      </div>
-      <div className="text-sm text-gray-500 mt-2">Points: {points}</div>
+      <svg width={size} height={size} aria-hidden>
+        <g transform={`translate(${size / 2},${size / 2})`}>
+          {/* Background circle */}
+          <circle r={radius} fill="transparent" stroke="#e5e7eb" strokeWidth={stroke} />
+          {/* Animated progress */}
+          <motion.circle
+            r={radius}
+            fill="transparent"
+            stroke="#7c3aed"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference}
+            animate={controls}
+            initial={{ dashoffset: circumference }}
+            style={{ rotate: -90, transformOrigin: "50% 50%" }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          />
+        </g>
+      </svg>
+      <div className="mt-2 text-sm font-semibold text-slate-800">{pct}%</div>
+      <div className="text-xs text-gray-500">{sessionsCompleted}/{totalSessions} sessions</div>
     </div>
   );
 }
+
+
