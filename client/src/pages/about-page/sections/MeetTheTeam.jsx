@@ -34,7 +34,7 @@ const MeetTheTeam = () => {
                 <img
                   src={member.head_shot}
                   alt={member.name}
-                  className="rounded-lg shadow-md w-full h-[400px] object-cover object-center"
+                  className="rounded-lg shadow-md w-full h-[500px] object-cover"
                 />
                 {/* Bottom card overlay */}
                 <div className="absolute bg-base-100 w-[85%] bottom-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 rounded-md text-center">
