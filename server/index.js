@@ -102,11 +102,13 @@ async function run() {
         expiresIn: "7d",
       });
 
+      const isProd = process.env.NODE_ENV === "production";
+
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false, //in local ? false : true
-          sameSite: "lax", //local ? lax : none
+          secure: isProd, //in local ? false : true
+          sameSite: isProd ? "none" : "lax", //local ? lax : none
         })
         .send({ success: true });
     });
