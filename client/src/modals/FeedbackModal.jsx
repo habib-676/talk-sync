@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import axiosSecure from "../hooks/useAxiosSecure";
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 // Modern mood icons (Tabler via react-icons)
@@ -266,7 +266,7 @@ const FeedbackModal = ({
         notes: notes.trim(),
       };
 
-      const { data } = await axios.post("/feedbacks", payload);
+      const { data } = await axiosSecure.post("/feedbacks", payload);
       if (!data?.success && !data?.id) {
         throw new Error(data?.message || "Failed to submit feedback");
       }
