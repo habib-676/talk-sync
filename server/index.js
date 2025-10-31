@@ -70,6 +70,7 @@ async function run() {
     const announcementsCollection = database.collection("announcements");
     const notificationsColl = database.collection("notifications");
     const sessionsCollections = database.collection("sessions");
+    const speakingCollections = database.collection("speakingPhrases");
 
     // feedback collections
     const feedbackCollection = database.collection("feedbacks");
@@ -265,6 +266,45 @@ async function run() {
       } catch (error) {
         console.error("Failed to add tutor:", error);
         res.status(500).json({ message: "Failed to add tutor" });
+      }
+    });
+
+    // speaking dashboard route
+    app.get("/speakingPhrases", async (req, res) => {
+      try {
+        const result = await speakingCollections.findOne({});
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching speaking phrases:", error);
+        res.status(500).send({ message: "Failed to fetch speaking phrases" });
+      }
+    });
+
+    // ✅ GET SINGLE PHRASE BY ID
+    app.get("/speakingPhrases/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await speakingCollections.findOne(query);
+        if (!result) {
+          return res.status(404).send({ message: "Phrase not found" });
+        }
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching single phrase:", error);
+        res.status(500).send({ message: "Failed to fetch phrase" });
+      }
+    });
+
+    // ✅ POST NEW PHRASES DATA
+    app.post("/speakingPhrases", async (req, res) => {
+      try {
+        const newData = req.body;
+        const result = await speakingCollections.insertOne(newData);
+        res.send(result);
+      } catch (error) {
+        console.error("Error adding new phrase:", error);
+        res.status(500).send({ message: "Failed to add phrase" });
       }
     });
 
