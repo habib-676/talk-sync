@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router";
+import { NavLink } from "react-router";
 import {
   LayoutDashboard,
   User,
@@ -18,20 +18,18 @@ import {
 } from "lucide-react";
 // import { FaQuestionCircle } from "react-icons/fa";
 
-export const SidebarItem = ({ to, icon, label }) => {
-  const location = useLocation();
-  const isActive =
-    location.pathname === to ||
-    (to !== "/dashboard" && location.pathname.startsWith(to));
-
+export const SidebarItem = ({ to, icon, label, end = false }) => {
   return (
     <NavLink
       to={to}
-      className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-base font-medium
-        ${isActive
-          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105"
-          : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-        }`}
+      end={end}
+      className={({ isActive }) =>
+        `flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-base font-medium ${
+          isActive
+            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-105"
+            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+        }`
+      }
     >
       {icon}
       <span>{label}</span>
@@ -46,6 +44,7 @@ export const AdminSidebarLinks = () => {
         to="/dashboard/admin"
         icon={<LayoutDashboard size={20} />}
         label="Admin Home"
+        end
       />
       <SidebarItem
         to="/dashboard/admin/users"
@@ -134,15 +133,11 @@ export const LearnerSidebarLinks = () => {
         label="Settings"
       /> */}
 
-
-
       <SidebarItem
         to="/dashboard/quizzes"
         icon={<Trophy size={20} />}
         label="Participate in quizzes"
       />
-
-
     </>
   );
 };
