@@ -10,7 +10,7 @@ const LeftSection = () => {
       <UploadPhoto />
       <BasicInfo />
       <PersonalDetails />
-      <StatusAndRole />
+      {/* <StatusAndRole /> */}
     </section>
   );
 };

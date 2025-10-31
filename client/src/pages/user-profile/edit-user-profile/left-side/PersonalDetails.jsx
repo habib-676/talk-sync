@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useCountryLanguage } from "../../../../hooks/useCountryLanguage";
-import { MapPin, User, AlertCircle } from "lucide-react";
+import { MapPin, User, AlertCircle, CalendarDays } from "lucide-react";
 import DateOfBirth from "../../../../components/date-of-birth/DateOfBirth";
 
 const PersonalDetails = () => {
@@ -24,16 +24,16 @@ const PersonalDetails = () => {
 
   if (loading) {
     return (
-      <section className="space-y-6 bg-base-300 p-6 rounded-lg shadow-md border border-base-200">
+      <section className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-gray-100 animate-pulse">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-          <User size={24} className="text-primary" />
+          <User size={24} className="text-blue-500" />
           Personal Details
         </h2>
         <div className="space-y-4">
           {[1, 2, 3].map((item) => (
             <div key={item} className="space-y-2">
-              <div className="skeleton h-4 w-32"></div>
-              <div className="skeleton h-12 w-full rounded-lg"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              <div className="h-12 w-full bg-gray-200 rounded-lg"></div>
             </div>
           ))}
         </div>
@@ -43,16 +43,16 @@ const PersonalDetails = () => {
 
   if (error) {
     return (
-      <section className="space-y-6 bg-base-300 p-6 rounded-lg shadow-md border border-base-200">
+      <section className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-red-200">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-          <User size={24} className="text-primary" />
+          <User size={24} className="text-blue-500" />
           Personal Details
         </h2>
-        <div className="alert alert-error shadow-lg">
+        <div className="alert alert-error shadow-lg bg-red-50 text-red-700 border-l-4 border-red-500">
           <AlertCircle size={20} />
           <div>
             <h3 className="font-semibold">Failed to load countries</h3>
-            <div className="text-sm">{error}</div>
+            <div className="text-sm">{error.message || error}</div>
           </div>
         </div>
       </section>
@@ -60,10 +60,10 @@ const PersonalDetails = () => {
   }
 
   return (
-    <section className="space-y-6 bg-base-300 p-6 rounded-lg shadow-md border border-base-200">
+    <section className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-gray-100">
       {/* Header with Icon */}
       <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-        <User size={24} className="text-primary" />
+        <User size={24} className="text-blue-500" />
         Personal Details
       </h2>
 
@@ -72,17 +72,20 @@ const PersonalDetails = () => {
         <div className="form-control">
           <label htmlFor="country" className="label">
             <span className="label-text font-semibold text-gray-700 flex items-center gap-2">
-              <MapPin size={16} />
+              <MapPin size={16} className="text-indigo-500" />
               Country
             </span>
           </label>
           <div className="relative">
             <select
+              id="country"
               className={`
-                select select-bordered w-full pl-10 pr-4 py-3
+                select select-bordered w-full pl-10 pr-4 py-3 rounded-lg
                 transition-all duration-200
-                focus:select-primary focus:ring-2 focus:ring-primary/20
-                ${errors.country ? "select-error" : ""}
+                focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                ${
+                  errors.country ? "border-error text-error" : "border-gray-300"
+                }
                 ${selectedCountry ? "text-gray-800" : "text-gray-500"}
               `}
               {...register("country", { required: false })}
@@ -92,54 +95,53 @@ const PersonalDetails = () => {
                 Select your country
               </option>
               {countries.map((country) => (
-                <option
-                  key={country.code}
-                  value={country.name}
-                  className="flex items-center gap-2"
-                >
+                <option key={country.code} value={country.name}>
                   {country.name}
                 </option>
               ))}
             </select>
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
               <MapPin size={18} className="text-gray-400" />
             </div>
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <div className="w-2 h-2 border-r-2 border-b-2 border-gray-400 rotate-45"></div>
-            </div>
+            {errors.country && (
+              <label className="label">
+                <span className="label-text-alt text-error flex items-center gap-1">
+                  <AlertCircle size={14} />
+                  {errors.country.message}
+                </span>
+              </label>
+            )}
           </div>
-          {errors.country && (
-            <label className="label">
-              <span className="label-text-alt text-error flex items-center gap-1">
-                <AlertCircle size={14} />
-                {errors.country.message}
-              </span>
-            </label>
-          )}
         </div>
 
         {/* Date of Birth Component */}
-        <DateOfBirth />
+        <div>
+          <label className="label">
+            <span className="label-text font-semibold text-gray-700 flex items-center gap-2"></span>
+          </label>
+          <DateOfBirth />{" "}
+          {/* This component should handle its own errors for 'date_of_birth' field */}
+        </div>
 
         {/* Gender Selection */}
         <div className="form-control">
           <legend className="label-text font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <User size={16} />
+            <User size={16} className="text-purple-500" />
             Gender
           </legend>
           <div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
             role="radiogroup"
           >
             {genderOptions.map((option) => (
               <label
                 key={option.value}
                 className={`
-                  relative flex items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200
+                  relative flex items-center justify-center py-3 px-4 border-2 rounded-xl cursor-pointer transition-all duration-200
                   ${
                     selectedGender === option.value
-                      ? "border-primary bg-primary/10 shadow-md"
-                      : "border-gray-200 bg-base-100 hover:border-gray-300 hover:shadow-sm"
+                      ? "border-blue-600 bg-blue-50 shadow-md text-blue-700"
+                      : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm text-gray-700"
                   }
                   ${errors.gender ? "border-error/50" : ""}
                 `}
@@ -155,22 +157,22 @@ const PersonalDetails = () => {
                 <div className="flex items-center gap-3">
                   <div
                     className={`
-                    w-4 h-4 rounded-full border-2 flex items-center justify-center
+                    w-5 h-5 rounded-full border-2 flex items-center justify-center
                     ${
                       selectedGender === option.value
-                        ? "border-primary bg-primary"
+                        ? "border-blue-600 bg-blue-600"
                         : "border-gray-400"
                     }
                   `}
                   >
                     {selectedGender === option.value && (
-                      <div className="w-2 h-2 rounded-full bg-white"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
                     )}
                   </div>
                   <span
                     className={`font-medium ${
                       selectedGender === option.value
-                        ? "text-primary"
+                        ? "text-blue-700"
                         : "text-gray-700"
                     }`}
                   >

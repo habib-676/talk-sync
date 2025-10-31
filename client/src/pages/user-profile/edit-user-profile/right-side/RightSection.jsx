@@ -8,7 +8,7 @@ const RightSection = () => {
     <div className="space-y-8">
       <LanguageSettings />
       <AboutMe />
-      <Friends />
+      {/* <Friends /> */}
     </div>
   );
 };

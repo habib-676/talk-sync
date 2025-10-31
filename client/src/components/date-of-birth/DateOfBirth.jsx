@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar, AlertCircle, CalendarDays } from "lucide-react";
 
 const DateOfBirth = () => {
   const {
@@ -28,7 +28,7 @@ const DateOfBirth = () => {
     <div className="form-control">
       <label className="label">
         <span className="label-text font-semibold text-gray-700 flex items-center gap-2">
-          <Calendar size={16} />
+          <CalendarDays size={16} className="text-green-500" />
           Date of Birth
         </span>
       </label>

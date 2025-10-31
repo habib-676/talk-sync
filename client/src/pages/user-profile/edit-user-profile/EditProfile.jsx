@@ -83,39 +83,52 @@ const EditProfile = () => {
   if (isLoading) return <p className="text-center">Loading profile...</p>;
 
   return (
-    <div className="bg-base-300 p-6 min-h-screen py-16">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 min-h-screen py-16">
       <FormProvider {...methods}>
         <form
           onSubmit={methods.handleSubmit(onsubmit)}
-          className="max-w-7xl mx-auto space-y-8 bg-base-100 p-5 rounded-2xl"
+          className="max-w-7xl mx-auto space-y-8 bg-white p-8 rounded-3xl shadow-xl border border-gray-100"
         >
-          <main className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <LeftSection></LeftSection>
-            <RightSection></RightSection>
+          <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-10 pb-4 border-b-2 border-indigo-200">
+            Edit Profile
+          </h1>
+          <main className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <LeftSection />
+            <RightSection />
           </main>
 
           {/* divider */}
-          <div className="divider"></div>
+          <div className="divider my-10"></div>
 
-          <div className="flex items-center justify-between">
-            <div className="space-x-3">
-              <Link to={"/"} className="btn btn-primary">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex gap-3">
+              <Link
+                to={"/"}
+                className="btn btn-outline btn-info px-8 font-semibold transition-all duration-300 hover:scale-105"
+              >
                 Home
               </Link>
               <button
                 type="button"
-                className="btn btn-warning"
+                className="btn btn-outline btn-warning px-8 font-semibold transition-all duration-300 hover:scale-105"
                 onClick={() => navigate(-1)}
               >
                 Back
               </button>
             </div>
-            <div className="flex justify-end gap-4 col-span-full">
-              <button type="submit" className="btn btn-success">
-                Save Changes
-              </button>
-              <button type="button" className="btn btn-error">
+            <div className="flex gap-4">
+              <button
+                type="button"
+                className="btn btn-error px-8 font-semibold text-white transition-all duration-300 hover:scale-105"
+                onClick={() => methods.reset(userData)}
+              >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 font-semibold shadow-lg shadow-indigo-200 transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:scale-105"
+              >
+                Save Changes
               </button>
             </div>
           </div>
@@ -124,5 +137,4 @@ const EditProfile = () => {
     </div>
   );
 };
-
 export default EditProfile;

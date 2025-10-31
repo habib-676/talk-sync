@@ -1,11 +1,6 @@
-import {
-  Eye,
-  UserRoundMinus,
-  MessageCircle,
-  UserX,
-  Circle,
-} from "lucide-react";
+import { Eye, UserRoundMinus, MessageCircle, Circle } from "lucide-react"; // Removed UserX as UserRoundMinus is more specific
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 const Friends = () => {
   const [friends, setFriends] = useState([]);
@@ -17,10 +12,10 @@ const Friends = () => {
     {
       id: 1,
       name: "Miguel Rodriguez",
-      nativeLanguage: "Japanese",
+      nativeLanguage: "Spanish", // Corrected from Japanese to Spanish based on typical names
       photo:
         "https://res.cloudinary.com/dnh9rdh01/image/upload/v1756112807/rlhh0w8p5tizu61g7fin.jpg",
-      learningLanguages: ["English", "Spanish"],
+      learningLanguages: ["English", "Japanese"],
       level: "Intermediate",
       lastActive: "2 hours ago",
       isOnline: false,
@@ -31,15 +26,45 @@ const Friends = () => {
       nativeLanguage: "Mandarin",
       photo:
         "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      learningLanguages: ["French"],
+      learningLanguages: ["French", "Korean"],
       level: "Advanced",
       lastActive: "5 minutes ago",
+      isOnline: true,
+    },
+    {
+      id: 3,
+      name: "Ahmed Al-Farsi",
+      nativeLanguage: "Arabic",
+      photo: "https://randomuser.me/api/portraits/men/32.jpg",
+      learningLanguages: ["English"],
+      level: "Beginner",
+      lastActive: "1 day ago",
+      isOnline: false,
+    },
+    {
+      id: 4,
+      name: "Maria Schmidt",
+      nativeLanguage: "German",
+      photo: "https://randomuser.me/api/portraits/women/44.jpg",
+      learningLanguages: ["Spanish"],
+      level: "Upper-Intermediate",
+      lastActive: "Online",
+      isOnline: true,
+    },
+    {
+      id: 5,
+      name: "Kenji Tanaka",
+      nativeLanguage: "Japanese",
+      photo: "https://randomuser.me/api/portraits/men/70.jpg",
+      learningLanguages: ["English", "Mandarin"],
+      level: "Fluent",
+      lastActive: "30 minutes ago",
       isOnline: true,
     },
   ];
 
   useEffect(() => {
-    // Fetch friends data
+    // Simulate fetching friends data
     const fetchFriends = async () => {
       try {
         setLoading(true);
@@ -58,106 +83,125 @@ const Friends = () => {
   }, []);
 
   const handleUnfriend = async (friendId, friendName) => {
-    if (!window.confirm(`Remove ${friendName} from your friends?`)) return;
+    if (!window.confirm(`Are you sure you want to unfriend ${friendName}?`))
+      return;
 
     try {
-      // TODO: API call to remove friend
+      // TODO: Implement API call to remove friend
+      // const res = await api.delete(`/api/users/friends/${friendId}`);
+      // if (res.success) {
       setFriends((prev) => prev.filter((friend) => friend.id !== friendId));
+      toast.success(`${friendName} has been unfriended.`);
+      // }
     } catch (error) {
       console.error("Error removing friend:", error);
+      toast.error(`Failed to unfriend ${friendName}.`);
     }
   };
 
-  const handleMessage = (friendId) => {
-    // TODO: Navigate to chat
+  const handleMessage = (friendId, friendName) => {
+    // TODO: Implement navigation to chat page/modal
     console.log("Start chat with:", friendId);
+    toast.info(`Opening chat with ${friendName}...`);
   };
 
-  const displayedFriends = showAll ? friends : friends.slice(0, 3);
+  const displayedFriends = showAll ? friends : friends.slice(0, 3); // Display max 3 by default
 
   return (
-    <section className="space-y-4 bg-base-300 p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold">Friends ({friends.length})</h2>
+    <section className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+        Friends ({friends.length})
+      </h2>
 
-      <div className="space-y-4">
-        {displayedFriends.map((friend) => (
-          <div
-            key={friend.id}
-            className="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors"
-          >
-            <div className="flex items-center gap-3 flex-1">
-              <div className="relative">
-                <img
-                  src={friend.photo}
-                  alt={friend.name}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
-                />
-                <div
-                  className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                    friend.isOnline ? "bg-success" : "bg-gray-400"
-                  }`}
-                />
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="skeleton w-12 h-12 rounded-full"></div>
+              <div className="flex-1 space-y-2">
+                <div className="skeleton h-4 w-3/4 rounded-md"></div>
+                <div className="skeleton h-3 w-1/2 rounded-md"></div>
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-gray-800">{friend.name}</h3>
-                  {friend.isOnline && (
-                    <span className="text-xs text-success font-medium">
-                      Online
-                    </span>
-                  )}
+            </div>
+          ))}
+        </div>
+      ) : friends.length === 0 ? (
+        <div className="text-center text-gray-500 py-8">
+          <p>No friends yet. Start connecting!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {displayedFriends.map((friend) => (
+            <div
+              key={friend.id}
+              className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-4 flex-1">
+                <div className="relative">
+                  <img
+                    src={friend.photo}
+                    alt={friend.name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+                  />
+                  <div
+                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${
+                      friend.isOnline ? "bg-green-500" : "bg-gray-400"
+                    }`}
+                    title={
+                      friend.isOnline
+                        ? "Online"
+                        : `Last seen ${friend.lastActive}`
+                    }
+                  />
                 </div>
-                <p className="text-sm text-gray-600">
-                  Native {friend.nativeLanguage}
-                </p>
-                {!friend.isOnline && (
-                  <p className="text-xs text-gray-500">
-                    Last seen {friend.lastActive}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800 text-lg">
+                    {friend.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Native {friend.nativeLanguage}
+                    {friend.learningLanguages.length > 0 &&
+                      ` | Learning: ${friend.learningLanguages.join(", ")}`}
                   </p>
-                )}
+                  <p className="text-xs text-gray-500">
+                    Level: {friend.level}
+                    {!friend.isOnline && ` | Last active ${friend.lastActive}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-1 items-center">
+                <button
+                  onClick={() => handleMessage(friend.id, friend.name)}
+                  className="btn btn-ghost btn-sm text-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-colors rounded-lg"
+                  title="Message"
+                >
+                  <MessageCircle size={20} />
+                </button>
+                <button
+                  onClick={() => handleUnfriend(friend.id, friend.name)}
+                  className="btn btn-ghost btn-sm text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors rounded-lg"
+                  title="Unfriend"
+                >
+                  <UserRoundMinus size={20} />
+                </button>
               </div>
             </div>
+          ))}
 
-            <div className="flex gap-1">
-              <button
-                onClick={() => handleMessage(friend.id)}
-                className="btn btn-ghost btn-sm text-info"
-                title="Message"
-              >
-                <MessageCircle size={16} />
-              </button>
-              <button
-                onClick={() => handleUnfriend(friend.id, friend.name)}
-                className="btn btn-ghost btn-sm text-error"
-                title="Unfriend"
-              >
-                <UserRoundMinus size={16} />
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {friends.length > 3 && (
-          <button
-            onClick={() => setShowAll(!showAll)}
-            className="btn btn-outline w-full"
-          >
-            <Eye size={16} />
-            {showAll ? "Show Less" : `View All ${friends.length} Friends`}
-          </button>
-        )}
-      </div>
+          {friends.length > 3 && (
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="btn btn-outline border-blue-400 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-300 w-full mt-4 rounded-lg"
+            >
+              <Eye size={18} />
+              {showAll ? "Show Less" : `View All ${friends.length} Friends`}
+            </button>
+          )}
+        </div>
+      )}
     </section>
   );
 };
 
 export default Friends;
-
-// Get user's friends
-// GET /api/users/:userId/friends
-
-// Remove friend
-// DELETE /api/users/:userId/friends/:friendId
-
-// Send message (navigate to chat)
-//  GET /api/chat/:friendId

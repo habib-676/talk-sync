@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Camera } from "lucide-react";
+import { Camera, AlertCircle } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -14,6 +14,13 @@ const UploadPhoto = () => {
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
   const currentPhoto = watch("image");
+
+  useEffect(() => {
+    // Set initial preview if an image URL exists
+    if (currentPhoto) {
+      setPreview(currentPhoto);
+    }
+  }, [currentPhoto]);
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
@@ -62,7 +69,7 @@ const UploadPhoto = () => {
       );
 
       if (res.data.secure_url) {
-        setValue("image", res.data.secure_url, { shouldValidate: true }); //shouldValidate is a react-hook-form method
+        setValue("image", res.data.secure_url, { shouldValidate: true });
         toast.success("Photo uploaded successfully!");
       } else {
         toast.error("Failed to get image URL from Cloudinary.");
@@ -70,55 +77,69 @@ const UploadPhoto = () => {
     } catch (error) {
       toast.error("Failed to upload image. Please try again.");
       console.error("Cloudinary Upload Error:", error);
+      // Revert preview if upload fails and there was no previous photo
+      if (!currentPhoto) {
+        setPreview(null);
+        setValue("image", "");
+      }
     } finally {
       setUploading(false);
-      e.target.value = "";
-
-      if (localPreviewUrl && !currentPhoto && !watch("image")) {
-        // if no new photo is set
-        URL.revokeObjectURL(localPreviewUrl);
-        setPreview(null);
-      }
+      e.target.value = ""; // Clear file input
     }
   };
 
   useEffect(() => {
     return () => {
-      if (preview) {
+      // Clean up URL object when component unmounts or preview changes
+      if (preview && preview.startsWith("blob:")) {
         URL.revokeObjectURL(preview);
       }
     };
   }, [preview]);
+
+  const displayPhoto =
+    preview || user?.photoURL || "https://via.placeholder.com/150?text=U"; // Default placeholder
+
   return (
-    <section className="bg-base-300 p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-6">Profile Photo</h2>
-      <div className="flex flex-col lg:flex-row items-center gap-4">
-        <img
-          src={preview || currentPhoto || user.photoURL}
-          alt="Upload Preview"
-          className="w-52 h-52 object-cover object-center rounded-full"
-        />
-        <div>
+    <section className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Profile Photo</h2>
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div className="relative w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+          <img
+            src={displayPhoto}
+            alt="Profile Preview"
+            className="w-full h-full object-cover object-center rounded-full border-4 border-blue-200 shadow-md"
+          />
+          {uploading && (
+            <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center">
+              <span className="loading loading-spinner loading-md text-white"></span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
           <input
             type="file"
             id="photo-upload"
             accept="image/jpeg, image/jpg, image/png, image/gif"
             className="hidden"
             onChange={handlePhotoChange}
+            disabled={uploading}
           />
           <label
             htmlFor="photo-upload"
             aria-label="Upload Profile Photo"
-            className={`btn bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-base-100 mb-4 ${
-              uploading ? "btn-loading cursor-not-allowed" : "cursor-pointer"
+            className={`btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white mb-3 px-6 shadow-md shadow-indigo-200 ${
+              uploading
+                ? "opacity-70 cursor-not-allowed"
+                : "cursor-pointer hover:from-blue-700 hover:to-indigo-700 transition-all duration-300"
             }`}
           >
-            <Camera /> {uploading ? "Uploading..." : "Change Photo"}
+            <Camera size={20} /> {uploading ? "Uploading..." : "Change Photo"}
           </label>
-          <p className="text-gray-600">JPG, GIF or PNG. Max size 2MB</p>
+          <p className="text-gray-600 text-sm">JPG, GIF or PNG. Max size 2MB</p>
           {uploading && (
-            <p className="text-blue-500 text-sm mt-2">
-              Uploading your photo...
+            <p className="text-blue-500 text-sm mt-2 flex items-center gap-1">
+              <AlertCircle size={14} /> Uploading in progress...
             </p>
           )}
         </div>
